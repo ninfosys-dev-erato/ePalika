@@ -1,0 +1,66 @@
+/* Backdrop */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 40;
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+
+/* Sheet */
+.sheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background: white;
+  border-top-left-radius: 1rem;
+  border-top-right-radius: 1rem;
+  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.15);
+  max-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  touch-action: none;
+}
+
+/* Drag Handle */
+.handleContainer {
+  display: flex;
+  justify-content: center;
+  padding: 0.75rem;
+  cursor: grab;
+}
+
+.handleContainer:active {
+  cursor: grabbing;
+}
+
+.handle {
+  width: 2.5rem;
+  height: 0.25rem;
+  background: #d4d4d4;
+  border-radius: 9999px;
+}
+
+/* Content */
+.content {
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding: 0 1rem 1rem;
+}
+
+/* Prevent scroll on body when sheet is open */
+body:has(.sheet) {
+  overflow: hidden;
+}
+
+/* Safe area support for notched devices */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .content {
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+  }
+}

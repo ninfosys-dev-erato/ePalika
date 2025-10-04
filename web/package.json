@@ -3,8 +3,11 @@
   "private": true,
   "packageManager": "pnpm@9.0.0",
   "scripts": {
+    "dev": "concurrently --kill-others --names \"SHELL,DARTA\" -c \"bgBlue.bold,bgMagenta.bold\" \"pnpm dev:shell\" \"pnpm dev:darta\"",
+    "dev:shell": "pnpm --filter @egov/shell dev",
+    "dev:darta": "pnpm --filter @egov/mfe-darta dev",
+    "dev:all": "pnpm -r --parallel dev",
     "build": "pnpm -r build",
-    "dev": "pnpm -r --parallel dev",
     "typecheck": "pnpm -r typecheck",
     "lint": "pnpm -r lint",
     "clean": "git clean -xfd -e node_modules",
@@ -12,6 +15,7 @@
     "guard:css": "grep -R \"@carbon/styles\" apps/mfe-* || true && if grep -R \"@carbon/styles\" apps/mfe-*; then echo '❌ MFEs must not import Carbon CSS'; exit 1; else echo '✅ CSS ownership OK'; fi"
   },
   "devDependencies": {
+    "concurrently": "^9.2.1",
     "sass": "^1.93.2",
     "typescript": "^5.6.3",
     "vite": "^7.1.7",

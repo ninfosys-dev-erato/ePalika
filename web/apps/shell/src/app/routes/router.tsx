@@ -1,8 +1,9 @@
 import { createRootRoute, createRoute, createRouter, RouterProvider, Link, Outlet } from '@tanstack/react-router'
 import { Suspense } from 'react'
+import { DartaIntakePage, DartaListPage } from '../../routes/darta'
 
 function prefetchDarta() {
-  // Preload data (and later: remoteEntry) when user intends to navigate
+  // Preload MFE remoteEntry when user intends to navigate
   const fn = (window as any).__prefetch_darta__
   if (typeof fn === 'function') fn()
 }
@@ -10,11 +11,12 @@ function prefetchDarta() {
 const Root = createRootRoute({
   component: () => (
     <div className="app">
-      <nav>
-        <Link to="/" preload="intent">Home</Link>
-        <Link to="/darta" preload="intent" onMouseEnter={prefetchDarta} onFocus={prefetchDarta}>Darta</Link>
+      <nav style={{ padding: '1rem', background: '#f4f4f4', display: 'flex', gap: '1rem' }}>
+        <Link to="/" preload="intent" style={{ textDecoration: 'none', color: '#dc2626' }}>गृह</Link>
+        <Link to="/darta" preload="intent" onMouseEnter={prefetchDarta} onFocus={prefetchDarta} style={{ textDecoration: 'none', color: '#dc2626' }}>दर्ता सूची</Link>
+        <Link to="/darta/new" preload="intent" onMouseEnter={prefetchDarta} onFocus={prefetchDarta} style={{ textDecoration: 'none', color: '#dc2626' }}>नयाँ दर्ता</Link>
       </nav>
-      <Suspense fallback={<div>Loading…</div>}>
+      <Suspense fallback={<div style={{ padding: '2rem', textAlign: 'center' }}>लोड हुँदैछ...</div>}>
         <Outlet />
       </Suspense>
     </div>
@@ -24,18 +26,27 @@ const Root = createRootRoute({
 const Home = createRoute({
   getParentRoute: () => Root,
   path: '/',
-  component: () => <div>Welcome — shell is live.</div>,
+  component: () => (
+    <div style={{ padding: '2rem' }}>
+      <h1>ePalika दर्ता-चलानी प्रणाली</h1>
+      <p>Welcome to the shell application</p>
+    </div>
+  ),
 })
 
-const Darta = createRoute({
+const DartaList = createRoute({
   getParentRoute: () => Root,
   path: '/darta',
-  // When loaders are enabled, we can also preload here.
-  // loader: async ({ context }) => { await (window as any).__prefetch_darta__?.() },
-  component: () => <div>Darta module (stub)</div>,
+  component: DartaListPage,
 })
 
-const routeTree = Root.addChildren([Home, Darta])
+const DartaNew = createRoute({
+  getParentRoute: () => Root,
+  path: '/darta/new',
+  component: DartaIntakePage,
+})
+
+const routeTree = Root.addChildren([Home, DartaList, DartaNew])
 
 export const router = createRouter({ routeTree })
 

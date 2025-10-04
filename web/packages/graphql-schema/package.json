@@ -1,0 +1,32 @@
+{
+  "name": "@egov/graphql-schema",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./mocks": "./src/mocks/index.ts",
+    "./generated": "./src/generated/index.ts"
+  },
+  "scripts": {
+    "codegen": "graphql-codegen --config codegen.yml",
+    "codegen:watch": "graphql-codegen --config codegen.yml --watch"
+  },
+  "dependencies": {
+    "@apollo/client": "^4.0.6",
+    "@faker-js/faker": "^9.3.0",
+    "graphql": "^16.11.0",
+    "msw": "^2.7.0",
+    "react": "^18.3.1"
+  },
+  "devDependencies": {
+    "@graphql-codegen/cli": "^5.0.3",
+    "@graphql-codegen/client-preset": "^4.5.1",
+    "@graphql-codegen/typed-document-node": "^5.0.12",
+    "@graphql-codegen/typescript": "^4.1.2",
+    "@graphql-codegen/typescript-operations": "^4.4.2",
+    "@graphql-codegen/typescript-react-apollo": "^4.3.2",
+    "@graphql-typed-document-node/core": "^3.2.0"
+  }
+}

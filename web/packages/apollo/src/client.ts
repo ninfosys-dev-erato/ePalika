@@ -6,7 +6,7 @@ import { sha256 } from 'js-sha256'
 
 export type MakeApolloClientOpts = {
   url: string
-  getAuthHeader?: () => Record<string, string> // Provide later from Keycloak
+  getAuthHeader?: () => Record<string, string> | undefined // Provide later from Keycloak
 }
 
 export function makeApolloClient({ url, getAuthHeader }: MakeApolloClientOpts) {
@@ -43,7 +43,7 @@ export function makeApolloClient({ url, getAuthHeader }: MakeApolloClientOpts) {
   return new ApolloClient({
     link: from([retry, apq, batch]),
     cache,
-    connectToDevTools: import.meta?.env?.DEV,
+    devtools: { enabled: import.meta?.env?.DEV },
     defaultOptions: {
       query: { fetchPolicy: 'cache-first' },
       watchQuery: { fetchPolicy: 'cache-first' },

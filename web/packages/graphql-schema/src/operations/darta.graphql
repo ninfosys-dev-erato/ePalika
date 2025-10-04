@@ -1,0 +1,97 @@
+# Darta Queries and Mutations
+
+query Dartas($filter: DartaFilterInput, $pagination: PaginationInput) {
+  dartas(filter: $filter, pagination: $pagination) {
+    edges {
+      cursor
+      node {
+        id
+        dartaNumber
+        formattedDartaNumber
+        fiscalYear
+        scope
+        ward {
+          id
+          name
+        }
+        subject
+        applicant {
+          id
+          fullName
+          type
+        }
+        intakeChannel
+        receivedDate
+        priority
+        status
+        isOverdue
+        createdAt
+      }
+    }
+    pageInfo {
+      page
+      limit
+      total
+      totalPages
+      hasNextPage
+      hasPreviousPage
+    }
+  }
+}
+
+query Darta($id: ID!) {
+  darta(id: $id) {
+    id
+    dartaNumber
+    formattedDartaNumber
+    fiscalYear
+    scope
+    ward {
+      id
+      name
+    }
+    subject
+    applicant {
+      id
+      fullName
+      phone
+      email
+      type
+    }
+    intakeChannel
+    receivedDate
+    priority
+    status
+    isOverdue
+    createdAt
+  }
+}
+
+mutation CreateDarta($input: CreateDartaInput!) {
+  createDarta(input: $input) {
+    id
+    dartaNumber
+    formattedDartaNumber
+    fiscalYear
+    scope
+    subject
+    applicant {
+      id
+      fullName
+      phone
+      type
+    }
+    intakeChannel
+    status
+    createdAt
+  }
+}
+
+mutation RouteDarta($input: RouteDartaInput!) {
+  routeDarta(input: $input) {
+    id
+    status
+    priority
+    createdAt
+  }
+}
