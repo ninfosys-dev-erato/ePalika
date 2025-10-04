@@ -1,0 +1,3 @@
+[submodule "dev/keycloak-dev"]
+	path = dev/keycloak-dev
+	url = https://github.com/ninjagnosis/keycloak-dev
