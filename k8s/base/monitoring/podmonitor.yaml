@@ -1,0 +1,80 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: epalika-pods
+  namespace: epalika
+  labels:
+    app: epalika
+    component: monitoring
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: epalika
+  podMetricsEndpoints:
+  - port: http
+    path: /metrics
+    interval: 30s
+  - port: management
+    path: /metrics
+    interval: 30s
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboards
+  namespace: epalika
+  labels:
+    grafana_dashboard: "1"
+data:
+  epalika-overview.json: |
+    {
+      "dashboard": {
+        "id": null,
+        "title": "ePalika Overview",
+        "tags": ["epalika"],
+        "style": "dark",
+        "timezone": "browser",
+        "panels": [
+          {
+            "title": "Service Health",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "up{job=~\"epalika.*\"}",
+                "legendFormat": "{{ job }}"
+              }
+            ]
+          },
+          {
+            "title": "Request Rate",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "sum(rate(http_requests_total{job=~\"epalika.*\"}[5m])) by (job)",
+                "legendFormat": "{{ job }}"
+              }
+            ]
+          },
+          {
+            "title": "Error Rate",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "sum(rate(http_requests_total{job=~\"epalika.*\",code=~\"5..\"}[5m])) by (job)",
+                "legendFormat": "{{ job }} errors"
+              }
+            ]
+          },
+          {
+            "title": "Response Time (95th percentile)",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job=~\"epalika.*\"}[5m])) by (job, le))",
+                "legendFormat": "{{ job }}"
+              }
+            ]
+          }
+        ]
+      }
+    }

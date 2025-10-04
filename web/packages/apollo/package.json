@@ -1,0 +1,13 @@
+{
+  "name": "@egov/apollo",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "src/client.ts",
+  "exports": { ".": "./src/client.ts" },
+  "peerDependencies": {
+    "@apollo/client": ">=3.10.0",
+    "graphql": ">=16.0.0",
+    "js-sha256": ">=0.11.0"
+  }
+}

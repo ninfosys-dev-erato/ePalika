@@ -1,0 +1,22 @@
+/* Own Carbon CSS in the shell ONLY */
+@import "@egov/design-system/styles.scss";
+
+/* Small layout reset to keep TBT low */
+:root {
+  --app-padding: 16px;
+}
+
+body {
+  margin: 0;
+}
+
+.app {
+  padding: var(--app-padding);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", "Apple Color Emoji", "Segoe UI Emoji";
+}
+
+nav {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+}

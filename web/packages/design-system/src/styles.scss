@@ -1,0 +1,15 @@
+// 🚀 Optimized Carbon imports for minimal bundle size
+@use '@carbon/styles/scss/reset';
+@use '@carbon/styles/scss/theme';
+@use '@carbon/styles/scss/grid';
+
+// Minimal typography with font optimization
+@use '@carbon/styles/scss/type';
+
+/* Only the components you actually need */
+@use '@carbon/styles/scss/components/button';
+@use '@carbon/styles/scss/components/inline-loading';
+@use '@carbon/styles/scss/components/notification';
+@use '@carbon/styles/scss/components/data-table';
+@use '@carbon/styles/scss/components/pagination';
+@use '@carbon/styles/scss/components/skeleton-styles';

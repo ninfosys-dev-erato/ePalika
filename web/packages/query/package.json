@@ -1,0 +1,13 @@
+{
+  "name": "@egov/query",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "exports": { ".": "./src/index.ts" },
+  "peerDependencies": {
+    "@tanstack/react-query": ">=5.0.0",
+    "@tanstack/react-query-persist-client": ">=5.0.0",
+    "idb-keyval": ">=6.2.1"
+  }
+}

@@ -1,0 +1,73 @@
+services:
+  openfga:
+    image: openfga/openfga:latest
+    command: ["run", "--datastore-engine", "memory", "--log-format", "json"]
+    ports:
+      - "8081:8080"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/healthz"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  pdp:
+    build:
+      context: .
+      dockerfile: services/pdp/cmd/pdpsvc/Dockerfile
+    environment:
+      FGA_CHECK_URL: "http://openfga:8080/stores/${FGA_STORE}/check"
+      FGA_MODEL_ID: "${FGA_MODEL_ID}"
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/healthz"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    depends_on:
+      - openfga
+
+  darta-chalani:
+    build:
+      context: .
+      dockerfile: services/darta-chalani/cmd/dartasvc/Dockerfile
+    ports:
+      - "9000:9000"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:9000/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  oathkeeper:
+    image: oryd/oathkeeper:latest
+    command: ["serve", "--config", "/etc/config/oathkeeper.yaml"]
+    ports:
+      - "4455:4455"
+      - "4456:4456"
+    volumes:
+      - ./policies/oathkeeper/config.yaml:/etc/config/oathkeeper.yaml:ro
+      - ./policies/oathkeeper/base:/rules:ro
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:4456/health/alive"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    depends_on:
+      - keycloak
+      - pdp
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:25.0
+    command: ["start-dev"]
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_HEALTH_ENABLED: "true"
+    ports:
+      - "8083:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 12

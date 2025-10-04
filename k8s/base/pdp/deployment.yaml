@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pdp
+  namespace: epalika
+  labels:
+    app: pdp
+    component: policy-decision
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: pdp
+  template:
+    metadata:
+      labels:
+        app: pdp
+        component: policy-decision
+    spec:
+      containers:
+      - name: pdp
+        image: epalika/pdp:latest
+        env:
+        - name: FGA_CHECK_URL
+          valueFrom:
+            configMapKeyRef:
+              name: epalika-config
+              key: fga-check-url
+        - name: FGA_MODEL_ID
+          valueFrom:
+            secretKeyRef:
+              name: epalika-secrets
+              key: fga-model-id
+        - name: FGA_API_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: epalika-secrets
+              key: fga-api-token
+              optional: true
+        ports:
+        - containerPort: 8080
+          name: http
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1001
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pdp
+  namespace: epalika
+  labels:
+    app: pdp
+spec:
+  selector:
+    app: pdp
+  ports:
+  - port: 8080
+    targetPort: 8080
+    name: http
+  type: ClusterIP

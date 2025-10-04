@@ -1,0 +1,9 @@
+{
+  "writes": {
+    "tuple_keys": [
+      { "user": "user:alice", "relation": "member", "object": "group:records-team" },
+      { "user": "group:records-team#member", "relation": "owner", "object": "folder:palika_bagmati/ward-1" },
+      { "user": "folder:palika_bagmati/ward-1", "relation": "parent", "object": "doc:palika_bagmati/123" }
+    ]
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "strict": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "types": [],
+    "baseUrl": ".",
+    "paths": {
+      "@egov/design-system/*": ["packages/design-system/src/*"],
+      "@egov/auth/*": ["packages/auth/src/*"],
+      "@egov/apollo/*": ["packages/apollo/src/*"],
+      "@egov/query/*": ["packages/query/src/*"]
+    }
+  }
+}

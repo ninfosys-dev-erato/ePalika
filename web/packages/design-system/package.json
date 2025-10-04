@@ -1,0 +1,17 @@
+{
+  "name": "@egov/design-system",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./styles.scss": "./src/styles.scss"
+  },
+  "peerDependencies": {
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0",
+    "@carbon/styles": "*"
+  },
+  "sideEffects": [
+    "src/styles.scss"
+  ]
+}
