@@ -78,6 +78,27 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
+    networks:
+      - authnz
+
+  graphql-gateway:
+    build:
+      context: .
+      dockerfile: services/graphql-gateway/cmd/gateways/Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - DARTA_CHALANI_URL=http://darta-chalani:9000
+      - PORT=8000
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8000/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    depends_on:
+      - darta-chalani
+    networks:
+      - authnz
 
   oathkeeper:
     image: oryd/oathkeeper:latest
@@ -142,6 +163,22 @@ services:
       timeout: 5s
       retries: 12
 
+### YUGABYTE SETUP ###
+  yugabytedb:
+    image: yugabytedb/yugabyte:latest
+    container_name: yugabytedb
+    ports:
+      - "7000:7000" # Admin UI
+      - "5433:5433" # YSQL
+      - "9042:9042" # YCQL
+    command: ["/home/yugabyte/bin/yb-ctl", "create", "--rf", "1"]
+    healthcheck:
+      test: ["CMD", "/home/yugabyte/bin/yb-ctl", "status"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - authnz
 networks:
   authnz:
     driver: bridge

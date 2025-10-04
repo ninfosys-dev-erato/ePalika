@@ -1,0 +1,24 @@
+type Query {
+  health: HealthStatus!
+}
+
+type Mutation {
+  registerDarta(input: RegisterDartaInput!): RegisterDartaResponse!
+}
+
+type HealthStatus {
+  status: String!
+  service: String!
+}
+
+input RegisterDartaInput {
+  title: String!
+  description: String!
+  submittedBy: String!
+}
+
+type RegisterDartaResponse {
+  success: Boolean!
+  message: String!
+  dartaId: String
+}
