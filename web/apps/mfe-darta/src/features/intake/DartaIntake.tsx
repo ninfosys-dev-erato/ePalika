@@ -1,10 +1,17 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useDartaStore, useUIStore } from '@egov/state-core'
 import { Button } from '@egov/ui-mobile/primitives/Button'
 import { Input } from '@egov/ui-mobile/primitives/Input'
 import { DocumentUpload, UploadedDocument } from '@egov/ui-mobile/patterns/DocumentUpload'
-import { useCreateDartaMutation, IntakeChannel, Scope, ApplicantType } from '@egov/graphql-schema/generated'
+import { Receipt, ReceiptProps } from '@egov/ui-mobile/patterns/Receipt'
+import {
+  useCreateDartaMutation,
+  IntakeChannel,
+  Scope,
+  CaseStatus,
+  type CreateDartaMutation,
+} from '@egov/graphql-schema/generated'
 import styles from './DartaIntake.module.css'
 
 interface DartaDraft {
@@ -33,22 +40,38 @@ export function DartaIntake() {
 
   const [createDarta, { loading }] = useCreateDartaMutation()
   const [documentError, setDocumentError] = useState<string | null>(null)
+  const [receipt, setReceipt] = useState<ReceiptProps | null>(null)
 
-  const [channel, setChannel] = useState<IntakeChannel>(
-    () => ((draft as any)?.intakeChannel as IntakeChannel) || 'COUNTER'
-  )
-  const [scope, setScope] = useState<Scope>(
-    () => ((draft as any)?.scope as Scope) || 'MUNICIPALITY'
-  )
+  const [channel, setChannel] = useState<IntakeChannel>(() => draft?.intakeChannel || 'COUNTER')
+  const [scope, setScope] = useState<Scope>(() => draft?.scope || 'MUNICIPALITY')
 
   const documents: UploadedDocument[] = useMemo(() => {
-    const stored = (draft as any)?.documents
-    if (!stored || !Array.isArray(stored)) return []
-    return stored as UploadedDocument[]
+    if (!draft?.documents || !Array.isArray(draft.documents)) return []
+    return draft.documents.map((doc) => ({ ...doc }))
   }, [draft])
+
+  useEffect(() => {
+    const storedChannel = draft?.intakeChannel
+    if (storedChannel && storedChannel !== channel) {
+      setChannel(storedChannel)
+    }
+
+    const storedScope = draft?.scope
+    if (storedScope && storedScope !== scope) {
+      setScope(storedScope)
+    }
+  }, [draft, channel, scope])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    if (!documents.length) {
+      setDocumentError('कृपया कम्तीमा एक कागजात थप्नुहोस्')
+      return
+    }
+
+    const primaryDocument = documents[0]
+    const annexIds = documents.slice(1).map((doc) => doc.id)
 
     try {
       const result = await createDarta({
@@ -57,12 +80,13 @@ export function DartaIntake() {
             scope,
             subject: draft?.subject || '',
             applicant: {
-              fullName: (draft as any)?.applicantName || '',
-              phone: (draft as any)?.applicantPhone || '',
+              fullName: draft?.applicantName || '',
+              phone: draft?.applicantPhone || '',
               type: 'CITIZEN',
             },
             intakeChannel: channel,
-            primaryDocumentId: 'temp',  // TODO: implement document upload
+            primaryDocumentId: primaryDocument.id,
+            annexIds: annexIds.length ? annexIds : undefined,
             receivedDate: new Date().toISOString(),
             idempotencyKey: `darta-${Date.now()}`,
           },
@@ -71,7 +95,11 @@ export function DartaIntake() {
 
       if (result.data?.createDarta) {
         addToast(`दर्ता सफलतापूर्वक सुरक्षित गरियो - ${result.data.createDarta.formattedDartaNumber}`, 'success')
+        setReceipt(buildReceiptPayload(result.data.createDarta))
         clearDraft()
+        setDocumentError(null)
+        setChannel('COUNTER')
+        setScope('MUNICIPALITY')
       }
     } catch (error) {
       console.error('Create darta error:', error)
@@ -80,10 +108,59 @@ export function DartaIntake() {
   }
 
   const handleDraftChange = (field: string, value: any) => {
+    if (receipt) {
+      setReceipt(null)
+    }
+
     setDraft({
-      ...draft,
+      ...(draft || {}),
       [field]: value,
     })
+  }
+
+  const handleDocumentsChange = (nextDocuments: UploadedDocument[]) => {
+    const normalized = nextDocuments.map((doc) => ({ ...doc }))
+    if (receipt) {
+      setReceipt(null)
+    }
+    setDraft({
+      ...(draft || {}),
+      documents: normalized.length ? normalized : undefined,
+    })
+
+    if (documentError && nextDocuments.length) {
+      setDocumentError(null)
+    }
+  }
+
+  const handleChannelChange = (nextChannel: IntakeChannel) => {
+    setChannel(nextChannel)
+    if (receipt) {
+      setReceipt(null)
+    }
+    setDraft({
+      ...(draft || {}),
+      intakeChannel: nextChannel,
+    })
+  }
+
+  const handleScopeChange = (nextScope: Scope) => {
+    setScope(nextScope)
+    if (receipt) {
+      setReceipt(null)
+    }
+    setDraft({
+      ...(draft || {}),
+      scope: nextScope,
+    })
+  }
+
+  const handleReset = () => {
+    clearDraft()
+    setDocumentError(null)
+    setChannel('COUNTER')
+    setScope('MUNICIPALITY')
+    setReceipt(null)
   }
 
   return (
@@ -108,7 +185,7 @@ export function DartaIntake() {
                 key={ch}
                 type="button"
                 className={`${styles.channelButton} ${channel === ch ? styles.active : ''}`}
-                onClick={() => setChannel(ch)}
+                onClick={() => handleChannelChange(ch)}
               >
                 {getChannelLabel(ch)}
               </button>
@@ -123,14 +200,14 @@ export function DartaIntake() {
             <button
               type="button"
               className={`${styles.scopeButton} ${scope === 'MUNICIPALITY' ? styles.active : ''}`}
-              onClick={() => setScope('MUNICIPALITY')}
+              onClick={() => handleScopeChange('MUNICIPALITY')}
             >
               नगरपालिका
             </button>
             <button
               type="button"
               className={`${styles.scopeButton} ${scope === 'WARD' ? styles.active : ''}`}
-              onClick={() => setScope('WARD')}
+              onClick={() => handleScopeChange('WARD')}
             >
               वडा
             </button>
@@ -150,7 +227,7 @@ export function DartaIntake() {
         <Input
           label="निवेदकको नाम"
           placeholder="पुरा नाम"
-          value={(draft as any)?.applicantName || ''}
+          value={draft?.applicantName || ''}
           onChange={(e) => handleDraftChange('applicantName', e.target.value)}
           required
         />
@@ -160,16 +237,28 @@ export function DartaIntake() {
           label="सम्पर्क नम्बर"
           type="tel"
           placeholder="९८XXXXXXXX"
-          value={(draft as any)?.applicantPhone || ''}
+          value={draft?.applicantPhone || ''}
           onChange={(e) => handleDraftChange('applicantPhone', e.target.value)}
         />
+
+        <div className={styles.field}>
+          <DocumentUpload
+            label="संलग्न कागजात"
+            required
+            helperText="PDF वा फोटो (५MB भित्र)"
+            error={documentError || undefined}
+            documents={documents}
+            onChange={handleDocumentsChange}
+            maxFiles={3}
+          />
+        </div>
 
         {/* Actions */}
         <div className={styles.actions}>
           <Button
             type="button"
             variant="ghost"
-            onClick={clearDraft}
+            onClick={handleReset}
             disabled={!draft || loading}
           >
             रद्द गर्नुहोस्
@@ -179,6 +268,12 @@ export function DartaIntake() {
           </Button>
         </div>
       </form>
+
+      {receipt && (
+        <div className={styles.receiptSection}>
+          <Receipt {...receipt} />
+        </div>
+      )}
     </motion.div>
   )
 }
@@ -192,4 +287,54 @@ function getChannelLabel(channel: IntakeChannel): string {
     'COURIER': 'कुरियर',
   }
   return labels[channel] || channel
+}
+
+function getScopeLabel(scope: Scope): string {
+  return scope === 'MUNICIPALITY' ? 'नगरपालिका' : 'वडा'
+}
+
+function getStatusLabel(status: CaseStatus): string {
+  const labels: Partial<Record<CaseStatus, string>> = {
+    PENDING_TRIAGE: 'विचाराधीन',
+    PENDING_REVIEW: 'समिक्षा हुँदै',
+    PENDING_APPROVAL: 'स्वीकृतिको प्रतिक्षा',
+    APPROVED: 'स्वीकृत',
+    DISPATCHED: 'प्रेषित',
+    ACKNOWLEDGED: 'प्राप्त पुष्टि',
+    CLOSED: 'बन्द',
+    VOID: 'रद्द',
+  }
+  return labels[status] || status
+}
+
+function buildReceiptPayload(created: CreateDartaMutation['createDarta']): ReceiptProps {
+  const organizationName = created.scope === 'MUNICIPALITY' ? 'नगरपालिका दर्ता शाखा' : 'वडा कार्यालय'
+
+  const fields = [
+    { label: 'विषय', value: created.subject, emphasis: true },
+    { label: 'निवेदक', value: created.applicant.fullName },
+    { label: 'सम्पर्क', value: created.applicant.phone || 'उपलब्ध छैन' },
+    { label: 'माध्यम', value: getChannelLabel(created.intakeChannel) },
+    { label: 'स्थिति', value: getStatusLabel(created.status) },
+  ]
+
+  const meta = [
+    { label: 'वित्तीय वर्ष', value: created.fiscalYear },
+    { label: 'स्तर', value: getScopeLabel(created.scope) },
+  ]
+
+  return {
+    title: 'दर्ता रसिद',
+    subtitle: 'आवेदन प्राप्तिको प्रमाण',
+    referenceNumber: created.formattedDartaNumber,
+    issuedAt: created.createdAt,
+    issuedBy: 'दर्ता शाखा',
+    organization: {
+      name: organizationName,
+    },
+    fields,
+    meta,
+    notes: 'कृपया यो रसिद सुरक्षित राख्नुहोस् र आवश्यक परे प्रस्तुत गर्नुहोस्।',
+    fileName: `darta-receipt-${created.formattedDartaNumber}`,
+  }
 }

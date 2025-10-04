@@ -68,6 +68,8 @@
   - [x] Flexible padding options
 - [x] BottomSheet pattern with swipe-to-dismiss
 - [x] Framer Motion animations (60fps)
+- [x] Camera & Document Upload patterns (lazy camera, touch-first upload)
+- [x] Receipt pattern with PDF generator
 
 **Key Files:**
 - `src/tokens/` - Design system tokens
@@ -153,25 +155,44 @@
   - [x] Success toast with darta number
   - [x] Error handling with toast
   - [x] Draft clearing on success
+- [x] **Camera & Document Upload Field**
+  - [x] Lazy-loaded camera overlay with photo capture
+  - [x] Document upload component with gallery + remove actions
+  - [x] Draft persistence for attachments across reloads
+  - [x] GraphQL submission wired with primary + annex IDs
+  - [x] Native QR/Barcode detection with fallback messaging
+- [x] **Digital Receipt Generation**
+  - [x] Downloadable PDF receipt (A4, Nepali locale)
+  - [x] Inline receipt preview with touch-first UI
+  - [x] Mock service returns captured primary/annex metadata
+- [x] **Triage Inbox Route**
+  - [x] Filtered inbox with pending दर्ता सूची
+  - [x] Route mutation wired with org-unit selection
+  - [x] Notes + quick chips for department targeting
 - [x] **DartaList GraphQL Integration**
   - [x] Data fetching via `useDartasQuery`
   - [x] Loading and error states
   - [x] Pagination ready (50 items per page)
 
 **Next Steps:**
-- [ ] Camera scanner integration (lazy loaded)
-- [ ] Document upload with photo capture
-- [ ] Receipt generation (PDF/print)
+- [x] Camera scanner integration (lazy-loaded capture UI)
+- [x] Document upload with photo capture
+- [x] Receipt generation (PDF/print)
 - [ ] Additional routes:
-  - [ ] `/triage` - Inbox, assign, route
+  - [x] `/triage` - Inbox, assign, route
   - [ ] `/review` - Workspace, decision, timeline
   - [ ] `/exceptions` - Backdate, void, corrections
 
 ### 3.2 Chalani MFE 📋
 **Location:** `apps/mfe-chalani/`
 
+**Completed:**
+- [x] ChalaniCompose screen (drafted letter workflow)
+  - [x] Offline draft persistence with Zustand store
+  - [x] Attachment handling with image compression pipeline reuse
+
 **Routes:**
-- [ ] `/compose` - Editor, templates, signatories
+- [x] `/compose` - Editor, templates, signatories
 - [ ] `/approvals` - Pending, detail, delegation
 - [ ] `/dispatch` - Channel, labels, tracking
 - [ ] `/acknowledgement` - QR scan, closure
@@ -270,14 +291,14 @@
 
 ### Priority 3: Camera Scanner
 1. **Scanner Component** (lazy loaded)
-   - QR code scanning
-   - Barcode scanning
-   - Photo capture
+   - [x] Photo capture overlay
+   - [x] QR code scanning (native `BarcodeDetector` with graceful fallback)
+   - [x] Barcode scanning (common symbologies via `BarcodeDetector`)
 
 2. **Document Upload**
-   - Gallery picker
-   - Image preview
-   - Compression
+   - [x] Gallery picker
+   - [x] Image preview + removal
+   - [x] Compression pipeline (client-side resize)
 
 ### Priority 4: Second MFE (Chalani)
 1. **MFE Structure**

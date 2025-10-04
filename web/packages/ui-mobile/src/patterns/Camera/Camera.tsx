@@ -4,6 +4,38 @@ import styles from './Camera.module.css'
 
 export type CameraMode = 'photo' | 'qr' | 'barcode'
 
+type BarcodeFormat =
+  | 'aztec'
+  | 'code_128'
+  | 'code_39'
+  | 'code_93'
+  | 'codabar'
+  | 'data_matrix'
+  | 'ean_13'
+  | 'ean_8'
+  | 'itf'
+  | 'pdf417'
+  | 'qr_code'
+  | 'upc_a'
+  | 'upc_e'
+
+type BarcodeDetectorResult = {
+  rawValue: string
+  format: BarcodeFormat
+}
+
+type BarcodeDetectorInstance = {
+  detect: (source: CanvasImageSource) => Promise<BarcodeDetectorResult[]>
+}
+
+type BarcodeDetectorConstructor = new (options?: { formats?: BarcodeFormat[] }) => BarcodeDetectorInstance
+
+declare global {
+  interface Window {
+    BarcodeDetector?: BarcodeDetectorConstructor
+  }
+}
+
 export interface CameraProps {
   /**
    * Camera mode
@@ -46,8 +78,7 @@ export interface CameraProps {
  *
  * Features:
  * - Photo capture with preview
- * - QR code scanning (requires qr-scanner library)
- * - Barcode scanning
+ * - QR / barcode scanning via native BarcodeDetector (with graceful fallback)
  * - Front/back camera switching
  * - Mobile-optimized fullscreen UI
  * - Nepali language support
@@ -82,6 +113,13 @@ export function Camera({
   const [stream, setStream] = useState<MediaStream | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [currentFacingMode, setCurrentFacingMode] = useState(facingMode)
+  const detectorRef = useRef<BarcodeDetectorInstance | null>(null)
+  const scanFrameRef = useRef<number | null>(null)
+  const lastScannedValueRef = useRef<string | null>(null)
+  const lastScanTsRef = useRef<number>(0)
+  const scanErrorLoggedRef = useRef(false)
+  const [scanResult, setScanResult] = useState<string | null>(null)
+  const [scanUnsupported, setScanUnsupported] = useState(false)
 
   // Start camera
   const startCamera = useCallback(async () => {
@@ -150,12 +188,26 @@ export function Camera({
   useEffect(() => {
     if (isOpen) {
       startCamera()
+      lastScannedValueRef.current = null
+      lastScanTsRef.current = 0
+      setScanResult(null)
+      setScanUnsupported(false)
     } else {
       stopCamera()
+      if (scanFrameRef.current) {
+        cancelAnimationFrame(scanFrameRef.current)
+        scanFrameRef.current = null
+      }
+      detectorRef.current = null
     }
 
     return () => {
       stopCamera()
+      if (scanFrameRef.current) {
+        cancelAnimationFrame(scanFrameRef.current)
+        scanFrameRef.current = null
+      }
+      detectorRef.current = null
     }
   }, [isOpen, startCamera, stopCamera])
 
@@ -165,7 +217,99 @@ export function Camera({
       stopCamera()
       startCamera()
     }
-  }, [currentFacingMode])
+  }, [currentFacingMode, isOpen, stream, startCamera, stopCamera])
+
+  useEffect(() => {
+    if (isOpen) {
+      setScanResult(null)
+      lastScannedValueRef.current = null
+      lastScanTsRef.current = 0
+    }
+  }, [mode, isOpen])
+
+  // QR / barcode detection loop
+  useEffect(() => {
+    if (!isOpen || error || mode === 'photo') {
+      if (scanFrameRef.current) {
+        cancelAnimationFrame(scanFrameRef.current)
+        scanFrameRef.current = null
+      }
+      detectorRef.current = null
+      return
+    }
+
+    if (typeof window === 'undefined' || !window.BarcodeDetector) {
+      setScanUnsupported(true)
+      return
+    }
+
+    const formats: BarcodeFormat[] =
+      mode === 'qr'
+        ? ['qr_code']
+        : ['qr_code', 'code_128', 'code_39', 'code_93', 'ean_13', 'ean_8', 'itf', 'upc_a', 'upc_e']
+
+    try {
+      detectorRef.current = new window.BarcodeDetector({ formats })
+      setScanUnsupported(false)
+      scanErrorLoggedRef.current = false
+    } catch (detectorError) {
+      console.warn('Barcode detector initialization failed:', detectorError)
+      setScanUnsupported(true)
+      detectorRef.current = null
+      return
+    }
+
+    let cancelled = false
+
+    const scan = async () => {
+      if (cancelled || !detectorRef.current || !videoRef.current) return
+
+      try {
+        const results = await detectorRef.current.detect(videoRef.current)
+
+        if (!cancelled && results.length > 0) {
+          const value = results[0].rawValue.trim()
+          const now = Date.now()
+          const cooldown = now - lastScanTsRef.current
+
+          if (value && (value !== lastScannedValueRef.current || cooldown > 1500)) {
+            lastScannedValueRef.current = value
+            lastScanTsRef.current = now
+            setScanResult(value)
+            try {
+              onScan?.(value)
+            } catch (callbackError) {
+              console.error('Camera onScan callback error:', callbackError)
+            }
+
+            if ('vibrate' in navigator) {
+              navigator.vibrate?.(50)
+            }
+          }
+        }
+      } catch (scanError) {
+        if (!scanErrorLoggedRef.current) {
+          console.warn('Barcode detection failed:', scanError)
+          scanErrorLoggedRef.current = true
+        }
+      } finally {
+        if (!cancelled) {
+          scanFrameRef.current = window.requestAnimationFrame(scan)
+        }
+      }
+    }
+
+    scanFrameRef.current = window.requestAnimationFrame(scan)
+
+    return () => {
+      cancelled = true
+      if (scanFrameRef.current) {
+        cancelAnimationFrame(scanFrameRef.current)
+        scanFrameRef.current = null
+      }
+      detectorRef.current = null
+    }
+  }, [isOpen, mode, error, onScan])
 
   return (
     <AnimatePresence>
@@ -222,6 +366,17 @@ export function Camera({
                       <p className={styles.scanHint}>
                         {mode === 'qr' ? 'QR कोड स्क्यान गर्नुहोस्' : 'बारकोड स्क्यान गर्नुहोस्'}
                       </p>
+                      {scanUnsupported && (
+                        <p className={styles.scanUnsupported}>
+                          यो उपकरणमा स्क्यान सुविधा उपलब्ध छैन। कृपया कोड म्यानुअल रूपमा प्रविष्ट गर्नुहोस्।
+                        </p>
+                      )}
+                      {scanResult && !scanUnsupported && (
+                        <div className={styles.scanResult}>
+                          <span className={styles.scanResultLabel}>स्क्यान गरिएको मान</span>
+                          <span className={styles.scanResultValue}>{scanResult}</span>
+                        </div>
+                      )}
                     </div>
                   )}
                 </>

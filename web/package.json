@@ -3,9 +3,10 @@
   "private": true,
   "packageManager": "pnpm@9.0.0",
   "scripts": {
-    "dev": "concurrently --kill-others --names \"SHELL,DARTA\" -c \"bgBlue.bold,bgMagenta.bold\" \"pnpm dev:shell\" \"pnpm dev:darta\"",
+    "dev": "concurrently --kill-others --names \"SHELL,DARTA,CHALANI\" -c \"bgBlue.bold,bgMagenta.bold,bgCyan.bold\" \"pnpm dev:shell\" \"pnpm dev:darta\" \"pnpm dev:chalani\"",
     "dev:shell": "pnpm --filter @egov/shell dev",
     "dev:darta": "pnpm --filter @egov/mfe-darta dev",
+    "dev:chalani": "pnpm --filter @egov/mfe-chalani dev",
     "dev:all": "pnpm -r --parallel dev",
     "build": "pnpm -r build",
     "typecheck": "pnpm -r typecheck",
@@ -29,6 +30,7 @@
   "dependencies": {
     "@carbon/react": "^1.92.1",
     "@carbon/styles": "^1.91.0",
+    "glob": "^11.0.3",
     "react-is": "18.3.1"
   },
   "pnpm": {

@@ -1,4 +1,4 @@
-import { useState, useRef, lazy, Suspense } from 'react'
+import { useState, useRef, useEffect, lazy, Suspense } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import clsx from 'clsx'
 import styles from './DocumentUpload.module.css'
@@ -106,9 +106,17 @@ export function DocumentUpload({
 }: DocumentUploadProps) {
   const [cameraOpen, setCameraOpen] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const isMountedRef = useRef(true)
+  const [processing, setProcessing] = useState(false)
 
   const hasError = Boolean(error)
   const canAddMore = documents.length < maxFiles
+
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false
+    }
+  }, [])
 
   // Handle file selection from gallery
   const handleFileSelect = async (files: FileList | null) => {
@@ -116,50 +124,64 @@ export function DocumentUpload({
 
     const newDocuments: UploadedDocument[] = []
 
-    for (let i = 0; i < files.length && documents.length + newDocuments.length < maxFiles; i++) {
-      const file = files[i]
+    setProcessing(true)
 
-      // Validate file size
-      if (file.size > maxSizeMB * 1024 * 1024) {
-        console.warn(`File ${file.name} exceeds ${maxSizeMB}MB limit`)
-        continue
+    try {
+      for (let i = 0; i < files.length && documents.length + newDocuments.length < maxFiles; i++) {
+        const file = files[i]
+
+        if (file.size > maxSizeMB * 1024 * 1024) {
+          console.warn(`File ${file.name} exceeds ${maxSizeMB}MB limit`)
+          continue
+        }
+
+        const { dataUrl, size, mimeType } = await optimizeFile(file)
+
+        newDocuments.push({
+          id: `doc-${Date.now()}-${i}`,
+          name: file.name,
+          dataUrl,
+          size,
+          type: mimeType,
+          uploadedAt: new Date().toISOString(),
+        })
       }
 
-      // Convert to base64
-      const dataUrl = await fileToDataUrl(file)
-
-      newDocuments.push({
-        id: `doc-${Date.now()}-${i}`,
-        name: file.name,
-        dataUrl,
-        size: file.size,
-        type: file.type,
-        uploadedAt: new Date().toISOString(),
-      })
-    }
-
-    if (newDocuments.length > 0) {
-      onChange?.([...documents, ...newDocuments])
-    }
-
-    if (fileInputRef.current) {
-      fileInputRef.current.value = ''
+      if (newDocuments.length > 0) {
+        onChange?.([...documents, ...newDocuments])
+      }
+    } finally {
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+      }
+      if (isMountedRef.current) {
+        setProcessing(false)
+      }
     }
   }
 
   // Handle camera capture
-  const handleCameraCapture = (imageData: string) => {
-    const newDocument: UploadedDocument = {
-      id: `photo-${Date.now()}`,
-      name: `photo-${Date.now()}.jpg`,
-      dataUrl: imageData,
-      size: Math.round(imageData.length * 0.75), // Rough estimate
-      type: 'image/jpeg',
-      uploadedAt: new Date().toISOString(),
-    }
+  const handleCameraCapture = async (imageData: string) => {
+    setProcessing(true)
 
-    onChange?.([...documents, newDocument])
-    setCameraOpen(false)
+    try {
+      const optimized = await optimizeDataUrl(imageData, 'image/jpeg')
+      const newDocument: UploadedDocument = {
+        id: `photo-${Date.now()}`,
+        name: `photo-${Date.now()}.jpg`,
+        dataUrl: optimized.dataUrl,
+        size: optimized.size,
+        type: optimized.mimeType,
+        uploadedAt: new Date().toISOString(),
+      }
+
+      onChange?.([...documents, newDocument])
+      setCameraOpen(false)
+    } finally {
+      if (isMountedRef.current) {
+        setProcessing(false)
+      }
+    }
   }
 
   // Remove document
@@ -289,6 +311,12 @@ export function DocumentUpload({
         )}
       </AnimatePresence>
 
+      {processing && (
+        <span className={styles.processing} role="status">
+          फाइल प्रशोधन गर्दै...
+        </span>
+      )}
+
       {/* Helper text or error */}
       {error && (
         <span className={styles.errorText} role="alert">
@@ -341,4 +369,75 @@ function formatFileSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
+
+async function optimizeFile(file: File) {
+  const mimeType = file.type || 'application/octet-stream'
+  if (!mimeType.startsWith('image/')) {
+    const dataUrl = await fileToDataUrl(file)
+    return {
+      dataUrl,
+      size: file.size,
+      mimeType,
+    }
+  }
+
+  const dataUrl = await fileToDataUrl(file)
+  return optimizeDataUrl(dataUrl, mimeType)
+}
+
+async function optimizeDataUrl(dataUrl: string, originalMime: string) {
+  const fallback = {
+    dataUrl,
+    size: Math.round(dataUrl.length * 0.75),
+    mimeType: originalMime,
+  }
+
+  if (!originalMime.startsWith('image/')) {
+    return fallback
+  }
+
+  if (typeof window === 'undefined') {
+    return fallback
+  }
+
+  try {
+    const img = await loadImage(dataUrl)
+    const maxDimension = 1600
+    const scale = Math.min(1, maxDimension / Math.max(img.width, img.height) || 1)
+    const targetWidth = Math.round(img.width * scale) || img.width
+    const targetHeight = Math.round(img.height * scale) || img.height
+
+    const canvas = document.createElement('canvas')
+    canvas.width = targetWidth
+    canvas.height = targetHeight
+
+    const ctx = canvas.getContext('2d')
+    if (!ctx) {
+      return fallback
+    }
+
+    ctx.drawImage(img, 0, 0, targetWidth, targetHeight)
+
+    const outputMime = 'image/jpeg'
+    const optimizedDataUrl = canvas.toDataURL(outputMime, 0.82)
+
+    return {
+      dataUrl: optimizedDataUrl,
+      size: Math.round(optimizedDataUrl.length * 0.75),
+      mimeType: outputMime,
+    }
+  } catch (err) {
+    console.warn('Document optimization failed, using original asset.', err)
+    return fallback
+  }
+}
+
+function loadImage(src: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const img = new Image()
+    img.onload = () => resolve(img)
+    img.onerror = reject
+    img.src = src
+  })
 }

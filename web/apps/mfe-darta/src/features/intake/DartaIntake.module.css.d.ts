@@ -13,6 +13,7 @@ declare const styles: {
   readonly scopeButton: string
   readonly active: string
   readonly actions: string
+  readonly receiptSection: string
 }
 
 export default styles

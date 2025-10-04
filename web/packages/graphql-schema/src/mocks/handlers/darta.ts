@@ -1,5 +1,5 @@
 import { graphql, HttpResponse } from 'msw'
-import { mockDartas, createMockDarta } from '../fixtures/darta.fixtures'
+import { mockDartas, createMockDarta, createMockAttachment } from '../fixtures/darta.fixtures'
 import { faker } from '@faker-js/faker'
 
 let dartas = [...mockDartas]
@@ -129,6 +129,28 @@ export const dartaHandlers = [
   // Mutation: Create Darta
   graphql.mutation('CreateDarta', ({ variables }) => {
     dartaCounter++
+    const primaryDocumentId = variables.input.primaryDocumentId
+    const annexIds: string[] = variables.input.annexIds ?? []
+    const primaryDocument = (() => {
+      const attachment = createMockAttachment()
+      const isPhoto = primaryDocumentId.startsWith('photo-')
+      return {
+        ...attachment,
+        id: primaryDocumentId,
+        mimeType: isPhoto ? 'image/jpeg' : attachment.mimeType,
+        fileName: isPhoto ? `${primaryDocumentId}.jpg` : `document-${primaryDocumentId}.pdf`,
+      }
+    })()
+    const annexAttachments = annexIds.map((id: string, index: number) => {
+      const attachment = createMockAttachment()
+      const isPhoto = id.startsWith('photo-')
+      return {
+        ...attachment,
+        id,
+        mimeType: isPhoto ? 'image/jpeg' : attachment.mimeType,
+        fileName: isPhoto ? `${id}.jpg` : `annex-${index + 1}.pdf`,
+      }
+    })
     const newDarta = createMockDarta({
       dartaNumber: dartaCounter,
       scope: variables.input.scope,
@@ -139,6 +161,8 @@ export const dartaHandlers = [
       receivedDate: variables.input.receivedDate,
       priority: variables.input.priority || 'MEDIUM',
       status: 'PENDING_TRIAGE',
+      primaryDocument,
+      annexes: annexAttachments,
     })
     dartas.push(newDarta)
 

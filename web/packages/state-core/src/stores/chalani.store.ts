@@ -2,6 +2,15 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { immer } from 'zustand/middleware/immer'
 import type { Chalani, ChalaniFilterInput } from '@egov/graphql-schema'
+import type { DraftDocument } from './darta.store'
+
+export type ChalaniDraft = Partial<Chalani> & {
+  recipientName?: string
+  recipientAddress?: string
+  dispatchChannel?: string
+  signatoryId?: string
+  documents?: DraftDocument[]
+}
 
 export interface ChalaniState {
   // Chalani list
@@ -17,14 +26,14 @@ export interface ChalaniState {
   error: string | null
 
   // Draft state (for offline)
-  draft: Partial<Chalani> | null
+  draft: ChalaniDraft | null
 
   // Actions
   setChalanis: (chalanis: Chalani[]) => void
   selectChalani: (chalani: Chalani | null) => void
   setPendingApprovals: (approvals: Chalani[]) => void
   setFilters: (filters: Partial<ChalaniFilterInput>) => void
-  setDraft: (draft: Partial<Chalani> | null) => void
+  setDraft: (draft: ChalaniDraft | null) => void
   clearDraft: () => void
   setLoading: (loading: boolean) => void
   setError: (error: string | null) => void

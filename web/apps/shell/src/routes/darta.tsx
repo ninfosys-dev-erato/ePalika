@@ -11,6 +11,11 @@ const DartaList = lazy(() =>
   import('mfe_darta/DartaList').then((m) => ({ default: m.DartaList }))
 )
 
+const DartaTriage = lazy(() =>
+  // @ts-ignore - Module Federation runtime import
+  import('mfe_darta/TriageInbox').then((m) => ({ default: m.TriageInbox }))
+)
+
 function LoadingFallback() {
   return (
     <div style={{ padding: '2rem', textAlign: 'center' }}>
@@ -31,6 +36,14 @@ export function DartaListPage() {
   return (
     <Suspense fallback={<LoadingFallback />}>
       <DartaList />
+    </Suspense>
+  )
+}
+
+export function DartaTriagePage() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <DartaTriage />
     </Suspense>
   )
 }

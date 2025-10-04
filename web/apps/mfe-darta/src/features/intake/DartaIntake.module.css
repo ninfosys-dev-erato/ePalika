@@ -113,6 +113,10 @@
   flex: 1;
 }
 
+.receiptSection {
+  margin-top: 1.5rem;
+}
+
 /* Tablet and up */
 @media (min-width: 768px) {
   .container {

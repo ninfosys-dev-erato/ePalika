@@ -3,6 +3,21 @@ import { persist } from 'zustand/middleware'
 import { immer } from 'zustand/middleware/immer'
 import type { Darta, DartaFilterInput } from '@egov/graphql-schema'
 
+export interface DraftDocument {
+  id: string
+  name: string
+  dataUrl: string
+  size: number
+  type: string
+  uploadedAt: string
+}
+
+export type DartaDraft = Partial<Darta> & {
+  applicantName?: string
+  applicantPhone?: string
+  documents?: DraftDocument[]
+}
+
 export interface DartaState {
   // Darta list
   dartas: Darta[]
@@ -16,13 +31,13 @@ export interface DartaState {
   error: string | null
 
   // Draft state (for offline)
-  draft: Partial<Darta> | null
+  draft: DartaDraft | null
 
   // Actions
   setDartas: (dartas: Darta[]) => void
   selectDarta: (darta: Darta | null) => void
   setFilters: (filters: Partial<DartaFilterInput>) => void
-  setDraft: (draft: Partial<Darta> | null) => void
+  setDraft: (draft: DartaDraft | null) => void
   clearDraft: () => void
   setLoading: (loading: boolean) => void
   setError: (error: string | null) => void

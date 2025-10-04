@@ -18,6 +18,7 @@ declare const styles: {
   readonly removeButton: string
   readonly errorText: string
   readonly helperText: string
+  readonly processing: string
   [key: string]: string
 }
 

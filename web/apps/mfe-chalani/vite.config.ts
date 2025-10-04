@@ -8,19 +8,17 @@ export default defineConfig({
     tsconfigPaths(),
     react(),
     federation({
-      name: 'mfe_darta',
+      name: 'mfe_chalani',
       filename: 'remoteEntry.js',
       exposes: {
-        './DartaIntake': './src/features/intake/DartaIntake',
-        './DartaList': './src/features/list/DartaList',
-        './TriageInbox': './src/features/triage/TriageInbox',
+        './ChalaniCompose': './src/features/compose/ChalaniCompose',
       },
       shared: {
         react: { singleton: true, requiredVersion: '^18.3.1' },
         'react-dom': { singleton: true, requiredVersion: '^18.3.1' },
         '@apollo/client': { singleton: true },
         '@tanstack/react-query': { singleton: true },
-        'zustand': { singleton: true },
+        zustand: { singleton: true },
       },
     }),
   ],
@@ -28,22 +26,12 @@ export default defineConfig({
     target: 'esnext',
     minify: 'esbuild',
     cssCodeSplit: true,
-    rollupOptions: {
-      output: {
-        manualChunks: (id) => {
-          // Camera/scanner libraries (lazy loaded)
-          if (id.includes('scanner') || id.includes('camera')) {
-            return 'chunk-camera'
-          }
-        },
-      },
-    },
   },
   server: {
-    port: 5201,
+    port: 5202,
     cors: true,
   },
   preview: {
-    port: 5201,
+    port: 5202,
   },
 })

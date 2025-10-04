@@ -194,6 +194,14 @@
   color: var(--color-text-secondary);
 }
 
+.processing {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .uploadButton,
   .removeButton,
