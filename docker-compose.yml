@@ -71,13 +71,39 @@ services:
     build:
       context: .
       dockerfile: services/darta-chalani/cmd/dartasvc/Dockerfile
+      target: dartasvc
     ports:
       - "9000:9000"
+    environment:
+      - DARTA_DB_DSN=postgres://yugabyte:yugabyte@yugabytedb:5433/epalika?sslmode=disable
+      - DARTA_DB_MAX_CONNS=15
+      - DARTA_DB_MIN_CONNS=3
+      - DARTA_DB_MIGRATE_TIMEOUT=60s
+      - DARTA_DB_HEALTH_TIMEOUT=3s
+      - DEFAULT_TENANT=default
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://localhost:9000/health"]
       interval: 5s
       timeout: 3s
       retries: 10
+    depends_on:
+      darta-chalani-migrate:
+        condition: service_completed_successfully
+    networks:
+      - authnz
+
+  darta-chalani-migrate:
+    build:
+      context: .
+      dockerfile: services/darta-chalani/cmd/dartasvc/Dockerfile
+      target: dartasvc-migrate
+    environment:
+      - DARTA_DB_DSN=postgres://yugabyte:yugabyte@yugabytedb:5433/epalika?sslmode=disable
+      - DARTA_DB_MIGRATE_TIMEOUT=60s
+    depends_on:
+      yugabytedb-init:
+        condition: service_completed_successfully
+    restart: "no"
     networks:
       - authnz
 
@@ -171,14 +197,36 @@ services:
       - "7000:7000" # Admin UI
       - "5433:5433" # YSQL
       - "9042:9042" # YCQL
-    command: ["/home/yugabyte/bin/yb-ctl", "create", "--rf", "1"]
+    command: ["bash", "-c", "/home/yugabyte/bin/yugabyted start --base_dir=/var/lib/yugabytedb --daemon=false"]
+    volumes:
+      - yugabytedb-data:/var/lib/yugabytedb
+    environment:
+      - YB_ENABLE_LOAD_BALANCER=false
     healthcheck:
-      test: ["CMD", "/home/yugabyte/bin/yb-ctl", "status"]
+      test: ["CMD", "ysqlsh", "-h", "localhost", "-c", "SELECT 1"]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 10
     networks:
       - authnz
+  yugabytedb-init:
+    image: yugabytedb/yugabyte:latest
+    depends_on:
+      yugabytedb:
+        condition: service_healthy
+    command: >
+      bash -c "
+        for i in {1..30}; do
+          ysqlsh -h yugabytedb -c 'SELECT 1' >/dev/null 2>&1 && break
+          sleep 2
+        done
+        ysqlsh -h yugabytedb -c \"CREATE DATABASE epalika\" >/dev/null 2>&1 || true
+      "
+    networks:
+      - authnz
+volumes:
+  yugabytedb-data:
+
 networks:
   authnz:
     driver: bridge

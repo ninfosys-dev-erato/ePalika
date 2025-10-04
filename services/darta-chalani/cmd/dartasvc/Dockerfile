@@ -8,10 +8,17 @@ COPY internal-libs ./internal-libs
 COPY services/darta-chalani ./services/darta-chalani
 COPY services/pdp ./services/pdp
 COPY services/graphql-gateway ./services/graphql-gateway
+RUN mkdir -p /out
 RUN --mount=type=cache,target=/go/pkg/mod \
-    cd services/darta-chalani && go build -o /dartasvc ./cmd/dartasvc
+    cd services/darta-chalani && \
+    go build -o /out/dartasvc ./cmd/dartasvc && \
+    go build -o /out/dartasvc-migrate ./cmd/dartasvc-migrate
 
-FROM gcr.io/distroless/base-debian12
-COPY --from=build /dartasvc /dartasvc
+FROM gcr.io/distroless/base-debian12 AS dartasvc
+COPY --from=build /out/dartasvc /dartasvc
 EXPOSE 9000
 ENTRYPOINT ["/dartasvc"]
+
+FROM gcr.io/distroless/base-debian12 AS dartasvc-migrate
+COPY --from=build /out/dartasvc-migrate /dartasvc-migrate
+ENTRYPOINT ["/dartasvc-migrate"]

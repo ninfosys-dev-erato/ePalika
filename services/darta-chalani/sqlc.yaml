@@ -1,0 +1,36 @@
+version: "2"
+sql:
+  - schema: "internal/dbutil/migrations"
+    queries: "queries"
+    engine: "postgresql"
+    gen:
+      go:
+        package: "db"
+        out: "internal/db"
+        sql_package: "pgx/v5"
+        emit_prepared_queries: false
+        emit_json_tags: true
+        emit_interface: true
+        overrides:
+          - column: "dartas.id"
+            go_type:
+              import: "github.com/google/uuid"
+              type: "UUID"
+          - column: "dartas.status"
+            go_type:
+              type: "string"
+          - column: "dartas.remarks"
+            go_type:
+              type: "*string"
+          - column: "dartas.tenant_id"
+            go_type:
+              type: "string"
+          - column: "dartas.created_at"
+            go_type:
+              import: "time"
+              type: "Time"
+          - column: "dartas.updated_at"
+            go_type:
+              import: "time"
+              type: "Time"
+              pointer: true
