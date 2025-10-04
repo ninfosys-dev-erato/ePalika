@@ -41,9 +41,8 @@ export async function initAuth(cfg: KeycloakConfig): Promise<{ authenticated: bo
     }
 
     const authenticated = await kc.init({
-      onLoad: 'check-sso',
+      onLoad: cfg.autoLogin ? 'login-required' : 'check-sso',
       pkceMethod: 'S256',
-      silentCheckSsoRedirectUri: cfg.silentCheckSsoRedirectUri,
       checkLoginIframe: false,
     })
 
