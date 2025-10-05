@@ -1,0 +1,25 @@
+extend type Query {
+  me: User! user(id: ID!): User users(filter: UsersFilter, pagination: PaginationInput): UserConnection!
+  person(id: ID!): Person orgUnit(id: ID!): OrgUnit
+  orgUnits(parentId: ID, type: OrgUnitType, search: String): [OrgUnit!]!
+  role(key: String!): Role roles(filter: RolesFilter, pagination: PaginationInput): RoleConnection!
+  grant(id: ID!): Grant grants(filter: GrantsFilter, pagination: PaginationInput): GrantConnection!
+  pendingGrantRequests(pagination: PaginationInput): GrantConnection!
+  group(id: ID!): Group groups(search: String): [Group!]!
+  delegations(userId: ID, status: DelegationStatus): [Delegation!]!
+  userCredentials(userId: ID!): [Credential!]! userAddresses(userId: ID!): [Address!]!
+  checkPermission(input: PermissionCheckInput!): PermissionCheckResult!
+  effectiveGrants(userId: ID!, orgUnitId: ID): [Grant!]!
+}
+
+input UsersFilter { status: UserStatus orgUnitId: ID search: String }
+input GrantsFilter { userId: ID roleKey: String orgUnitId: ID status: GrantStatus }
+input RolesFilter { key: String search: String }
+
+type PermissionCheckResult { allowed: Boolean! matchedGrantIds: [ID!]! reason: String }
+type UserConnection { edges: [UserEdge!]! pageInfo: PageInfo! }
+type UserEdge { cursor: String! node: User! }
+type GrantConnection { edges: [GrantEdge!]! pageInfo: PageInfo! }
+type GrantEdge { cursor: String! node: Grant! }
+type RoleConnection { edges: [RoleEdge!]! pageInfo: PageInfo! }
+type RoleEdge { cursor: String! node: Role! }

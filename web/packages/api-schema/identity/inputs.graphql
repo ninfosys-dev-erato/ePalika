@@ -1,0 +1,12 @@
+input InviteUserInput { person: PersonInput! username: String! email: String phone: String orgUnitId: ID actorType: String attributes: JSON }
+input PersonInput { legalName: String! preferredName: String dateOfBirth: String contacts: [ContactInput!] primaryAddress: AddressInput govIdRefs: [GovIdRefInput!] }
+input ContactInput { type: String! value: String! }
+input AddressInput { raw: String! normalized: JSON lat: Float lng: Float }
+input GovIdRefInput { type: String! value: String! issuedBy: String expiresAt: DateTime }
+input EvidenceInput { kind: String! fileId: ID! }
+input RequestGrantInput { userId: ID! roleKey: String! orgUnitId: ID! reason: String startAt: DateTime endAt: DateTime }
+input ApproveGrantInput { grantId: ID! approve: Boolean! reason: String overrideSoD: Boolean = false }
+input RevokeGrantInput { grantId: ID! reason: String! }
+input DelegateGrantInput { grantId: ID! toUserId: ID! startAt: DateTime! endAt: DateTime constraints: JSON }
+input PermissionCheckInput { userId: ID resourceType: String! resourceId: ID action: String! orgUnitId: ID }
+input OrgUnitInput { name: String! code: String! type: OrgUnitType! parentId: ID wardNumber: Int }

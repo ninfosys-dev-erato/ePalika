@@ -1,0 +1,19 @@
+type Person { id: ID! legalName: String! preferredName: String dateOfBirth: String govIdRefs: [GovIdRef!]! contacts: [Contact!]! primaryAddress: Address createdAt: DateTime! updatedAt: DateTime! }
+type GovIdRef { type: String! value: String! issuedBy: String expiresAt: DateTime }
+type Contact { type: String! value: String! verified: Boolean! verifiedAt: DateTime }
+type Address { id: ID! raw: String! normalized: JSON geo: GeoPoint status: AddressStatus! evidence: [AddressEvidence!]! createdAt: DateTime! verifiedAt: DateTime }
+type GeoPoint { lat: Float! lng: Float! }
+type AddressEvidence { id: ID! kind: String! fileId: ID! uploadedAt: DateTime! }
+
+type OrgUnit { id: ID! name: String! code: String! type: OrgUnitType! parent: OrgUnit children: [OrgUnit!]! wardNumber: Int createdAt: DateTime! updatedAt: DateTime! }
+
+type Role { id: ID! key: String! name: String! description: String permissions: [Permission!]! constraints: RoleConstraints! createdAt: DateTime! updatedAt: DateTime! }
+type Permission { resource: String! action: String! }
+type RoleConstraints { scopeTypes: [OrgUnitType!]! requiresMFA: Boolean! SoDConflicts: [String!]! }
+
+type Group { id: ID! name: String! description: String members: [User!]! createdAt: DateTime! updatedAt: DateTime! }
+type Grant { id: ID! role: Role! subject: GrantSubject! scope: ScopeRef! status: GrantStatus! requestedBy: User! requestedAt: DateTime! decidedBy: User decidedAt: DateTime startAt: DateTime endAt: DateTime conditions: JSON decisionReason: String createdAt: DateTime! updatedAt: DateTime! }
+type GrantSubject { type: String! user: User group: Group }
+type ScopeRef { orgUnit: OrgUnit! }
+type Delegation { id: ID! fromGrant: Grant! toUser: User! status: DelegationStatus! startAt: DateTime! endAt: DateTime constraints: JSON createdAt: DateTime! endedAt: DateTime reason: String }
+type Credential { id: ID! type: CredentialType! status: CredentialStatus! createdAt: DateTime! lastUsedAt: DateTime rotatedAt: DateTime expiresAt: DateTime }
