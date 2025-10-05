@@ -95,6 +95,30 @@ services:
         condition: service_completed_successfully
     networks:
       - authnz
+
+  identity:
+    build:
+      context: .
+      dockerfile: services/identity/Dockerfile
+    ports:
+      - "9001:9001"
+    environment:
+      - PORT=9001
+      - KEYCLOAK_URL=http://keycloak:8080
+      - KEYCLOAK_REALM=master
+      - KEYCLOAK_CLIENT_ID=admin-cli
+      - KEYCLOAK_CLIENT_SECRET=admin
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:9001/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    depends_on:
+      keycloak:
+        condition: service_healthy
+    networks:
+      - authnz
+
   graphql-gateway:
     build:
       context: .
@@ -103,6 +127,7 @@ services:
       - "8000:8000"
     environment:
       - DARTA_CHALANI_GRPC_ADDR=darta-chalani:9000
+      - IDENTITY_GRPC_ADDR=identity:9001
       - PDP_GRPC_ADDR=pdp:9100
       - PORT=8000
     healthcheck:
@@ -112,6 +137,7 @@ services:
       retries: 10
     depends_on:
       - darta-chalani
+      - identity
       - pdp
     networks:
       - authnz

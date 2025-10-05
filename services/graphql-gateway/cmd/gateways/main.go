@@ -31,6 +31,11 @@ func main() {
 		dartaAddr = "localhost:9000"
 	}
 
+	identityAddr := os.Getenv("IDENTITY_GRPC_ADDR")
+	if identityAddr == "" {
+		identityAddr = "localhost:9001"
+	}
+
 	pdpAddr := os.Getenv("PDP_GRPC_ADDR")
 	if pdpAddr == "" {
 		pdpAddr = "localhost:9100"
@@ -42,13 +47,19 @@ func main() {
 	}
 	defer dartaClient.Close()
 
+	identityClient, err := clients.NewIdentityClient(ctx, identityAddr)
+	if err != nil {
+		log.Fatalf("failed to create identity client: %v", err)
+	}
+	defer identityClient.Close()
+
 	pdpClient, err := clients.NewPDPClient(ctx, pdpAddr)
 	if err != nil {
 		log.Fatalf("failed to create pdp client: %v", err)
 	}
 	defer pdpClient.Close()
 
-	resolver := graph.NewResolver(dartaClient, pdpClient)
+	resolver := graph.NewResolver(dartaClient, identityClient, pdpClient)
 
 	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: resolver}))
 

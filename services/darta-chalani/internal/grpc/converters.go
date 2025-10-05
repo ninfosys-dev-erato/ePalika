@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -14,6 +15,14 @@ import (
 	"git.ninjainfosys.com/ePalika/services/darta-chalani/internal/db"
 	"git.ninjainfosys.com/ePalika/services/darta-chalani/internal/domain"
 )
+
+// Helper to convert pgtype.Timestamptz to timestamppb
+func pgTimestamptzToProto(ts pgtype.Timestamptz) *timestamppb.Timestamp {
+	if !ts.Valid {
+		return nil
+	}
+	return timestamppb.New(ts.Time)
+}
 
 // toProtoDarta converts db.Darta to proto Darta
 func toProtoDarta(d *db.Darta) *dartav1.Darta {
@@ -27,15 +36,15 @@ func toProtoDarta(d *db.Darta) *dartav1.Darta {
 		Scope:         stringToScope(d.Scope),
 		Subject:       d.Subject,
 		IntakeChannel: stringToIntakeChannel(d.IntakeChannel),
-		ReceivedDate:  timestamppb.New(d.ReceivedDate),
-		EntryDate:     timestamppb.New(d.EntryDate),
+		ReceivedDate:  pgTimestamptzToProto(d.ReceivedDate),
+		EntryDate:     pgTimestamptzToProto(d.EntryDate),
 		IsBackdated:   d.IsBackdated,
 		Status:        stringToDartaStatus(d.Status),
 		Priority:      stringToPriority(d.Priority),
 		CreatedBy:     &dartav1.User{Id: d.CreatedBy},
-		CreatedAt:     timestamppb.New(d.CreatedAt),
-		UpdatedAt:     timestamppb.New(d.UpdatedAt),
-		TenantID:      d.TenantID,
+		CreatedAt:     pgTimestamptzToProto(d.CreatedAt),
+		UpdatedAt:     pgTimestamptzToProto(d.UpdatedAt),
+		TenantId:      d.TenantID,
 	}
 
 	if d.DartaNumber != nil {
@@ -62,8 +71,8 @@ func toProtoDarta(d *db.Darta) *dartav1.Darta {
 	if d.CurrentAssigneeID != nil {
 		darta.CurrentAssignee = &dartav1.User{Id: *d.CurrentAssigneeID}
 	}
-	if d.SlaDeadline != nil {
-		darta.SlaDeadline = timestamppb.New(*d.SlaDeadline)
+	if d.SlaDeadline.Valid {
+		darta.SlaDeadline = pgTimestamptzToProto(d.SlaDeadline)
 	}
 
 	darta.PrimaryDocument = &dartav1.Attachment{Id: d.PrimaryDocumentID.String()}
@@ -84,15 +93,91 @@ func buildDartaFromRow(row *db.GetDartaRow) *dartav1.Darta {
 		Scope:         stringToScope(row.Scope),
 		Subject:       row.Subject,
 		IntakeChannel: stringToIntakeChannel(row.IntakeChannel),
-		ReceivedDate:  timestamppb.New(row.ReceivedDate),
-		EntryDate:     timestamppb.New(row.EntryDate),
+		ReceivedDate:  pgTimestamptzToProto(row.ReceivedDate),
+		EntryDate:     pgTimestamptzToProto(row.EntryDate),
 		IsBackdated:   row.IsBackdated,
 		Status:        stringToDartaStatus(row.Status),
 		Priority:      stringToPriority(row.Priority),
 		CreatedBy:     &dartav1.User{Id: row.CreatedBy},
-		CreatedAt:     timestamppb.New(row.CreatedAt),
-		UpdatedAt:     timestamppb.New(row.UpdatedAt),
-		TenantID:      row.TenantID,
+		CreatedAt:     pgTimestamptzToProto(row.CreatedAt),
+		UpdatedAt:     pgTimestamptzToProto(row.UpdatedAt),
+		TenantId:      row.TenantID,
+		Applicant: &dartav1.Applicant{
+			Id:       row.ID_2.String(),
+			Type:     stringToApplicantType(row.Type),
+			FullName: row.FullName,
+		},
+	}
+
+	if row.DartaNumber != nil {
+		darta.DartaNumber = *row.DartaNumber
+	}
+	if row.FormattedDartaNumber != nil {
+		darta.FormattedDartaNumber = *row.FormattedDartaNumber
+	}
+
+	return darta
+}
+
+// buildDartaFromListRow builds Darta from ListDartasRow
+func buildDartaFromListRow(row *db.ListDartasRow) *dartav1.Darta {
+	if row == nil {
+		return nil
+	}
+
+	darta := &dartav1.Darta{
+		Id:            row.ID.String(),
+		FiscalYear:    &dartav1.FiscalYear{Id: row.FiscalYearID},
+		Scope:         stringToScope(row.Scope),
+		Subject:       row.Subject,
+		IntakeChannel: stringToIntakeChannel(row.IntakeChannel),
+		ReceivedDate:  pgTimestamptzToProto(row.ReceivedDate),
+		EntryDate:     pgTimestamptzToProto(row.EntryDate),
+		IsBackdated:   row.IsBackdated,
+		Status:        stringToDartaStatus(row.Status),
+		Priority:      stringToPriority(row.Priority),
+		CreatedBy:     &dartav1.User{Id: row.CreatedBy},
+		CreatedAt:     pgTimestamptzToProto(row.CreatedAt),
+		UpdatedAt:     pgTimestamptzToProto(row.UpdatedAt),
+		TenantId:      row.TenantID,
+		Applicant: &dartav1.Applicant{
+			Id:       row.ID_2.String(),
+			Type:     stringToApplicantType(row.Type),
+			FullName: row.FullName,
+		},
+	}
+
+	if row.DartaNumber != nil {
+		darta.DartaNumber = *row.DartaNumber
+	}
+	if row.FormattedDartaNumber != nil {
+		darta.FormattedDartaNumber = *row.FormattedDartaNumber
+	}
+
+	return darta
+}
+
+// buildDartaFromMyDartasRow builds Darta from GetMyDartasRow
+func buildDartaFromMyDartasRow(row *db.GetMyDartasRow) *dartav1.Darta {
+	if row == nil {
+		return nil
+	}
+
+	darta := &dartav1.Darta{
+		Id:            row.ID.String(),
+		FiscalYear:    &dartav1.FiscalYear{Id: row.FiscalYearID},
+		Scope:         stringToScope(row.Scope),
+		Subject:       row.Subject,
+		IntakeChannel: stringToIntakeChannel(row.IntakeChannel),
+		ReceivedDate:  pgTimestamptzToProto(row.ReceivedDate),
+		EntryDate:     pgTimestamptzToProto(row.EntryDate),
+		IsBackdated:   row.IsBackdated,
+		Status:        stringToDartaStatus(row.Status),
+		Priority:      stringToPriority(row.Priority),
+		CreatedBy:     &dartav1.User{Id: row.CreatedBy},
+		CreatedAt:     pgTimestamptzToProto(row.CreatedAt),
+		UpdatedAt:     pgTimestamptzToProto(row.UpdatedAt),
+		TenantId:      row.TenantID,
 		Applicant: &dartav1.Applicant{
 			Id:       row.ID_2.String(),
 			Type:     stringToApplicantType(row.Type),

@@ -17,7 +17,6 @@ import (
 	"google.golang.org/grpc/reflection"
 
 	dartav1 "git.ninjainfosys.com/ePalika/proto/gen/darta/v1"
-	chalaniv1 "git.ninjainfosys.com/ePalika/proto/gen/darta/v1"
 	"git.ninjainfosys.com/ePalika/services/darta-chalani/internal/config"
 	"git.ninjainfosys.com/ePalika/services/darta-chalani/internal/db"
 	"git.ninjainfosys.com/ePalika/services/darta-chalani/internal/domain"
@@ -65,11 +64,11 @@ func main() {
 	dartaServer := grpcserver.NewDartaServer(dartaService, queries)
 	dartav1.RegisterDartaServiceServer(grpcServer, dartaServer)
 
-	chalaniServer := grpcserver.NewChalaniServer(queries)
-	chalaniv1.RegisterChalaniServiceServer(grpcServer, chalaniServer)
+	// TODO: Register Chalani service when proto is generated
+	// chalaniServer := grpcserver.NewChalaniServer(queries)
+	// chalaniv1.RegisterChalaniServiceServer(grpcServer, chalaniServer)
 
 	// Suppress unused variable warnings
-	_ = dartaService
 	_ = chalaniService
 
 	// Register health service

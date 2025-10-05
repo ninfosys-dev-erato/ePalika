@@ -8,8 +8,41 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 	"git.ninjainfosys.com/ePalika/services/darta-chalani/internal/db"
 )
+
+// Helper functions for type conversions
+func timeToPgTimestamptz(t time.Time) pgtype.Timestamptz {
+	return pgtype.Timestamptz{
+		Time:  t,
+		Valid: true,
+	}
+}
+
+func timePtrToPgTimestamptz(t *time.Time) pgtype.Timestamptz {
+	if t == nil {
+		return pgtype.Timestamptz{Valid: false}
+	}
+	return pgtype.Timestamptz{
+		Time:  *t,
+		Valid: true,
+	}
+}
+
+func uuidToPgUUID(u uuid.UUID) pgtype.UUID {
+	return pgtype.UUID{
+		Bytes: u,
+		Valid: true,
+	}
+}
+
+func stringPtrIfNotEmpty(s string) *string {
+	if s == "" {
+		return nil
+	}
+	return &s
+}
 
 // DartaService handles Darta business logic
 type DartaService struct {
@@ -53,8 +86,9 @@ func (s *DartaService) CreateDarta(ctx context.Context, input CreateDartaInput) 
 	
 	// Check idempotency
 	if input.IdempotencyKey != "" {
+		idempotencyKeyPtr := stringPtrIfNotEmpty(input.IdempotencyKey)
 		existing, err := s.queries.GetDartaByIdempotencyKey(ctx, db.GetDartaByIdempotencyKeyParams{
-			IdempotencyKey: input.IdempotencyKey,
+			IdempotencyKey: idempotencyKeyPtr,
 			TenantID:       userCtx.TenantID,
 		})
 		if err == nil && existing.ID != uuid.Nil {
@@ -91,8 +125,8 @@ func (s *DartaService) CreateDarta(ctx context.Context, input CreateDartaInput) 
 		Subject:            input.Subject,
 		ApplicantID:        input.ApplicantID,
 		IntakeChannel:      input.IntakeChannel,
-		ReceivedDate:       input.ReceivedDate,
-		EntryDate:          time.Now(),
+		ReceivedDate:       timeToPgTimestamptz(input.ReceivedDate),
+		EntryDate:          timeToPgTimestamptz(time.Now()),
 		IsBackdated:        input.IsBackdated,
 		BackdateReason:     input.BackdateReason,
 		BackdateApproverID: input.BackdateApproverID,
@@ -101,7 +135,7 @@ func (s *DartaService) CreateDarta(ctx context.Context, input CreateDartaInput) 
 		Priority:           input.Priority,
 		CreatedBy:          userCtx.UserID,
 		TenantID:           userCtx.TenantID,
-		IdempotencyKey:     input.IdempotencyKey,
+		IdempotencyKey:     stringPtrIfNotEmpty(input.IdempotencyKey),
 		Metadata:           metadataJSON,
 	})
 	if err != nil {
@@ -111,8 +145,8 @@ func (s *DartaService) CreateDarta(ctx context.Context, input CreateDartaInput) 
 	// Add annexes
 	for _, annexID := range input.AnnexIDs {
 		err := s.queries.AddDartaAnnex(ctx, db.AddDartaAnnexParams{
-			DartaID:      darta.ID,
-			AttachmentID: annexID,
+			DartaID:      uuidToPgUUID(darta.ID),
+			AttachmentID: uuidToPgUUID(annexID),
 		})
 		if err != nil {
 			// Log error but continue
@@ -237,7 +271,7 @@ func (s *DartaService) AssignDarta(ctx context.Context, id uuid.UUID, unitID, as
 		ID:                 id,
 		AssignedToUnitID:   unitID,
 		CurrentAssigneeID:  assigneeID,
-		SlaDeadline:        slaDeadline,
+		SlaDeadline:        timePtrToPgTimestamptz(slaDeadline),
 		Priority:           priority,
 	})
 	if err != nil {
@@ -340,7 +374,7 @@ func (s *DartaService) createAuditEntry(ctx context.Context, entityType string, 
 	
 	_, err := s.queries.CreateAuditEntry(ctx, db.CreateAuditEntryParams{
 		EntityType:  entityType,
-		EntityID:    entityID,
+		EntityID:    uuidToPgUUID(entityID),
 		Action:      action,
 		PerformedBy: userCtx.UserID,
 		Changes:     changesJSON,

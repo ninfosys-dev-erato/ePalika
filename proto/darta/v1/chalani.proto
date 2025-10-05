@@ -6,7 +6,7 @@ option go_package = "git.ninjainfosys.com/ePalika/proto/gen/darta/v1;dartav1";
 
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/struct.proto";
-import "proto/darta/v1/common.proto";
+import "darta/v1/common.proto";
 
 // ============================================================================
 // ENUMS - Chalani Specific

@@ -461,9 +461,11 @@ func (s *DartaServer) ReviewDarta(ctx context.Context, req *dartav1.ReviewDartaR
 	// Determine new status based on decision
 	var newStatus string
 	switch req.Input.Decision {
-	case dartav1.DartaReviewDecision_DARTA_REVIEW_DECISION_APPROVE_REVIEW:
+	case dartav1.DartaReviewDecision_DARTA_REVIEW_DECISION_APPROVED:
 		newStatus = "CLASSIFICATION"
-	case dartav1.DartaReviewDecision_DARTA_REVIEW_DECISION_EDIT_REQUIRED:
+	case dartav1.DartaReviewDecision_DARTA_REVIEW_DECISION_REJECTED:
+		newStatus = "VOIDED"
+	case dartav1.DartaReviewDecision_DARTA_REVIEW_DECISION_REQUEST_CHANGES:
 		newStatus = "RETURNED_FOR_CLARIFICATION"
 	default:
 		return nil, status.Error(codes.InvalidArgument, "invalid review decision")
@@ -516,6 +518,8 @@ func (s *DartaServer) DirectRegisterDarta(ctx context.Context, req *dartav1.Dire
 
 // ScanDarta updates scan metadata for physical document scanning
 func (s *DartaServer) ScanDarta(ctx context.Context, req *dartav1.ScanDartaRequest) (*dartav1.ScanDartaResponse, error) {
+	userCtx := domain.GetUserContext(ctx)
+
 	dartaID, err := uuid.Parse(req.DartaId)
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "invalid darta ID: %v", err)
@@ -523,14 +527,17 @@ func (s *DartaServer) ScanDarta(ctx context.Context, req *dartav1.ScanDartaReque
 
 	// Update metadata with scan information
 	scanMetadata := map[string]interface{}{
-		"scan_date":         time.Now(),
-		"scan_attachment_id": req.ScanAttachmentId,
+		"scan_date":    time.Now(),
+		"scanner_user": userCtx.UserID,
+		"scan_quality": req.ScanQuality,
+		"page_count":   req.PageCount,
 	}
 	metadataJSON, _ := json.Marshal(scanMetadata)
 
 	updated, err := s.queries.UpdateDartaMetadata(ctx, db.UpdateDartaMetadataParams{
 		ID:       dartaID,
 		Metadata: metadataJSON,
+		TenantID: userCtx.TenantID,
 	})
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to update metadata: %v", err)
@@ -543,21 +550,18 @@ func (s *DartaServer) ScanDarta(ctx context.Context, req *dartav1.ScanDartaReque
 
 // EnrichDartaMetadata adds or updates metadata fields
 func (s *DartaServer) EnrichDartaMetadata(ctx context.Context, req *dartav1.EnrichDartaMetadataRequest) (*dartav1.EnrichDartaMetadataResponse, error) {
+	userCtx := domain.GetUserContext(ctx)
+
 	dartaID, err := uuid.Parse(req.DartaId)
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "invalid darta ID: %v", err)
 	}
 
-	// Convert protobuf Struct to JSON
-	metadataJSON, err := req.Metadata.MarshalJSON()
-	if err != nil {
-		return nil, status.Errorf(codes.InvalidArgument, "invalid metadata: %v", err)
-	}
-
 	// Merge new metadata with existing
 	updated, err := s.queries.UpdateDartaMetadata(ctx, db.UpdateDartaMetadataParams{
 		ID:       dartaID,
-		Metadata: metadataJSON,
+		Metadata: []byte(req.Metadata),
+		TenantID: userCtx.TenantID,
 	})
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to update metadata: %v", err)
@@ -570,6 +574,8 @@ func (s *DartaServer) EnrichDartaMetadata(ctx context.Context, req *dartav1.Enri
 
 // FinalizeDartaArchive marks darta as archived
 func (s *DartaServer) FinalizeDartaArchive(ctx context.Context, req *dartav1.FinalizeDartaArchiveRequest) (*dartav1.FinalizeDartaArchiveResponse, error) {
+	userCtx := domain.GetUserContext(ctx)
+
 	dartaID, err := uuid.Parse(req.DartaId)
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "invalid darta ID: %v", err)
@@ -584,7 +590,21 @@ func (s *DartaServer) FinalizeDartaArchive(ctx context.Context, req *dartav1.Fin
 		return nil, status.Errorf(codes.Internal, "failed to archive: %v", err)
 	}
 
-	// TODO: Create audit trail when queries support it
+	// Create audit trail
+	changes := map[string]interface{}{
+		"status":       map[string]string{"to": "ARCHIVED"},
+		"archive_notes": req.Notes,
+	}
+	changesJSON, _ := json.Marshal(changes)
+
+	_ = s.queries.CreateAuditTrail(ctx, db.CreateAuditTrailParams{
+		EntityType:  "DARTA",
+		EntityID:    dartaID,
+		Action:      "ARCHIVED",
+		PerformedBy: userCtx.UserID,
+		Changes:     changesJSON,
+		TenantID:    userCtx.TenantID,
+	})
 
 	return &dartav1.FinalizeDartaArchiveResponse{
 		Darta: toProtoDarta(&updated),
@@ -598,33 +618,62 @@ func (s *DartaServer) SectionReviewDarta(ctx context.Context, req *dartav1.Secti
 		return nil, status.Errorf(codes.InvalidArgument, "invalid darta ID: %v", err)
 	}
 
-	// Simply get the darta and return it (proto doesn't define what section review does)
-	dartaRow, err := s.queries.GetDarta(ctx, dartaID)
-	if err != nil {
-		return nil, status.Errorf(codes.NotFound, "darta not found: %v", err)
-	}
-
-	return &dartav1.SectionReviewDartaResponse{
-		Darta: buildDartaFromRow(&dartaRow),
-	}, nil
-}
-
-// RequestDartaClarification requests additional information from applicant
-func (s *DartaServer) RequestDartaClarification(ctx context.Context, req *dartav1.RequestDartaClarificationRequest) (*dartav1.RequestDartaClarificationResponse, error) {
-	dartaID, err := uuid.Parse(req.DartaId)
-	if err != nil {
-		return nil, status.Errorf(codes.InvalidArgument, "invalid darta ID: %v", err)
+	var newStatus string
+	if req.Approved {
+		newStatus = "PENDING_APPROVAL"
+	} else {
+		newStatus = "RETURNED_FOR_CLARIFICATION"
 	}
 
 	updated, err := s.queries.UpdateDartaStatus(ctx, db.UpdateDartaStatusParams{
 		ID:     dartaID,
-		Status: "RETURNED_FOR_CLARIFICATION",
+		Status: newStatus,
 	})
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to update status: %v", err)
 	}
 
 	// TODO: Create audit trail when queries support it
+
+	return &dartav1.SectionReviewDartaResponse{
+		Darta: toProtoDarta(&updated),
+	}, nil
+}
+
+// RequestDartaClarification requests additional information from applicant
+func (s *DartaServer) RequestDartaClarification(ctx context.Context, req *dartav1.RequestDartaClarificationRequest) (*dartav1.RequestDartaClarificationResponse, error) {
+	userCtx := domain.GetUserContext(ctx)
+
+	dartaID, err := uuid.Parse(req.DartaId)
+	if err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "invalid darta ID: %v", err)
+	}
+
+	updated, err := s.queries.UpdateDartaStatus(ctx, db.UpdateDartaStatusParams{
+		ID:        dartaID,
+		Status:    "RETURNED_FOR_CLARIFICATION",
+		TenantID:  userCtx.TenantID,
+		UpdatedAt: time.Now(),
+	})
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to update status: %v", err)
+	}
+
+	changes := map[string]interface{}{
+		"status":               map[string]string{"to": "RETURNED_FOR_CLARIFICATION"},
+		"clarification_notes":  req.ClarificationNotes,
+		"requested_by":         userCtx.UserID,
+	}
+	changesJSON, _ := json.Marshal(changes)
+
+	_ = s.queries.CreateAuditTrail(ctx, db.CreateAuditTrailParams{
+		EntityType:  "DARTA",
+		EntityID:    dartaID,
+		Action:      "CLARIFICATION_REQUESTED",
+		PerformedBy: userCtx.UserID,
+		Changes:     changesJSON,
+		TenantID:    userCtx.TenantID,
+	})
 
 	return &dartav1.RequestDartaClarificationResponse{
 		Darta: toProtoDarta(&updated),
@@ -633,6 +682,8 @@ func (s *DartaServer) RequestDartaClarification(ctx context.Context, req *dartav
 
 // ProvideDartaClarification submits clarification from applicant
 func (s *DartaServer) ProvideDartaClarification(ctx context.Context, req *dartav1.ProvideDartaClarificationRequest) (*dartav1.ProvideDartaClarificationResponse, error) {
+	userCtx := domain.GetUserContext(ctx)
+
 	dartaID, err := uuid.Parse(req.DartaId)
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "invalid darta ID: %v", err)
@@ -640,14 +691,30 @@ func (s *DartaServer) ProvideDartaClarification(ctx context.Context, req *dartav
 
 	// Move back to PENDING_REVIEW after clarification provided
 	updated, err := s.queries.UpdateDartaStatus(ctx, db.UpdateDartaStatusParams{
-		ID:     dartaID,
-		Status: "PENDING_REVIEW",
+		ID:        dartaID,
+		Status:    "PENDING_REVIEW",
+		TenantID:  userCtx.TenantID,
+		UpdatedAt: time.Now(),
 	})
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to update status: %v", err)
 	}
 
-	// TODO: Create audit trail when queries support it
+	changes := map[string]interface{}{
+		"status":             map[string]string{"from": "RETURNED_FOR_CLARIFICATION", "to": "PENDING_REVIEW"},
+		"clarification_text": req.ClarificationText,
+		"provided_by":        userCtx.UserID,
+	}
+	changesJSON, _ := json.Marshal(changes)
+
+	_ = s.queries.CreateAuditTrail(ctx, db.CreateAuditTrailParams{
+		EntityType:  "DARTA",
+		EntityID:    dartaID,
+		Action:      "CLARIFICATION_PROVIDED",
+		PerformedBy: userCtx.UserID,
+		Changes:     changesJSON,
+		TenantID:    userCtx.TenantID,
+	})
 
 	return &dartav1.ProvideDartaClarificationResponse{
 		Darta: toProtoDarta(&updated),
@@ -656,20 +723,38 @@ func (s *DartaServer) ProvideDartaClarification(ctx context.Context, req *dartav
 
 // AcceptDarta marks darta as accepted by assigned staff
 func (s *DartaServer) AcceptDarta(ctx context.Context, req *dartav1.AcceptDartaRequest) (*dartav1.AcceptDartaResponse, error) {
+	userCtx := domain.GetUserContext(ctx)
+
 	dartaID, err := uuid.Parse(req.DartaId)
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "invalid darta ID: %v", err)
 	}
 
 	updated, err := s.queries.UpdateDartaStatus(ctx, db.UpdateDartaStatusParams{
-		ID:     dartaID,
-		Status: "UNDER_PROCESSING",
+		ID:        dartaID,
+		Status:    "UNDER_PROCESSING",
+		TenantID:  userCtx.TenantID,
+		UpdatedAt: time.Now(),
 	})
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to update status: %v", err)
 	}
 
-	// TODO: Create audit trail when queries support it
+	changes := map[string]interface{}{
+		"status":      map[string]string{"to": "UNDER_PROCESSING"},
+		"accepted_by": userCtx.UserID,
+		"accepted_at": time.Now(),
+	}
+	changesJSON, _ := json.Marshal(changes)
+
+	_ = s.queries.CreateAuditTrail(ctx, db.CreateAuditTrailParams{
+		EntityType:  "DARTA",
+		EntityID:    dartaID,
+		Action:      "ACCEPTED",
+		PerformedBy: userCtx.UserID,
+		Changes:     changesJSON,
+		TenantID:    userCtx.TenantID,
+	})
 
 	return &dartav1.AcceptDartaResponse{
 		Darta: toProtoDarta(&updated),
@@ -678,12 +763,32 @@ func (s *DartaServer) AcceptDarta(ctx context.Context, req *dartav1.AcceptDartaR
 
 // MarkDartaAction records an action/decision taken on the darta
 func (s *DartaServer) MarkDartaAction(ctx context.Context, req *dartav1.MarkDartaActionRequest) (*dartav1.MarkDartaActionResponse, error) {
+	userCtx := domain.GetUserContext(ctx)
+
 	dartaID, err := uuid.Parse(req.DartaId)
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "invalid darta ID: %v", err)
 	}
 
-	// TODO: Create audit trail for action when queries support it
+	// Create audit trail for action
+	changes := map[string]interface{}{
+		"action_type":  req.ActionType,
+		"action_notes": req.ActionNotes,
+		"action_by":    userCtx.UserID,
+	}
+	changesJSON, _ := json.Marshal(changes)
+
+	err = s.queries.CreateAuditTrail(ctx, db.CreateAuditTrailParams{
+		EntityType:  "DARTA",
+		EntityID:    dartaID,
+		Action:      "ACTION_MARKED",
+		PerformedBy: userCtx.UserID,
+		Changes:     changesJSON,
+		TenantID:    userCtx.TenantID,
+	})
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to create audit trail: %v", err)
+	}
 
 	// Fetch darta for response
 	dartaRow, err := s.queries.GetDarta(ctx, dartaID)
@@ -698,6 +803,8 @@ func (s *DartaServer) MarkDartaAction(ctx context.Context, req *dartav1.MarkDart
 
 // IssueDartaResponse prepares response to be sent to applicant
 func (s *DartaServer) IssueDartaResponse(ctx context.Context, req *dartav1.IssueDartaResponseRequest) (*dartav1.IssueDartaResponseResponse, error) {
+	userCtx := domain.GetUserContext(ctx)
+
 	dartaID, err := uuid.Parse(req.DartaId)
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "invalid darta ID: %v", err)
@@ -705,14 +812,30 @@ func (s *DartaServer) IssueDartaResponse(ctx context.Context, req *dartav1.Issue
 
 	// Move to RESOLVED status
 	updated, err := s.queries.UpdateDartaStatus(ctx, db.UpdateDartaStatusParams{
-		ID:     dartaID,
-		Status: "RESOLVED",
+		ID:        dartaID,
+		Status:    "RESOLVED",
+		TenantID:  userCtx.TenantID,
+		UpdatedAt: time.Now(),
 	})
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to update status: %v", err)
 	}
 
-	// TODO: Create audit trail when queries support it
+	changes := map[string]interface{}{
+		"status":         map[string]string{"to": "RESOLVED"},
+		"response_text":  req.ResponseText,
+		"response_by":    userCtx.UserID,
+	}
+	changesJSON, _ := json.Marshal(changes)
+
+	_ = s.queries.CreateAuditTrail(ctx, db.CreateAuditTrailParams{
+		EntityType:  "DARTA",
+		EntityID:    dartaID,
+		Action:      "RESPONSE_ISSUED",
+		PerformedBy: userCtx.UserID,
+		Changes:     changesJSON,
+		TenantID:    userCtx.TenantID,
+	})
 
 	return &dartav1.IssueDartaResponseResponse{
 		Darta: toProtoDarta(&updated),
@@ -721,12 +844,32 @@ func (s *DartaServer) IssueDartaResponse(ctx context.Context, req *dartav1.Issue
 
 // RequestDartaAck sends acknowledgement request to applicant
 func (s *DartaServer) RequestDartaAck(ctx context.Context, req *dartav1.RequestDartaAckRequest) (*dartav1.RequestDartaAckResponse, error) {
+	userCtx := domain.GetUserContext(ctx)
+
 	dartaID, err := uuid.Parse(req.DartaId)
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "invalid darta ID: %v", err)
 	}
 
-	// TODO: Create audit trail for acknowledgement request when queries support it
+	// Create audit trail for acknowledgement request
+	changes := map[string]interface{}{
+		"ack_requested":    true,
+		"ack_requested_by": userCtx.UserID,
+		"ack_requested_at": time.Now(),
+	}
+	changesJSON, _ := json.Marshal(changes)
+
+	err = s.queries.CreateAuditTrail(ctx, db.CreateAuditTrailParams{
+		EntityType:  "DARTA",
+		EntityID:    dartaID,
+		Action:      "ACK_REQUESTED",
+		PerformedBy: userCtx.UserID,
+		Changes:     changesJSON,
+		TenantID:    userCtx.TenantID,
+	})
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to create audit trail: %v", err)
+	}
 
 	dartaRow, err := s.queries.GetDarta(ctx, dartaID)
 	if err != nil {
@@ -740,12 +883,32 @@ func (s *DartaServer) RequestDartaAck(ctx context.Context, req *dartav1.RequestD
 
 // ReceiveDartaAck records acknowledgement from applicant
 func (s *DartaServer) ReceiveDartaAck(ctx context.Context, req *dartav1.ReceiveDartaAckRequest) (*dartav1.ReceiveDartaAckResponse, error) {
+	userCtx := domain.GetUserContext(ctx)
+
 	dartaID, err := uuid.Parse(req.DartaId)
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "invalid darta ID: %v", err)
 	}
 
-	// TODO: Create audit trail for acknowledgement received when queries support it
+	// Create audit trail for acknowledgement received
+	changes := map[string]interface{}{
+		"ack_received":    true,
+		"ack_received_at": time.Now(),
+		"ack_signature":   req.AcknowledgementSignature,
+	}
+	changesJSON, _ := json.Marshal(changes)
+
+	err = s.queries.CreateAuditTrail(ctx, db.CreateAuditTrailParams{
+		EntityType:  "DARTA",
+		EntityID:    dartaID,
+		Action:      "ACK_RECEIVED",
+		PerformedBy: userCtx.UserID,
+		Changes:     changesJSON,
+		TenantID:    userCtx.TenantID,
+	})
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to create audit trail: %v", err)
+	}
 
 	dartaRow, err := s.queries.GetDarta(ctx, dartaID)
 	if err != nil {
@@ -759,14 +922,16 @@ func (s *DartaServer) ReceiveDartaAck(ctx context.Context, req *dartav1.ReceiveD
 
 // SupersedeDartaRecord marks a darta as superseded by another
 func (s *DartaServer) SupersedeDartaRecord(ctx context.Context, req *dartav1.SupersedeDartaRecordRequest) (*dartav1.SupersedeDartaRecordResponse, error) {
+	userCtx := domain.GetUserContext(ctx)
+
 	dartaID, err := uuid.Parse(req.DartaId)
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "invalid darta ID: %v", err)
 	}
 
-	supersededByID, err := uuid.Parse(req.NewDartaId)
+	supersededByID, err := uuid.Parse(req.SupersededByDartaId)
 	if err != nil {
-		return nil, status.Errorf(codes.InvalidArgument, "invalid new darta ID: %v", err)
+		return nil, status.Errorf(codes.InvalidArgument, "invalid superseded by darta ID: %v", err)
 	}
 
 	// Update metadata to mark as superseded
@@ -781,12 +946,27 @@ func (s *DartaServer) SupersedeDartaRecord(ctx context.Context, req *dartav1.Sup
 	updated, err := s.queries.UpdateDartaMetadata(ctx, db.UpdateDartaMetadataParams{
 		ID:       dartaID,
 		Metadata: metadataJSON,
+		TenantID: userCtx.TenantID,
 	})
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to update metadata: %v", err)
 	}
 
-	// TODO: Create audit trail when queries support it
+	// Create audit trail
+	changes := map[string]interface{}{
+		"superseded_by": supersededByID.String(),
+		"reason":        req.Reason,
+	}
+	changesJSON, _ := json.Marshal(changes)
+
+	_ = s.queries.CreateAuditTrail(ctx, db.CreateAuditTrailParams{
+		EntityType:  "DARTA",
+		EntityID:    dartaID,
+		Action:      "SUPERSEDED",
+		PerformedBy: userCtx.UserID,
+		Changes:     changesJSON,
+		TenantID:    userCtx.TenantID,
+	})
 
 	return &dartav1.SupersedeDartaRecordResponse{
 		Darta: toProtoDarta(&updated),

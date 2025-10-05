@@ -9,13 +9,15 @@ import (
 // It serves as dependency injection for your app, add any dependencies you require here.
 
 type Resolver struct {
-	DartaClient clients.DartaService
-	PDPClient   clients.PDPService
+	DartaClient    clients.DartaService
+	IdentityClient clients.IdentityService
+	PDPClient      clients.PDPService
 }
 
-func NewResolver(dartaClient clients.DartaService, pdpClient clients.PDPService) *Resolver {
+func NewResolver(dartaClient clients.DartaService, identityClient clients.IdentityService, pdpClient clients.PDPService) *Resolver {
 	return &Resolver{
-		DartaClient: dartaClient,
-		PDPClient:   pdpClient,
+		DartaClient:    dartaClient,
+		IdentityClient: identityClient,
+		PDPClient:      pdpClient,
 	}
 }
