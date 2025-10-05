@@ -11,8 +11,8 @@ export function resolveRuntimeFlags(): RuntimeFlags {
   const search = typeof window !== "undefined" ? window.location.search : "";
   const params = new URLSearchParams(search);
 
-  const authFromUrl = params.get("authMode");
-  const gqlFromUrl = params.get("gqlMode");
+  const authFromUrl = params.get("authMode") ?? undefined;
+  const gqlFromUrl = params.get("gqlMode") ?? undefined;
 
   const authFromEnv = import.meta.env.VITE_AUTH_MODE;
   const gqlFromEnv = import.meta.env.VITE_GRAPHQL_MODE;
