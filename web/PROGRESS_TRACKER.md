@@ -165,7 +165,7 @@ None currently
 |---------|--------|---------|-------|
 | @egov/graphql-schema | ✅ | 0.1.0 | Schema + MSW mocks |
 | @egov/state-core | ✅ | 0.1.0 | Zustand stores |
-| @egov/ui-mobile | ✅ | 0.1.0 | Design tokens + components |
+| @egov/ui | ✅ | 0.1.0 | Design tokens + components |
 | @egov/apollo | ✅ | 0.1.0 | Apollo client config |
 | @egov/auth | ✅ | 0.1.0 | Keycloak integration |
 | @egov/query | ✅ | 0.1.0 | TanStack Query config |
@@ -206,7 +206,7 @@ None currently
 
 ### Completed Components (4)
 
-**ui-mobile:**
+**ui:**
 - [x] Button (variants: primary, secondary, ghost)
 - [x] BottomSheet (swipe-to-dismiss)
 

@@ -127,7 +127,7 @@ export default defineConfig(({ mode }) => {
             if (id.includes('packages/graphql-schema')) {
               return 'lib-schema'
             }
-            if (id.includes('packages/ui-mobile')) {
+            if (id.includes('packages/ui')) {
               return 'lib-ui'
             }
           },

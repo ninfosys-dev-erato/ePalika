@@ -76,7 +76,7 @@ web/
 ├── packages/
 │   ├── graphql-schema/     # GraphQL schema + types + MSW mocks
 │   ├── state-core/         # Zustand stores (darta, chalani, ui)
-│   ├── ui-mobile/          # Mobile-first design system
+│   ├── ui/          # Mobile-first design system
 │   └── ...                 # 7 more packages
 │
 └── package.json            # Workspace root (concurrently setup)

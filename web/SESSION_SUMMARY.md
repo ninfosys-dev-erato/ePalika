@@ -121,7 +121,7 @@ apps/mfe-darta/
 **Issue:** Project references required composite mode
 **Fixed:**
 - ✅ Added `composite: true` to `packages/graphql-schema/tsconfig.json`
-- ✅ Added `composite: true` to `packages/ui-mobile/tsconfig.json`
+- ✅ Added `composite: true` to `packages/ui/tsconfig.json`
 - ✅ Added `composite: true` to `packages/state-core/tsconfig.json`
 
 ### GraphQL Schema Dependency
@@ -133,7 +133,7 @@ apps/mfe-darta/
 
 1. ✅ `@egov/graphql-schema` - Schema, types, mocks
 2. ✅ `@egov/perf-budget` - Bundle analysis (disabled pending ESM fix)
-3. ✅ `@egov/ui-mobile` - Mobile-first components
+3. ✅ `@egov/ui` - Mobile-first components
 4. ✅ `@egov/state-core` - Zustand stores ← **NEW**
 5. ✅ `@egov/shell` - Main app
 6. ✅ `@egov/mfe-darta` - Darta intake MFE ← **NEW**
@@ -195,7 +195,7 @@ apps/mfe-darta/
 3. [apps/shell/src/app/providers.tsx](apps/shell/src/app/providers.tsx:21) ← UI store integration
 4. [apps/shell/package.json](apps/shell/package.json:21) ← Added state-core
 5. [packages/graphql-schema/tsconfig.json](packages/graphql-schema/tsconfig.json:6-8) ← composite mode
-6. [packages/ui-mobile/tsconfig.json](packages/ui-mobile/tsconfig.json:7-9) ← composite mode
+6. [packages/ui/tsconfig.json](packages/ui/tsconfig.json:7-9) ← composite mode
 7. [packages/state-core/package.json](packages/state-core/package.json:16) ← graphql-schema dep
 
 ## 🎉 Session Success Metrics

@@ -19,7 +19,7 @@
     "@egov/perf-budget": "workspace:*",
     "@egov/query": "workspace:*",
     "@egov/state-core": "workspace:*",
-    "@egov/ui-mobile": "workspace:*",
+    "@egov/ui": "workspace:*",
     "@tanstack/react-query": "^5.90.2",
     "@tanstack/react-router": "^1.132.19",
     "@vitejs/plugin-react": "^5.0.4",

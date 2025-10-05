@@ -432,7 +432,7 @@ web/
 │   │   ├── package.json
 │   │   └── tsconfig.json
 │   │
-│   ├── ui-mobile/                           # Mobile-First UI Components
+│   ├── ui/                           # Mobile-First UI Components
 │   │   ├── src/
 │   │   │   ├── index.ts
 │   │   │   ├── tokens/
@@ -604,7 +604,7 @@ web/
 
 ### Infrastructure Packages (3)
 - **graphql-schema**: ~25 files (schema + mocks + codegen)
-- **ui-mobile**: ~40 files (tokens + components + hooks)
+- **ui**: ~40 files (tokens + components + hooks)
 - **state-core**: ~12 files
 - **perf-budget**: ~12 files
 
@@ -625,7 +625,7 @@ web/
 This structure ensures:
 - ✅ **Granular separation** (DDD principles)
 - ✅ **Federated deployment** (independent MFEs)
-- ✅ **Mobile-first** (dedicated ui-mobile package)
+- ✅ **Mobile-first** (dedicated ui package)
 - ✅ **Performance budgets** (perf-budget tooling)
 - ✅ **Type safety** (GraphQL Codegen + strict TS)
 - ✅ **Offline-first** (state-core persistence)

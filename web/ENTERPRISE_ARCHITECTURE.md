@@ -80,7 +80,7 @@ web/
 ├── packages/              # Shared libraries
 │   ├── graphql-schema/   # Schema + types + MSW mocks
 │   ├── state-core/       # Zustand stores
-│   ├── ui-mobile/        # Design system
+│   ├── ui/        # Design system
 │   ├── apollo/           # GraphQL client
 │   ├── auth/             # Keycloak
 │   ├── query/            # TanStack Query
@@ -95,7 +95,7 @@ web/
 apps/shell
   ├─ @egov/graphql-schema (workspace:*)
   ├─ @egov/state-core (workspace:*)
-  ├─ @egov/ui-mobile (workspace:*)
+  ├─ @egov/ui (workspace:*)
   ├─ @egov/apollo (workspace:*)
   ├─ @egov/auth (workspace:*)
   └─ Remote: mfe_darta (Module Federation)
@@ -103,7 +103,7 @@ apps/shell
 apps/mfe-darta
   ├─ @egov/graphql-schema (workspace:*)
   ├─ @egov/state-core (workspace:*)
-  ├─ @egov/ui-mobile (workspace:*)
+  ├─ @egov/ui (workspace:*)
   └─ Exposes: ./DartaIntake, ./DartaList
 ```
 
@@ -137,7 +137,7 @@ shared: {
 
 ### Mobile-First Tokens
 
-**Location:** `packages/ui-mobile/src/tokens/`
+**Location:** `packages/ui/src/tokens/`
 
 ```typescript
 // Touch Targets (Nepal Government Accessibility)
@@ -159,7 +159,7 @@ fontFamily: 'Noto Sans Devanagari, Noto Sans, system-ui'
 ### Component Ownership
 
 ```
-packages/ui-mobile/
+packages/ui/
   ├── primitives/
   │   ├── Button         ← Shared by all MFEs
   │   ├── Input          ← Shared by all MFEs

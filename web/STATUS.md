@@ -242,7 +242,7 @@ pnpm dev
 cd packages/graphql-schema
 
 # More UI components
-cd packages/ui-mobile
+cd packages/ui
 
 # New MFE
 cd apps/mfe-chalani

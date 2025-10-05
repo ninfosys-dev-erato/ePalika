@@ -1,6 +1,6 @@
 import { useDartaStore } from '@egov/state-core'
 import { useDartasQuery } from '@egov/graphql-schema/generated'
-import { Card } from '@egov/ui-mobile/primitives/Card'
+import { Card } from '@egov/ui/primitives/Card'
 import styles from './DartaList.module.css'
 
 /**

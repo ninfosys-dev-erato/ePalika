@@ -33,14 +33,14 @@ Successfully built the **foundational infrastructure** for the enterprise-grade 
 
 **Location:** `packages/perf-budget/`
 
-### 3. **@egov/ui-mobile** ✅
+### 3. **@egov/ui** ✅
 - Design tokens (colors, spacing, typography, motion)
 - Primitive components (Button with loading states)
 - Pattern components (BottomSheet with drag-to-dismiss)
 - Touch-friendly (min 44px targets)
 - Framer Motion animations
 
-**Location:** `packages/ui-mobile/`
+**Location:** `packages/ui/`
 
 ### 4. **@egov/auth** (existing) ✅
 - Keycloak integration
@@ -136,7 +136,7 @@ web/
 ├── packages/
 │   ├── graphql-schema/        (~20 files) ✅
 │   ├── perf-budget/           (~8 files) ✅
-│   ├── ui-mobile/             (~15 files) ✅
+│   ├── ui/             (~15 files) ✅
 │   ├── auth/                  (existing) ✅
 │   ├── apollo/                (existing, fixed) ✅
 │   ├── query/                 (existing) ✅
@@ -210,7 +210,7 @@ import { mockDartas } from '@egov/graphql-schema/mocks'
 
 ### Use UI Components:
 ```tsx
-import { Button, BottomSheet, tokens } from '@egov/ui-mobile'
+import { Button, BottomSheet, tokens } from '@egov/ui'
 
 <Button variant="primary" loading={isLoading}>
   दर्ता गर्नुहोस्
@@ -250,8 +250,8 @@ import { Darta, Chalani } from '@egov/graphql-schema'
 import { startMockServiceWorker } from '@egov/graphql-schema/mocks'
 
 // UI Components
-import { Button, BottomSheet, tokens } from '@egov/ui-mobile'
-import { colors, spacing } from '@egov/ui-mobile/tokens'
+import { Button, BottomSheet, tokens } from '@egov/ui'
+import { colors, spacing } from '@egov/ui/tokens'
 
 // Performance
 import { perfBudgetPlugin } from '@egov/perf-budget/vite-plugin'
@@ -262,8 +262,8 @@ import { analyzeBundles } from '@egov/perf-budget'
 - Schema: `packages/graphql-schema/src/schema/schema.graphql`
 - Types: `packages/graphql-schema/src/generated/graphql.ts`
 - Mocks: `packages/graphql-schema/src/mocks/`
-- Tokens: `packages/ui-mobile/src/tokens/`
-- Components: `packages/ui-mobile/src/primitives/`
+- Tokens: `packages/ui/src/tokens/`
+- Components: `packages/ui/src/primitives/`
 
 ---
 

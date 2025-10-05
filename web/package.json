@@ -3,7 +3,7 @@
   "private": true,
   "packageManager": "pnpm@9.0.0",
   "scripts": {
-    "dev": "pnpm build:mfes && concurrently --kill-others --names \"SHELL,DARTA,CHALANI\" -c \"bgBlue.bold,bgMagenta.bold,bgCyan.bold\" \"pnpm dev:shell\" \"pnpm preview:darta\" \"pnpm preview:chalani\"",
+    "dev": "concurrently --kill-others --names \"SHELL,DARTA,CHALANI\" -c \"bgBlue.bold,bgMagenta.bold,bgCyan.bold\" \"pnpm dev:shell\" \"pnpm dev:darta\" \"pnpm dev:chalani\"",
     "dev:shell": "pnpm --filter @egov/shell dev --host",
     "dev:darta": "pnpm --filter @egov/mfe-darta dev --host",
     "dev:chalani": "pnpm --filter @egov/mfe-chalani dev --host",
@@ -23,7 +23,7 @@
     "concurrently": "^9.2.1",
     "sass": "^1.93.2",
     "typescript": "^5.6.3",
-    "vite": "^7.1.7",
+    "vite": "^7.1.9",
     "vite-plugin-beasties": "^0.3.5",
     "vite-tsconfig-paths": "^5.1.4"
   },
@@ -34,6 +34,7 @@
   "dependencies": {
     "@carbon/react": "^1.92.1",
     "@carbon/styles": "^1.91.0",
+    "@vitejs/plugin-react": "^5.0.4",
     "glob": "^11.0.3",
     "react-is": "18.3.1"
   },

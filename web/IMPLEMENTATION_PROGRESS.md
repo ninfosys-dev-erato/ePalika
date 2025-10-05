@@ -44,7 +44,7 @@
 ## ✅ Phase 2: UI Foundation & State Management (COMPLETED)
 
 ### 2.1 Mobile-First UI Package ✅
-**Location:** `packages/ui-mobile/`
+**Location:** `packages/ui/`
 
 **Completed:**
 - [x] Design tokens (colors, spacing, typography, motion, breakpoints)
@@ -245,7 +245,7 @@
 ### Packages Created (10 total)
 - ✅ `@egov/graphql-schema` (complete with types + mocks)
 - ✅ `@egov/perf-budget` (complete with Vite plugin)
-- ✅ `@egov/ui-mobile` (design tokens + components)
+- ✅ `@egov/ui` (design tokens + components)
 - ✅ `@egov/state-core` (Zustand stores)
 - ✅ `@egov/apollo` (GraphQL client)
 - ✅ `@egov/auth` (Keycloak integration)

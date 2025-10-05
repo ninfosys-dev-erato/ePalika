@@ -1,10 +1,10 @@
 import { useState, useMemo, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useDartaStore, useUIStore } from '@egov/state-core'
-import { Button } from '@egov/ui-mobile/primitives/Button'
-import { Input } from '@egov/ui-mobile/primitives/Input'
-import { DocumentUpload, UploadedDocument } from '@egov/ui-mobile/patterns/DocumentUpload'
-import { Receipt, ReceiptProps } from '@egov/ui-mobile/patterns/Receipt'
+import { Button } from '@egov/ui/primitives/Button'
+import { Input } from '@egov/ui/primitives/Input'
+import { DocumentUpload, UploadedDocument } from '@egov/ui/patterns/DocumentUpload'
+import { Receipt, ReceiptProps } from '@egov/ui/patterns/Receipt'
 import {
   useCreateDartaMutation,
   IntakeChannel,

@@ -75,7 +75,7 @@ web/
 │   ├── perf-budget/        # Bundle size analyzer
 │   ├── query/              # TanStack Query config
 │   ├── state-core/         # Zustand stores
-│   └── ui-mobile/          # Mobile-first components
+│   └── ui/          # Mobile-first components
 └── tools/                  # Build tools
 ```
 
@@ -228,7 +228,7 @@ const { data, loading } = useDartasQuery({
 
 ### Mobile-First Design Tokens
 
-Located in `packages/ui-mobile/src/tokens/`:
+Located in `packages/ui/src/tokens/`:
 
 ```typescript
 // Touch targets
@@ -258,7 +258,7 @@ fontFamily = 'Noto Sans Devanagari'
 ### Usage
 
 ```typescript
-import { Button } from '@egov/ui-mobile/primitives/Button'
+import { Button } from '@egov/ui/primitives/Button'
 
 <Button variant="primary" size="large">
   दर्ता गर्नुहोस्

@@ -1,18 +1,12 @@
-// Tokens
-export * from './tokens'
-
 // Primitives
 export { Button } from './primitives/Button'
-export type { ButtonProps } from './primitives/Button'
 
-export { Input } from './primitives/Input'
-export type { InputProps } from './primitives/Input'
+export { TextInput } from './primitives/TextInput'
 
 export { Select } from './primitives/Select'
-export type { SelectProps, SelectOption } from './primitives/Select'
 
-export { Card } from './primitives/Card'
-export type { CardProps } from './primitives/Card'
+export {TextArea} from './primitives/TextArea'
+
 
 // Patterns
 export { BottomSheet } from './patterns/BottomSheet'

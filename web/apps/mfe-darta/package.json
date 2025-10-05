@@ -13,7 +13,7 @@
     "@apollo/client": "^4.0.6",
     "@egov/graphql-schema": "workspace:*",
     "@egov/state-core": "workspace:*",
-    "@egov/ui-mobile": "workspace:*",
+    "@egov/ui": "workspace:*",
     "@tanstack/react-query": "^5.90.2",
     "@tanstack/react-router": "^1.132.19",
     "framer-motion": "^12.0.0",

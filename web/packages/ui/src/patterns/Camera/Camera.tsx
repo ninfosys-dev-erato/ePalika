@@ -85,7 +85,7 @@ export interface CameraProps {
  *
  * Note: This component should be lazy loaded:
  * ```tsx
- * const Camera = lazy(() => import('@egov/ui-mobile/patterns/Camera'))
+ * const Camera = lazy(() => import('@egov/ui/patterns/Camera'))
  * ```
  *
  * @example

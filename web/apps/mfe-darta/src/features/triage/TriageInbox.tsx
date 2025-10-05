@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Card } from '@egov/ui-mobile/primitives/Card'
-import { Button } from '@egov/ui-mobile/primitives/Button'
-import { Select } from '@egov/ui-mobile/primitives/Select'
+import { Card } from '@egov/ui/primitives/Card'
+import { Button } from '@egov/ui/primitives/Button'
+import { Select } from '@egov/ui/primitives/Select'
 import {
   useDartasQuery,
   useRouteDartaMutation,

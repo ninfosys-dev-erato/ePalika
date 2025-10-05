@@ -1,11 +1,12 @@
 import { ChangeEvent, FormEvent, useState } from 'react'
-import { Button } from '@egov/ui-mobile/primitives/Button'
-import { Input } from '@egov/ui-mobile/primitives/Input'
-import { Select } from '@egov/ui-mobile/primitives/Select'
+import { Button } from '@egov/ui/primitives/Button'
+import { TextInput } from '@egov/ui/primitives/TextInput'
+import { TextArea } from '@egov/ui/primitives/TextArea'
+import { Select } from '@egov/ui/primitives/Select'
 import {
   DocumentUpload,
   type UploadedDocument,
-} from '@egov/ui-mobile/patterns/DocumentUpload'
+} from '@egov/ui/patterns/DocumentUpload'
 import { useChalaniStore, useUIStore, type ChalaniDraft } from '@egov/state-core'
 import styles from './ChalaniCompose.module.css'
 
@@ -83,7 +84,7 @@ export function ChalaniCompose() {
 
         <div className={styles.section}>
           <div className={styles.twoColumn}>
-            <Input
+            <TextInput
               label="विषय"
               placeholder="उदा. भवन निर्माण बुध्दीपत्र"
               value={chalaniDraft.subject || ''}
@@ -92,7 +93,7 @@ export function ChalaniCompose() {
               }
               required
             />
-            <Input
+            <TextInput
               label="प्राप्तकर्ता"
               placeholder="संस्था वा व्यक्तिको नाम"
               value={chalaniDraft.recipientName || ''}
@@ -104,7 +105,7 @@ export function ChalaniCompose() {
           </div>
 
           <div className={styles.twoColumn}>
-            <Input
+            <TextInput
               label="गन्तव्य ठेगाना"
               placeholder="नगरपालिका, वडा, जिल्ला"
               value={chalaniDraft.recipientAddress || ''}
@@ -147,9 +148,9 @@ export function ChalaniCompose() {
           <label className={styles.bodyLabel} htmlFor="chalani-body">
             पत्रको मुख्य भाग
           </label>
-          <textarea
+         <TextArea
             id="chalani-body"
-            className={styles.bodyArea}
+            labelText="पत्रको मुख्य भाग"
             placeholder="औपचारिक पत्र यहाँ लेख्नुहोस्..."
             value={chalaniDraft.body ?? DEFAULT_TEMPLATE}
             onChange={(event: ChangeEvent<HTMLTextAreaElement>) =>
