@@ -54,7 +54,7 @@ pnpm build
 pnpm --filter @egov/shell build
 
 # Run GraphQL codegen
-cd packages/graphql-schema
+cd packages/api-schema
 pnpm codegen
 ```
 
@@ -71,7 +71,7 @@ web/
 │   ├── apollo/             # Apollo Client config
 │   ├── auth/               # Keycloak integration
 │   ├── design-system/      # Carbon Design wrapper
-│   ├── graphql-schema/     # Schema + types + MSW mocks
+│   ├── api-schema/     # Schema + types + MSW mocks
 │   ├── perf-budget/        # Bundle size analyzer
 │   ├── query/              # TanStack Query config
 │   ├── state-core/         # Zustand stores
@@ -187,7 +187,7 @@ persist(
 Development mode uses MSW to mock GraphQL API:
 
 ```typescript
-// packages/graphql-schema/src/mocks/handlers/darta.ts
+// packages/api-schema/src/mocks/handlers/darta.ts
 export const dartaHandlers = [
   graphql.query('Dartas', ({ variables }) => {
     // Return mock data
@@ -206,7 +206,7 @@ export const dartaHandlers = [
 Schema → TypeScript types:
 
 ```bash
-cd packages/graphql-schema
+cd packages/api-schema
 pnpm codegen
 ```
 
@@ -217,7 +217,7 @@ Generates:
 Usage:
 
 ```typescript
-import { useDartasQuery } from '@egov/graphql-schema'
+import { useDartasQuery } from '@egov/api-schema'
 
 const { data, loading } = useDartasQuery({
   variables: { filter: { scope: 'MUNICIPALITY' } }
@@ -347,7 +347,7 @@ pnpm build
 
 **Solution:** Some packages need to be built first:
 ```bash
-cd packages/graphql-schema
+cd packages/api-schema
 pnpm codegen
 ```
 

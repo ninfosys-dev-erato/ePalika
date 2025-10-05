@@ -1,0 +1,4 @@
+type Attachment {
+  id: ID! fileName: String! fileSize: Int! mimeType: String!
+  url: String! checksum: String! uploadedAt: DateTime! uploadedBy: User!
+}

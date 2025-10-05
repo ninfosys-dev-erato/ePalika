@@ -239,7 +239,7 @@ pnpm dev
 ### Start Building Features
 ```bash
 # GraphQL mutations
-cd packages/graphql-schema
+cd packages/api-schema
 
 # More UI components
 cd packages/ui

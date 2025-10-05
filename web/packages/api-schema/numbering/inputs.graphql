@@ -1,0 +1,6 @@
+input NumberAllocationInput {
+  scope: Scope! type: CounterType! fiscalYear: FiscalYear!
+  wardId: ID idempotencyKey: String! ttlMinutes: Int = 2880
+}
+input CommitNumberInput { allocationId: ID! entityId: ID! entityType: String! }
+input VoidNumberInput { allocationId: ID! reason: String! }

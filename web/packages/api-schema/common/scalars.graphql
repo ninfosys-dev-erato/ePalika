@@ -1,0 +1,4 @@
+scalar DateTime
+scalar Upload
+scalar JSON
+scalar FiscalYear

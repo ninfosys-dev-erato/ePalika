@@ -1,0 +1,43 @@
+extend type Mutation {
+  inviteUser(input: InviteUserInput!): User!
+  verifyUser(userId: ID!, method: VerificationMethod!, token: String!): Boolean!
+  approveUserProvisioning(userId: ID!): User!
+  suspendUser(userId: ID!, reason: String!): User!
+  unlockUser(userId: ID!): User!
+  disableUser(userId: ID!, reason: String!): User!
+  deprovisionUser(userId: ID!, reason: String!): User!
+  anonymizeUser(userId: ID!): User!
+
+  addAddress(userId: ID!, address: AddressInput!): Address!
+  verifyAddress(addressId: ID!, evidence: [EvidenceInput!]!): Address!
+  rejectAddress(addressId: ID!, reason: String!): Address!
+  setPrimaryAddress(userId: ID!, addressId: ID!): Person!
+
+  requestGrant(input: RequestGrantInput!): Grant!
+  approveGrant(input: ApproveGrantInput!): Grant!
+  revokeGrant(input: RevokeGrantInput!): Grant!
+  renewGrant(grantId: ID!, endAt: DateTime!): Grant!
+
+  delegateGrant(input: DelegateGrantInput!): Delegation!
+  endDelegation(delegationId: ID!, reason: String): Delegation!
+
+  createGroup(name: String!, description: String): Group!
+  addUserToGroup(groupId: ID!, userId: ID!): Group!
+  removeUserFromGroup(groupId: ID!, userId: ID!): Group!
+
+  createOrgUnit(input: OrgUnitInput!): OrgUnit!
+  updateOrgUnit(id: ID!, input: OrgUnitInput!): OrgUnit!
+  deleteOrgUnit(id: ID!): Boolean!
+
+  addCredential(userId: ID!, type: CredentialType!): Credential!
+  revokeCredential(credentialId: ID!, reason: String!): Credential!
+  rotateCredential(credentialId: ID!): Credential!
+
+  upsertRole(
+    key: String! name: String! description: String
+    permissions: [PermissionInput!]! constraints: RoleConstraintsInput!
+  ): Role!
+}
+
+input PermissionInput { resource: String! action: String! }
+input RoleConstraintsInput { scopeTypes: [OrgUnitType!]! requiresMFA: Boolean! SoDConflicts: [String!]! }

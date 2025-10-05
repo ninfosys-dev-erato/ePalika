@@ -163,7 +163,7 @@ None currently
 
 | Package | Status | Version | Notes |
 |---------|--------|---------|-------|
-| @egov/graphql-schema | ✅ | 0.1.0 | Schema + MSW mocks |
+| @egov/api-schema | ✅ | 0.1.0 | Schema + MSW mocks |
 | @egov/state-core | ✅ | 0.1.0 | Zustand stores |
 | @egov/ui | ✅ | 0.1.0 | Design tokens + components |
 | @egov/apollo | ✅ | 0.1.0 | Apollo client config |

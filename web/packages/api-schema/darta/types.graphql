@@ -1,0 +1,35 @@
+enum DartaStatus {
+  DRAFT PENDING_REVIEW CLASSIFICATION NUMBER_RESERVED REGISTERED VOIDED
+  SCANNED METADATA_ENRICHED DIGITALLY_ARCHIVED ASSIGNED IN_REVIEW_BY_SECTION
+  NEEDS_CLARIFICATION ACCEPTED ACTION_TAKEN RESPONSE_ISSUED ACK_REQUESTED
+  ACK_RECEIVED SUPERSEDED CLOSED
+}
+
+type Darta {
+  id: ID! dartaNumber: Int formattedDartaNumber: String fiscalYear: FiscalYear!
+  scope: Scope! ward: Ward subject: String! applicant: Applicant!
+  intakeChannel: IntakeChannel! receivedDate: DateTime! entryDate: DateTime!
+  isBackdated: Boolean! backdateReason: String backdateApprover: User
+  primaryDocument: Attachment! annexes: [Attachment!]! status: DartaStatus!
+  priority: Priority! classificationCode: String assignedTo: OrganizationalUnit
+  currentAssignee: User slaDeadline: DateTime isOverdue: Boolean!
+  createdBy: User! createdAt: DateTime! updatedAt: DateTime!
+  auditTrail: [AuditEntry!]! chalaniResponses: [Chalani!]! relatedDarta: [Darta!]!
+}
+
+type Applicant {
+  id: ID! type: ApplicantType! fullName: String! organization: String
+  email: String phone: String address: String identificationNumber: String
+}
+enum ApplicantType { CITIZEN ORGANIZATION GOVERNMENT_OFFICE OTHER }
+
+type DartaConnection { edges: [DartaEdge!]! pageInfo: PageInfo! }
+type DartaEdge { cursor: String! node: Darta! }
+
+type DartaStats {
+  total: Int! byStatus: [DartaStatusCount!]!
+  byChannel: [ChannelCount!]! overdueCount: Int!
+  avgProcessingTimeHours: Float!
+}
+type DartaStatusCount { status: DartaStatus! count: Int! }
+type ChannelCount { channel: IntakeChannel! count: Int! }

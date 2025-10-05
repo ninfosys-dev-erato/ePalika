@@ -267,7 +267,7 @@ web/
 │
 ├── packages/                                # Domain Packages & Libraries
 │   │
-│   ├── graphql-schema/                      # GraphQL Schema & Mocks
+│   ├── api-schema/                      # GraphQL Schema & Mocks
 │   │   ├── src/
 │   │   │   ├── index.ts
 │   │   │   ├── schema/
@@ -603,7 +603,7 @@ web/
 - **domain-fy**: ~15 files
 
 ### Infrastructure Packages (3)
-- **graphql-schema**: ~25 files (schema + mocks + codegen)
+- **api-schema**: ~25 files (schema + mocks + codegen)
 - **ui**: ~40 files (tokens + components + hooks)
 - **state-core**: ~12 files
 - **perf-budget**: ~12 files

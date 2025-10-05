@@ -7,7 +7,7 @@ import { AppRouter } from './app/routes/router'
 // Start MSW in development (lazy loaded)
 async function init() {
   if (import.meta.env.DEV) {
-    const { startMockServiceWorker } = await import('@egov/graphql-schema/mocks')
+    const { startMockServiceWorker } = await import('@egov/api-schema/mocks')
     await startMockServiceWorker()
   }
 

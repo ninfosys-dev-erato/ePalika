@@ -1,4 +1,4 @@
-# @egov/graphql-schema
+# @egov/api-schema
 
 GraphQL schema, types, and mock service worker for Darta-Chalani system.
 
@@ -14,19 +14,19 @@ GraphQL schema, types, and mock service worker for Darta-Chalani system.
 ### Import Types
 
 ```typescript
-import { Darta, Chalani, Counter } from '@egov/graphql-schema'
+import { Darta, Chalani, Counter } from '@egov/api-schema'
 ```
 
 ### Import Generated Hooks (coming soon with operations)
 
 ```typescript
-import { useDartaQuery, useCreateDartaMutation } from '@egov/graphql-schema/generated'
+import { useDartaQuery, useCreateDartaMutation } from '@egov/api-schema/generated'
 ```
 
 ### Start Mock Service Worker
 
 ```typescript
-import { startMockServiceWorker } from '@egov/graphql-schema/mocks'
+import { startMockServiceWorker } from '@egov/api-schema/mocks'
 
 // In your app entry point
 await startMockServiceWorker()

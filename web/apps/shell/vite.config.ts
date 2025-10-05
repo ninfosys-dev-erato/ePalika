@@ -46,7 +46,7 @@ export default defineConfig(({ mode }) => {
           'zustand': {
             singleton: true,
           },
-          '@egov/graphql-schema': {
+          '@egov/api-schema': {
             singleton: true,
             eager: true,
           },
@@ -124,7 +124,7 @@ export default defineConfig(({ mode }) => {
             }
 
             // Workspace packages (async chunks)
-            if (id.includes('packages/graphql-schema')) {
+            if (id.includes('packages/api-schema')) {
               return 'lib-schema'
             }
             if (id.includes('packages/ui')) {

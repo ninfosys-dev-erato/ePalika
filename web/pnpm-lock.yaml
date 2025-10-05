@@ -54,9 +54,9 @@ importers:
       '@apollo/client':
         specifier: ^4.0.6
         version: 4.0.6(graphql-ws@6.0.6(graphql@16.11.0)(ws@8.18.3))(graphql@16.11.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(rxjs@7.8.2)
-      '@egov/graphql-schema':
+      '@egov/api-schema':
         specifier: workspace:*
-        version: link:../../packages/graphql-schema
+        version: link:../../packages/api-schema
       '@egov/state-core':
         specifier: workspace:*
         version: link:../../packages/state-core
@@ -112,9 +112,9 @@ importers:
       '@apollo/client':
         specifier: ^4.0.6
         version: 4.0.6(graphql-ws@6.0.6(graphql@16.11.0)(ws@8.18.3))(graphql@16.11.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(rxjs@7.8.2)
-      '@egov/graphql-schema':
+      '@egov/api-schema':
         specifier: workspace:*
-        version: link:../../packages/graphql-schema
+        version: link:../../packages/api-schema
       '@egov/state-core':
         specifier: workspace:*
         version: link:../../packages/state-core
@@ -164,6 +164,9 @@ importers:
       '@apollo/client':
         specifier: ^4.0.6
         version: 4.0.6(graphql-ws@6.0.6(graphql@16.11.0)(ws@8.18.3))(graphql@16.11.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(rxjs@7.8.2)
+      '@egov/api-schema':
+        specifier: workspace:*
+        version: link:../../packages/api-schema
       '@egov/apollo':
         specifier: workspace:*
         version: link:../../packages/apollo
@@ -173,9 +176,6 @@ importers:
       '@egov/design-system':
         specifier: workspace:*
         version: link:../../packages/design-system
-      '@egov/graphql-schema':
-        specifier: workspace:*
-        version: link:../../packages/graphql-schema
       '@egov/perf-budget':
         specifier: workspace:*
         version: link:../../packages/perf-budget
@@ -226,6 +226,52 @@ importers:
         specifier: ^5.4.0
         version: 5.4.20(@types/node@24.6.2)(sass@1.93.2)
 
+  packages/api-schema:
+    dependencies:
+      '@apollo/client':
+        specifier: ^4.0.6
+        version: 4.0.6(graphql-ws@6.0.6(graphql@16.11.0)(ws@8.18.3))(graphql@16.11.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(rxjs@7.8.2)
+      '@faker-js/faker':
+        specifier: ^9.3.0
+        version: 9.9.0
+      msw:
+        specifier: ^2.7.0
+        version: 2.11.3(@types/node@24.6.2)(typescript@5.9.2)
+      react:
+        specifier: ^18.3.1
+        version: 18.3.1
+    devDependencies:
+      '@graphql-codegen/cli':
+        specifier: ^5.0.3
+        version: 5.0.7(@parcel/watcher@2.5.1)(@types/node@24.6.2)(graphql@16.11.0)(typescript@5.9.2)
+      '@graphql-codegen/client-preset':
+        specifier: ^4.5.1
+        version: 4.8.3(graphql@16.11.0)
+      '@graphql-codegen/typed-document-node':
+        specifier: ^5.0.12
+        version: 5.1.2(graphql@16.11.0)
+      '@graphql-codegen/typescript':
+        specifier: ^4.1.2
+        version: 4.1.6(graphql@16.11.0)
+      '@graphql-codegen/typescript-operations':
+        specifier: ^4.4.2
+        version: 4.6.1(graphql@16.11.0)
+      '@graphql-codegen/typescript-react-apollo':
+        specifier: ^4.3.2
+        version: 4.3.3(graphql@16.11.0)
+      '@graphql-tools/load-files':
+        specifier: ^7.0.1
+        version: 7.0.1(graphql@16.11.0)
+      '@graphql-tools/merge':
+        specifier: ^9.1.1
+        version: 9.1.1(graphql@16.11.0)
+      '@graphql-typed-document-node/core':
+        specifier: ^3.2.0
+        version: 3.2.0(graphql@16.11.0)
+      graphql:
+        specifier: ^16.11.0
+        version: 16.11.0
+
   packages/apollo:
     dependencies:
       '@apollo/client':
@@ -255,46 +301,6 @@ importers:
       react-dom:
         specifier: ^18.3.0
         version: 18.3.1(react@18.3.1)
-
-  packages/graphql-schema:
-    dependencies:
-      '@apollo/client':
-        specifier: ^4.0.6
-        version: 4.0.6(graphql-ws@6.0.6(graphql@16.11.0)(ws@8.18.3))(graphql@16.11.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(rxjs@7.8.2)
-      '@faker-js/faker':
-        specifier: ^9.3.0
-        version: 9.9.0
-      graphql:
-        specifier: ^16.11.0
-        version: 16.11.0
-      msw:
-        specifier: ^2.7.0
-        version: 2.11.3(@types/node@24.6.2)(typescript@5.9.2)
-      react:
-        specifier: ^18.3.1
-        version: 18.3.1
-    devDependencies:
-      '@graphql-codegen/cli':
-        specifier: ^5.0.3
-        version: 5.0.7(@parcel/watcher@2.5.1)(@types/node@24.6.2)(graphql@16.11.0)(typescript@5.9.2)
-      '@graphql-codegen/client-preset':
-        specifier: ^4.5.1
-        version: 4.8.3(graphql@16.11.0)
-      '@graphql-codegen/typed-document-node':
-        specifier: ^5.0.12
-        version: 5.1.2(graphql@16.11.0)
-      '@graphql-codegen/typescript':
-        specifier: ^4.1.2
-        version: 4.1.6(graphql@16.11.0)
-      '@graphql-codegen/typescript-operations':
-        specifier: ^4.4.2
-        version: 4.6.1(graphql@16.11.0)
-      '@graphql-codegen/typescript-react-apollo':
-        specifier: ^4.3.2
-        version: 4.3.3(graphql@16.11.0)
-      '@graphql-typed-document-node/core':
-        specifier: ^3.2.0
-        version: 3.2.0(graphql@16.11.0)
 
   packages/perf-budget:
     dependencies:
@@ -332,9 +338,9 @@ importers:
 
   packages/state-core:
     dependencies:
-      '@egov/graphql-schema':
+      '@egov/api-schema':
         specifier: workspace:*
-        version: link:../graphql-schema
+        version: link:../api-schema
       idb-keyval:
         specifier: ^6.2.1
         version: 6.2.2
@@ -1266,6 +1272,12 @@ packages:
 
   '@graphql-tools/json-file-loader@8.0.20':
     resolution: {integrity: sha512-5v6W+ZLBBML5SgntuBDLsYoqUvwfNboAwL6BwPHi3z/hH1f8BS9/0+MCW9OGY712g7E4pc3y9KqS67mWF753eA==}
+    engines: {node: '>=16.0.0'}
+    peerDependencies:
+      graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
+
+  '@graphql-tools/load-files@7.0.1':
+    resolution: {integrity: sha512-oTNIENc9To9u8Gc3kY82C74caW6kXa8ya2GyxWRXp8gP4zK/7PmvlWJK0/GFCUH0cU3t9jM7k59zXz1+ZfP3Mw==}
     engines: {node: '>=16.0.0'}
     peerDependencies:
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
@@ -4496,6 +4508,13 @@ snapshots:
   '@graphql-tools/json-file-loader@8.0.20(graphql@16.11.0)':
     dependencies:
       '@graphql-tools/utils': 10.9.1(graphql@16.11.0)
+      globby: 11.1.0
+      graphql: 16.11.0
+      tslib: 2.8.1
+      unixify: 1.0.0
+
+  '@graphql-tools/load-files@7.0.1(graphql@16.11.0)':
+    dependencies:
       globby: 11.1.0
       graphql: 16.11.0
       tslib: 2.8.1

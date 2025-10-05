@@ -120,18 +120,18 @@ apps/mfe-darta/
 ### TypeScript Configuration
 **Issue:** Project references required composite mode
 **Fixed:**
-- ✅ Added `composite: true` to `packages/graphql-schema/tsconfig.json`
+- ✅ Added `composite: true` to `packages/api-schema/tsconfig.json`
 - ✅ Added `composite: true` to `packages/ui/tsconfig.json`
 - ✅ Added `composite: true` to `packages/state-core/tsconfig.json`
 
 ### GraphQL Schema Dependency
 **Issue:** mfe-darta couldn't import GraphQL enums during build (circular dep)
 **Workaround:** Inline enum definitions in MFE components
-**TODO:** Build graphql-schema declaration files for proper imports
+**TODO:** Build api-schema declaration files for proper imports
 
 ## 📦 Packages Created (Total: 8)
 
-1. ✅ `@egov/graphql-schema` - Schema, types, mocks
+1. ✅ `@egov/api-schema` - Schema, types, mocks
 2. ✅ `@egov/perf-budget` - Bundle analysis (disabled pending ESM fix)
 3. ✅ `@egov/ui` - Mobile-first components
 4. ✅ `@egov/state-core` - Zustand stores ← **NEW**
@@ -194,9 +194,9 @@ apps/mfe-darta/
 2. [apps/shell/vite.config.ts](apps/shell/vite.config.ts:87-89) ← vendor-state chunk
 3. [apps/shell/src/app/providers.tsx](apps/shell/src/app/providers.tsx:21) ← UI store integration
 4. [apps/shell/package.json](apps/shell/package.json:21) ← Added state-core
-5. [packages/graphql-schema/tsconfig.json](packages/graphql-schema/tsconfig.json:6-8) ← composite mode
+5. [packages/api-schema/tsconfig.json](packages/api-schema/tsconfig.json:6-8) ← composite mode
 6. [packages/ui/tsconfig.json](packages/ui/tsconfig.json:7-9) ← composite mode
-7. [packages/state-core/package.json](packages/state-core/package.json:16) ← graphql-schema dep
+7. [packages/state-core/package.json](packages/state-core/package.json:16) ← api-schema dep
 
 ## 🎉 Session Success Metrics
 

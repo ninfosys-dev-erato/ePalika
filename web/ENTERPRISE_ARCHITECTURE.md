@@ -78,7 +78,7 @@ web/
 │   └── mfe-fy/            # Fiscal year domain (future)
 │
 ├── packages/              # Shared libraries
-│   ├── graphql-schema/   # Schema + types + MSW mocks
+│   ├── api-schema/   # Schema + types + MSW mocks
 │   ├── state-core/       # Zustand stores
 │   ├── ui/        # Design system
 │   ├── apollo/           # GraphQL client
@@ -93,7 +93,7 @@ web/
 **Dependency Flow:**
 ```
 apps/shell
-  ├─ @egov/graphql-schema (workspace:*)
+  ├─ @egov/api-schema (workspace:*)
   ├─ @egov/state-core (workspace:*)
   ├─ @egov/ui (workspace:*)
   ├─ @egov/apollo (workspace:*)
@@ -101,7 +101,7 @@ apps/shell
   └─ Remote: mfe_darta (Module Federation)
 
 apps/mfe-darta
-  ├─ @egov/graphql-schema (workspace:*)
+  ├─ @egov/api-schema (workspace:*)
   ├─ @egov/state-core (workspace:*)
   ├─ @egov/ui (workspace:*)
   └─ Exposes: ./DartaIntake, ./DartaList
@@ -226,7 +226,7 @@ const draft = useDartaStore((state) => state.draft)
 ### Development: MSW (No Backend Needed!)
 
 ```typescript
-// packages/graphql-schema/src/mocks/handlers/darta.ts
+// packages/api-schema/src/mocks/handlers/darta.ts
 
 export const dartaHandlers = [
   graphql.query('Dartas', ({ variables }) => {
