@@ -17,12 +17,24 @@ importers:
       '@carbon/styles':
         specifier: ^1.91.0
         version: 1.91.0(sass@1.93.2)
+      '@graphql-tools/load':
+        specifier: ^8.1.2
+        version: 8.1.2(graphql@16.11.0)
+      '@graphql-tools/merge':
+        specifier: ^9.1.1
+        version: 9.1.1(graphql@16.11.0)
+      '@graphql-tools/schema':
+        specifier: ^10.0.0
+        version: 10.0.25(graphql@16.11.0)
       '@vitejs/plugin-react':
         specifier: ^5.0.4
         version: 5.0.4(vite@7.1.9(@types/node@24.6.2)(jiti@2.6.1)(sass@1.93.2)(tsx@4.20.6)(yaml@2.8.1))
       glob:
         specifier: ^11.0.3
         version: 11.0.3
+      graphql:
+        specifier: ^16.11.0
+        version: 16.11.0
       react-is:
         specifier: 18.3.1
         version: 18.3.1
@@ -42,6 +54,9 @@ importers:
       '@module-federation/vite':
         specifier: ^1.8.1
         version: 1.8.1(rollup@4.52.3)
+      '@types/node':
+        specifier: ^24.6.2
+        version: 24.6.2
       concurrently:
         specifier: ^9.2.1
         version: 9.2.1
@@ -69,6 +84,9 @@ importers:
       '@egov/api-schema':
         specifier: workspace:*
         version: link:../../packages/api-schema
+      '@egov/api-types':
+        specifier: workspace:*
+        version: link:../../packages/api-types
       '@egov/state-core':
         specifier: workspace:*
         version: link:../../packages/state-core
@@ -179,6 +197,9 @@ importers:
       '@egov/api-schema':
         specifier: workspace:*
         version: link:../../packages/api-schema
+      '@egov/api-types':
+        specifier: workspace:*
+        version: link:../../packages/api-types
       '@egov/apollo':
         specifier: workspace:*
         version: link:../../packages/apollo
@@ -188,6 +209,9 @@ importers:
       '@egov/design-system':
         specifier: workspace:*
         version: link:../../packages/design-system
+      '@egov/mock-db':
+        specifier: workspace:*
+        version: link:../../packages/mock-db
       '@egov/perf-budget':
         specifier: workspace:*
         version: link:../../packages/perf-budget
@@ -284,20 +308,7 @@ importers:
         specifier: ^16.11.0
         version: 16.11.0
 
-  packages/api-types:
-    devDependencies:
-      '@graphql-codegen/cli':
-        specifier: ^5.0.3
-        version: 5.0.7(@parcel/watcher@2.5.1)(@types/node@24.6.2)(graphql@16.11.0)(typescript@5.9.2)
-      '@graphql-codegen/typescript':
-        specifier: ^4.1.2
-        version: 4.1.6(graphql@16.11.0)
-      '@graphql-codegen/typescript-operations':
-        specifier: ^4.4.2
-        version: 4.6.1(graphql@16.11.0)
-      '@graphql-codegen/typescript-react-apollo':
-        specifier: ^4.3.2
-        version: 4.3.3(graphql@16.11.0)
+  packages/api-types: {}
 
   packages/apollo:
     dependencies:
@@ -328,6 +339,18 @@ importers:
       react-dom:
         specifier: ^18.3.0
         version: 18.3.1(react@18.3.1)
+
+  packages/mock-db:
+    dependencies:
+      '@faker-js/faker':
+        specifier: ^9.2.0
+        version: 9.9.0
+      '@graphql-tools/schema':
+        specifier: ^10.0.0
+        version: 10.0.25(graphql@16.11.0)
+      graphql:
+        specifier: ^16.11.0
+        version: 16.11.0
 
   packages/perf-budget:
     dependencies:

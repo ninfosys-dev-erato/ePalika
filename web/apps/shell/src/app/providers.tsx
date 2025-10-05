@@ -2,7 +2,7 @@ import { useMemo, useState, useEffect } from 'react'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { makeQueryClient } from '@egov/query'
 import { ApolloProvider } from '@apollo/client/react'
-import { makeApolloClient } from '@egov/apollo'
+import { createApolloClient } from "../graphql/clientFactory";
 import { CarbonProviders } from '../ui/CarbonProviders'
 import { initAuth, getAuthHeader, isAuthenticated, login } from '@egov/auth'
 import { useUIStore } from '@egov/state-core'
@@ -22,13 +22,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   // Build Apollo once; auth header is injected per-request (fresh token)
   const apollo = useMemo(
-    () => makeApolloClient({
-      url: import.meta.env.VITE_GRAPHQL_URL!,
-      getAuthHeader: () => {
-        const header = getAuthHeader()
-        return header?.Authorization ? header : undefined
-      }
-    }),
+    () => createApolloClient(),
     []
   )
 
