@@ -16,10 +16,18 @@
     "lint": "pnpm -r lint",
     "clean": "git clean -xfd -e node_modules",
     "guard:ds-react": "if grep -R \"@carbon/react\\|from 'react'\\|from \\\"react\\\"\" packages/design-system/src >/dev/null 2>&1; then echo '❌ @egov/design-system must be CSS-only (no React/@carbon/react)'; exit 1; else echo '✅ design-system is CSS-only'; fi",
-    "guard:css": "grep -R \"@carbon/styles\" apps/mfe-* || true && if grep -R \"@carbon/styles\" apps/mfe-*; then echo '❌ MFEs must not import Carbon CSS'; exit 1; else echo '✅ CSS ownership OK'; fi"
+    "guard:css": "grep -R \"@carbon/styles\" apps/mfe-* || true && if grep -R \"@carbon/styles\" apps/mfe-*; then echo '❌ MFEs must not import Carbon CSS'; exit 1; else echo '✅ CSS ownership OK'; fi",
+    "compose:schema": "node packages/api-schema/compose-schema.mjs",
+    "generate:types": "graphql-codegen --config packages/api-types/codegen.yml",
+    "codegen": "pnpm compose:schema && pnpm generate:types"
   },
   "devDependencies": {
+    "@graphql-codegen/cli": "^5.0.3",
+    "@graphql-codegen/typescript": "^4.1.2",
+    "@graphql-codegen/typescript-operations": "^4.4.2",
+    "@graphql-codegen/typescript-react-apollo": "^4.3.2",
     "@module-federation/vite": "^1.8.1",
+    "@types/node": "^24.6.2",
     "concurrently": "^9.2.1",
     "sass": "^1.93.2",
     "typescript": "^5.6.3",
@@ -34,8 +42,12 @@
   "dependencies": {
     "@carbon/react": "^1.92.1",
     "@carbon/styles": "^1.91.0",
+    "@graphql-tools/load": "^8.1.2",
+    "@graphql-tools/merge": "^9.1.1",
+    "@graphql-tools/schema": "^10.0.0",
     "@vitejs/plugin-react": "^5.0.4",
     "glob": "^11.0.3",
+    "graphql": "^16.11.0",
     "react-is": "18.3.1"
   },
   "pnpm": {

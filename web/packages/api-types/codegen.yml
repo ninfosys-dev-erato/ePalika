@@ -1,0 +1,59 @@
+# =============================================================================
+# 🧠  ePalika GraphQL Codegen Configuration — Enterprise Edition v2.3
+# =============================================================================
+# PURPOSE:
+#   Generates type-safe artifacts (TypeScript interfaces, operation types,
+#   React Apollo hooks) from the unified GraphQL schema produced by the Schema
+#   Composition Pipeline. This configuration mirrors the same path resolution
+#   model used in schema composition — relative to the monorepo root.
+#
+# COVERAGE:
+#   • Unified schema from packages/api-schema/index.graphql
+#   • All MFE GraphQL operations under apps/*
+#   • Shared fragments under packages/api-types/src/fragments
+#
+# OUTPUT:
+#   • packages/api-types/src/generated.ts — single canonical type output
+#
+# EXECUTION CONTEXT:
+#   • Invoked from monorepo root (`pnpm codegen`)
+#   • All relative paths are resolved from repository root
+# =============================================================================
+
+schema:
+  - "packages/api-schema/index.graphql" # Unified composed schema
+
+documents:
+  - "apps/**/*.{ts,tsx,graphql,gql}" # MFE GraphQL operations
+  - "packages/api-types/src/fragments/**/*.graphql" # Shared fragments
+  - "packages/api-types/src/**/*.graphql" # Local operations (safety net)
+
+generates:
+  packages/api-types/src/generated.ts:
+    plugins:
+      - "typescript"
+      - "typescript-operations"
+      - "typescript-react-apollo"
+    config:
+      withHooks: true
+      withComponent: false
+      withHOC: false
+      scalars:
+        DateTime: string
+        JSON: Record<string, any>
+        Upload: File
+        FiscalYear: string
+        ID: string
+      avoidOptionals: true
+      immutableTypes: true
+      enumsAsTypes: true
+      nonOptionalTypename: true
+      skipTypename: false
+      dedupeOperationSuffix: true
+      namingConvention:
+        typeNames: change-case#pascalCase
+        transformUnderscore: true
+
+hooks:
+  afterAllFileWrite:
+    - prettier --write
