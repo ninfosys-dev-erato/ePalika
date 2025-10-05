@@ -71,6 +71,10 @@ build-darta: ## Build Darta-Chalani service
 	@echo "$(GREEN)Building Darta-Chalani service...$(RESET)"
 	@cd services/darta-chalani && go build -o ../../bin/darta-chalani ./cmd/dartasvc
 
+sqlc-darta: ## Generate sqlc code for Darta-Chalani
+	@echo "$(GREEN)Generating sqlc artifacts for darta-chalani...$(RESET)"
+	@cd services/darta-chalani && sqlc generate
+
 # Testing
 test: ## Run all tests
 	@echo "$(GREEN)Running tests...$(RESET)"

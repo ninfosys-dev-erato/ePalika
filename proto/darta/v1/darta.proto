@@ -1,0 +1,485 @@
+syntax = "proto3";
+
+package darta.v1;
+
+option go_package = "git.ninjainfosys.com/ePalika/proto/gen/darta/v1;dartav1";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/struct.proto";
+import "darta/v1/common.proto";
+
+// ============================================================================
+// ENUMS - Darta Specific
+// ============================================================================
+
+enum DartaStatus {
+  DARTA_STATUS_UNSPECIFIED = 0;
+  DARTA_STATUS_DRAFT = 1;
+  DARTA_STATUS_PENDING_REVIEW = 2;
+  DARTA_STATUS_CLASSIFICATION = 3;
+  DARTA_STATUS_NUMBER_RESERVED = 4;
+  DARTA_STATUS_REGISTERED = 5;
+  DARTA_STATUS_VOIDED = 6;
+  DARTA_STATUS_SCANNED = 7;
+  DARTA_STATUS_METADATA_ENRICHED = 8;
+  DARTA_STATUS_DIGITALLY_ARCHIVED = 9;
+  DARTA_STATUS_ASSIGNED = 10;
+  DARTA_STATUS_IN_REVIEW_BY_SECTION = 11;
+  DARTA_STATUS_NEEDS_CLARIFICATION = 12;
+  DARTA_STATUS_ACCEPTED = 13;
+  DARTA_STATUS_ACTION_TAKEN = 14;
+  DARTA_STATUS_RESPONSE_ISSUED = 15;
+  DARTA_STATUS_ACK_REQUESTED = 16;
+  DARTA_STATUS_ACK_RECEIVED = 17;
+  DARTA_STATUS_SUPERSEDED = 18;
+  DARTA_STATUS_CLOSED = 19;
+}
+
+enum ApplicantType {
+  APPLICANT_TYPE_UNSPECIFIED = 0;
+  APPLICANT_TYPE_CITIZEN = 1;
+  APPLICANT_TYPE_ORGANIZATION = 2;
+  APPLICANT_TYPE_GOVERNMENT_OFFICE = 3;
+  APPLICANT_TYPE_OTHER = 4;
+}
+
+enum DartaReviewDecision {
+  DARTA_REVIEW_DECISION_UNSPECIFIED = 0;
+  DARTA_REVIEW_DECISION_APPROVE_REVIEW = 1;
+  DARTA_REVIEW_DECISION_EDIT_REQUIRED = 2;
+}
+
+// ============================================================================
+// MESSAGES - Darta Types
+// ============================================================================
+
+// Darta represents an incoming correspondence record
+message Darta {
+  string id = 1;
+  int32 darta_number = 2;
+  string formatted_darta_number = 3;
+  FiscalYear fiscal_year = 4;
+  Scope scope = 5;
+  Ward ward = 6;
+  string subject = 7;
+  Applicant applicant = 8;
+  IntakeChannel intake_channel = 9;
+  google.protobuf.Timestamp received_date = 10;
+  google.protobuf.Timestamp entry_date = 11;
+  bool is_backdated = 12;
+  string backdate_reason = 13;
+  User backdate_approver = 14;
+  Attachment primary_document = 15;
+  repeated Attachment annexes = 16;
+  DartaStatus status = 17;
+  Priority priority = 18;
+  string classification_code = 19;
+  OrganizationalUnit assigned_to = 20;
+  User current_assignee = 21;
+  google.protobuf.Timestamp sla_deadline = 22;
+  bool is_overdue = 23;
+  User created_by = 24;
+  google.protobuf.Timestamp created_at = 25;
+  google.protobuf.Timestamp updated_at = 26;
+  repeated AuditEntry audit_trail = 27;
+  repeated string chalani_response_ids = 28; // Reference to chalani IDs
+  repeated string related_darta_ids = 29; // Reference to related darta IDs
+  string tenant_id = 30;
+}
+
+// Applicant represents the person/organization submitting the darta
+message Applicant {
+  string id = 1;
+  ApplicantType type = 2;
+  string full_name = 3;
+  string organization = 4;
+  string email = 5;
+  string phone = 6;
+  string address = 7;
+  string identification_number = 8; // Citizenship/Registration number
+}
+
+// DartaConnection for cursor-based pagination
+message DartaConnection {
+  repeated DartaEdge edges = 1;
+  PageInfo page_info = 2;
+}
+
+message DartaEdge {
+  string cursor = 1;
+  Darta node = 2;
+}
+
+// DartaStats for analytics
+message DartaStats {
+  int32 total = 1;
+  repeated DartaStatusCount by_status = 2;
+  repeated ChannelCount by_channel = 3;
+  int32 overdue_count = 4;
+  double avg_processing_time_hours = 5;
+}
+
+message DartaStatusCount {
+  DartaStatus status = 1;
+  int32 count = 2;
+}
+
+message ChannelCount {
+  IntakeChannel channel = 1;
+  int32 count = 2;
+}
+
+// ============================================================================
+// INPUT MESSAGES
+// ============================================================================
+
+// DartaFilterInput for filtering darta list
+message DartaFilterInput {
+  string fiscal_year_id = 1;
+  Scope scope = 2;
+  string ward_id = 3;
+  DartaStatus status = 4;
+  Priority priority = 5;
+  string organizational_unit_id = 6;
+  string assignee_id = 7;
+  IntakeChannel intake_channel = 8;
+  google.protobuf.Timestamp from_date = 9;
+  google.protobuf.Timestamp to_date = 10;
+  string search = 11; // Search in subject, applicant name, etc.
+  bool is_overdue = 12;
+  string tenant_id = 13;
+}
+
+// ApplicantInput for creating/updating applicant
+message ApplicantInput {
+  ApplicantType type = 1;
+  string full_name = 2;
+  string organization = 3;
+  string email = 4;
+  string phone = 5;
+  string address = 6;
+  string identification_number = 7;
+}
+
+// CreateDartaInput for creating a new darta
+message CreateDartaInput {
+  Scope scope = 1;
+  string ward_id = 2;
+  string subject = 3;
+  ApplicantInput applicant = 4;
+  IntakeChannel intake_channel = 5;
+  google.protobuf.Timestamp received_date = 6;
+  string primary_document_id = 7;
+  repeated string annex_ids = 8;
+  Priority priority = 9;
+  string idempotency_key = 10;
+  string tenant_id = 11;
+}
+
+// RouteDartaInput for routing darta to a unit/user
+message RouteDartaInput {
+  string darta_id = 1;
+  string organizational_unit_id = 2;
+  string assignee_id = 3;
+  Priority priority = 4;
+  int32 sla_hours = 5;
+  string notes = 6;
+}
+
+// ReviewDartaInput for reviewing darta
+message ReviewDartaInput {
+  string darta_id = 1;
+  string notes = 2;
+  DartaReviewDecision decision = 3;
+  string requested_info = 4;
+}
+
+// ============================================================================
+// SERVICE DEFINITION
+// ============================================================================
+
+service DartaService {
+  // Query operations
+  rpc GetDarta(GetDartaRequest) returns (GetDartaResponse);
+  rpc GetDartaByNumber(GetDartaByNumberRequest) returns (GetDartaByNumberResponse);
+  rpc ListDartas(ListDartasRequest) returns (ListDartasResponse);
+  rpc GetMyDartas(GetMyDartasRequest) returns (GetMyDartasResponse);
+  rpc GetDartaStats(GetDartaStatsRequest) returns (GetDartaStatsResponse);
+  
+  // Mutation operations - Registration workflow
+  rpc CreateDarta(CreateDartaRequest) returns (CreateDartaResponse);
+  rpc SubmitDartaForReview(SubmitDartaForReviewRequest) returns (SubmitDartaForReviewResponse);
+  rpc ReviewDarta(ReviewDartaRequest) returns (ReviewDartaResponse);
+  rpc ClassifyDarta(ClassifyDartaRequest) returns (ClassifyDartaResponse);
+  rpc ReserveDartaNumber(ReserveDartaNumberRequest) returns (ReserveDartaNumberResponse);
+  rpc FinalizeDartaRegistration(FinalizeDartaRegistrationRequest) returns (FinalizeDartaRegistrationResponse);
+  rpc DirectRegisterDarta(DirectRegisterDartaRequest) returns (DirectRegisterDartaResponse);
+  rpc VoidDarta(VoidDartaRequest) returns (VoidDartaResponse);
+  
+  // Mutation operations - Digitization workflow
+  rpc ScanDarta(ScanDartaRequest) returns (ScanDartaResponse);
+  rpc EnrichDartaMetadata(EnrichDartaMetadataRequest) returns (EnrichDartaMetadataResponse);
+  rpc FinalizeDartaArchive(FinalizeDartaArchiveRequest) returns (FinalizeDartaArchiveResponse);
+  
+  // Mutation operations - Assignment workflow
+  rpc RouteDarta(RouteDartaRequest) returns (RouteDartaResponse);
+  rpc SectionReviewDarta(SectionReviewDartaRequest) returns (SectionReviewDartaResponse);
+  rpc RequestDartaClarification(RequestDartaClarificationRequest) returns (RequestDartaClarificationResponse);
+  rpc ProvideDartaClarification(ProvideDartaClarificationRequest) returns (ProvideDartaClarificationResponse);
+  rpc AcceptDarta(AcceptDartaRequest) returns (AcceptDartaResponse);
+  
+  // Mutation operations - Action workflow
+  rpc MarkDartaAction(MarkDartaActionRequest) returns (MarkDartaActionResponse);
+  rpc IssueDartaResponse(IssueDartaResponseRequest) returns (IssueDartaResponseResponse);
+  rpc RequestDartaAck(RequestDartaAckRequest) returns (RequestDartaAckResponse);
+  rpc ReceiveDartaAck(ReceiveDartaAckRequest) returns (ReceiveDartaAckResponse);
+  rpc SupersedeDartaRecord(SupersedeDartaRecordRequest) returns (SupersedeDartaRecordResponse);
+  rpc CloseDarta(CloseDartaRequest) returns (CloseDartaResponse);
+  
+  // Health check
+  rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse);
+}
+
+// ============================================================================
+// REQUEST/RESPONSE MESSAGES
+// ============================================================================
+
+// Query requests/responses
+message GetDartaRequest {
+  string id = 1;
+}
+
+message GetDartaResponse {
+  Darta darta = 1;
+}
+
+message GetDartaByNumberRequest {
+  int32 darta_number = 1;
+  string fiscal_year_id = 2;
+  Scope scope = 3;
+  string ward_id = 4;
+}
+
+message GetDartaByNumberResponse {
+  Darta darta = 1;
+}
+
+message ListDartasRequest {
+  DartaFilterInput filter = 1;
+  PaginationInput pagination = 2;
+}
+
+message ListDartasResponse {
+  DartaConnection connection = 1;
+}
+
+message GetMyDartasRequest {
+  DartaStatus status = 1;
+  PaginationInput pagination = 2;
+  string user_id = 3; // From context
+}
+
+message GetMyDartasResponse {
+  DartaConnection connection = 1;
+}
+
+message GetDartaStatsRequest {
+  Scope scope = 1;
+  string fiscal_year_id = 2;
+  string ward_id = 3;
+  string tenant_id = 4;
+}
+
+message GetDartaStatsResponse {
+  DartaStats stats = 1;
+}
+
+// Mutation requests/responses
+message CreateDartaRequest {
+  CreateDartaInput input = 1;
+}
+
+message CreateDartaResponse {
+  Darta darta = 1;
+}
+
+message SubmitDartaForReviewRequest {
+  string darta_id = 1;
+}
+
+message SubmitDartaForReviewResponse {
+  Darta darta = 1;
+}
+
+message ReviewDartaRequest {
+  ReviewDartaInput input = 1;
+}
+
+message ReviewDartaResponse {
+  Darta darta = 1;
+}
+
+message ClassifyDartaRequest {
+  string darta_id = 1;
+  string classification_code = 2;
+}
+
+message ClassifyDartaResponse {
+  Darta darta = 1;
+}
+
+message ReserveDartaNumberRequest {
+  string darta_id = 1;
+  string allocation_id = 2;
+}
+
+message ReserveDartaNumberResponse {
+  Darta darta = 1;
+}
+
+message FinalizeDartaRegistrationRequest {
+  string darta_id = 1;
+  string allocation_id = 2;
+}
+
+message FinalizeDartaRegistrationResponse {
+  Darta darta = 1;
+}
+
+message DirectRegisterDartaRequest {
+  string darta_id = 1;
+}
+
+message DirectRegisterDartaResponse {
+  Darta darta = 1;
+}
+
+message VoidDartaRequest {
+  string darta_id = 1;
+  string reason = 2;
+}
+
+message VoidDartaResponse {
+  Darta darta = 1;
+}
+
+message ScanDartaRequest {
+  string darta_id = 1;
+  string scan_attachment_id = 2;
+}
+
+message ScanDartaResponse {
+  Darta darta = 1;
+}
+
+message EnrichDartaMetadataRequest {
+  string darta_id = 1;
+  google.protobuf.Struct metadata = 2;
+}
+
+message EnrichDartaMetadataResponse {
+  Darta darta = 1;
+}
+
+message FinalizeDartaArchiveRequest {
+  string darta_id = 1;
+}
+
+message FinalizeDartaArchiveResponse {
+  Darta darta = 1;
+}
+
+message RouteDartaRequest {
+  RouteDartaInput input = 1;
+}
+
+message RouteDartaResponse {
+  Darta darta = 1;
+}
+
+message SectionReviewDartaRequest {
+  string darta_id = 1;
+}
+
+message SectionReviewDartaResponse {
+  Darta darta = 1;
+}
+
+message RequestDartaClarificationRequest {
+  string darta_id = 1;
+  string note = 2;
+}
+
+message RequestDartaClarificationResponse {
+  Darta darta = 1;
+}
+
+message ProvideDartaClarificationRequest {
+  string darta_id = 1;
+  string note = 2;
+}
+
+message ProvideDartaClarificationResponse {
+  Darta darta = 1;
+}
+
+message AcceptDartaRequest {
+  string darta_id = 1;
+}
+
+message AcceptDartaResponse {
+  Darta darta = 1;
+}
+
+message MarkDartaActionRequest {
+  string darta_id = 1;
+  string action_note = 2;
+}
+
+message MarkDartaActionResponse {
+  Darta darta = 1;
+}
+
+message IssueDartaResponseRequest {
+  string darta_id = 1;
+  string response_chalani_id = 2;
+  string doc_attachment_id = 3;
+}
+
+message IssueDartaResponseResponse {
+  Darta darta = 1;
+}
+
+message RequestDartaAckRequest {
+  string darta_id = 1;
+}
+
+message RequestDartaAckResponse {
+  Darta darta = 1;
+}
+
+message ReceiveDartaAckRequest {
+  string darta_id = 1;
+}
+
+message ReceiveDartaAckResponse {
+  Darta darta = 1;
+}
+
+message SupersedeDartaRecordRequest {
+  string darta_id = 1;
+  string reason = 2;
+  string new_darta_id = 3;
+}
+
+message SupersedeDartaRecordResponse {
+  Darta darta = 1;
+}
+
+message CloseDartaRequest {
+  string darta_id = 1;
+}
+
+message CloseDartaResponse {
+  Darta darta = 1;
+}

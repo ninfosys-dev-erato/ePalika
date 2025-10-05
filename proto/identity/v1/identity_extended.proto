@@ -1,0 +1,329 @@
+syntax = "proto3";
+
+package identity.v1;
+
+option go_package = "git.ninjainfosys.com/ePalika/proto/gen/identity/v1;identityv1";
+
+import "google/protobuf/timestamp.proto";
+
+// Extended message types for identity service
+
+// OrganizationalUnit represents a department or unit within an organization
+message OrganizationalUnit {
+  string id = 1;
+  string organization_id = 2;
+  string name = 3;
+  string code = 4;
+  string description = 5;
+  string parent_id = 6; // For hierarchical units
+  int32 level = 7; // Depth in hierarchy
+  bool is_active = 8;
+  google.protobuf.Timestamp created_at = 9;
+  google.protobuf.Timestamp updated_at = 10;
+}
+
+// Ward represents a ward/electoral division in a municipality
+message Ward {
+  string id = 1;
+  string organization_id = 2;
+  int32 ward_number = 3;
+  string name = 4;
+  string name_nepali = 5;
+  string description = 6;
+  int64 population = 7;
+  double area_sq_km = 8;
+  string ward_office_address = 9;
+  string ward_chairperson = 10;
+  string contact_phone = 11;
+  string contact_email = 12;
+  bool is_active = 13;
+  google.protobuf.Timestamp created_at = 14;
+  google.protobuf.Timestamp updated_at = 15;
+}
+
+// FiscalYear represents a Nepali fiscal year (e.g., 2081-82)
+message FiscalYear {
+  string id = 1;
+  string organization_id = 2;
+  string name = 3; // e.g., "2081-82"
+  string name_nepali = 4; // e.g., "२०८१-८२"
+  int32 start_year_bs = 5; // Bikram Sambat start year
+  int32 end_year_bs = 6; // Bikram Sambat end year
+  google.protobuf.Timestamp start_date_ad = 7; // Gregorian start date
+  google.protobuf.Timestamp end_date_ad = 8; // Gregorian end date
+  bool is_active = 9;
+  bool is_current = 10; // Only one can be current at a time
+  google.protobuf.Timestamp created_at = 11;
+  google.protobuf.Timestamp updated_at = 12;
+}
+
+// Role represents a system role with permissions
+message Role {
+  string id = 1;
+  string name = 2;
+  string code = 3; // e.g., "darta_clerk", "admin"
+  string description = 4;
+  repeated string permissions = 5; // List of permission codes
+  bool is_system_role = 6; // Cannot be deleted
+  bool is_active = 7;
+  google.protobuf.Timestamp created_at = 8;
+  google.protobuf.Timestamp updated_at = 9;
+}
+
+// UserRole represents a user's assigned role
+message UserRole {
+  string id = 1;
+  string user_id = 2;
+  string role_id = 3;
+  string organization_id = 4; // Role scoped to organization
+  string organizational_unit_id = 5; // Role scoped to unit
+  string ward_id = 6; // Role scoped to ward
+  google.protobuf.Timestamp assigned_at = 7;
+  string assigned_by = 8;
+}
+
+// Organizational Unit operations
+message CreateOrganizationalUnitRequest {
+  string organization_id = 1;
+  string name = 2;
+  string code = 3;
+  string description = 4;
+  string parent_id = 5;
+}
+
+message CreateOrganizationalUnitResponse {
+  OrganizationalUnit organizational_unit = 1;
+}
+
+message GetOrganizationalUnitRequest {
+  string id = 1;
+}
+
+message GetOrganizationalUnitResponse {
+  OrganizationalUnit organizational_unit = 1;
+}
+
+message UpdateOrganizationalUnitRequest {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  bool is_active = 4;
+}
+
+message UpdateOrganizationalUnitResponse {
+  OrganizationalUnit organizational_unit = 1;
+}
+
+message ListOrganizationalUnitsRequest {
+  string organization_id = 1;
+  string parent_id = 2; // Filter by parent
+  int32 limit = 3;
+  int32 offset = 4;
+}
+
+message ListOrganizationalUnitsResponse {
+  repeated OrganizationalUnit organizational_units = 1;
+  int64 total = 2;
+}
+
+// Ward operations
+message CreateWardRequest {
+  string organization_id = 1;
+  int32 ward_number = 2;
+  string name = 3;
+  string name_nepali = 4;
+  string description = 5;
+  int64 population = 6;
+  double area_sq_km = 7;
+  string ward_office_address = 8;
+  string ward_chairperson = 9;
+  string contact_phone = 10;
+  string contact_email = 11;
+}
+
+message CreateWardResponse {
+  Ward ward = 1;
+}
+
+message GetWardRequest {
+  string id = 1;
+}
+
+message GetWardResponse {
+  Ward ward = 1;
+}
+
+message UpdateWardRequest {
+  string id = 1;
+  string name = 2;
+  string name_nepali = 3;
+  string description = 4;
+  int64 population = 5;
+  double area_sq_km = 6;
+  string ward_office_address = 7;
+  string ward_chairperson = 8;
+  string contact_phone = 9;
+  string contact_email = 10;
+  bool is_active = 11;
+}
+
+message UpdateWardResponse {
+  Ward ward = 1;
+}
+
+message ListWardsRequest {
+  string organization_id = 1;
+  int32 limit = 2;
+  int32 offset = 3;
+}
+
+message ListWardsResponse {
+  repeated Ward wards = 1;
+  int64 total = 2;
+}
+
+// Fiscal Year operations
+message CreateFiscalYearRequest {
+  string organization_id = 1;
+  string name = 2;
+  string name_nepali = 3;
+  int32 start_year_bs = 4;
+  int32 end_year_bs = 5;
+  google.protobuf.Timestamp start_date_ad = 6;
+  google.protobuf.Timestamp end_date_ad = 7;
+}
+
+message CreateFiscalYearResponse {
+  FiscalYear fiscal_year = 1;
+}
+
+message GetFiscalYearRequest {
+  string id = 1;
+}
+
+message GetFiscalYearResponse {
+  FiscalYear fiscal_year = 1;
+}
+
+message GetActiveFiscalYearRequest {
+  string organization_id = 1;
+}
+
+message GetActiveFiscalYearResponse {
+  FiscalYear fiscal_year = 1;
+}
+
+message ListFiscalYearsRequest {
+  string organization_id = 1;
+  int32 limit = 2;
+  int32 offset = 3;
+}
+
+message ListFiscalYearsResponse {
+  repeated FiscalYear fiscal_years = 1;
+  int64 total = 2;
+}
+
+message SetActiveFiscalYearRequest {
+  string id = 1;
+}
+
+message SetActiveFiscalYearResponse {
+  FiscalYear fiscal_year = 1;
+}
+
+// Role operations
+message CreateRoleRequest {
+  string name = 1;
+  string code = 2;
+  string description = 3;
+  repeated string permissions = 4;
+}
+
+message CreateRoleResponse {
+  Role role = 1;
+}
+
+message GetRoleRequest {
+  string id = 1;
+}
+
+message GetRoleResponse {
+  Role role = 1;
+}
+
+message ListRolesRequest {
+  int32 limit = 1;
+  int32 offset = 2;
+}
+
+message ListRolesResponse {
+  repeated Role roles = 1;
+  int64 total = 2;
+}
+
+message AssignRoleRequest {
+  string user_id = 1;
+  string role_id = 2;
+  string organization_id = 3;
+  string organizational_unit_id = 4;
+  string ward_id = 5;
+}
+
+message AssignRoleResponse {
+  UserRole user_role = 1;
+}
+
+message RevokeRoleRequest {
+  string user_role_id = 1;
+}
+
+message RevokeRoleResponse {
+  bool success = 1;
+}
+
+// Additional User operations
+message GetUserByKeycloakIdRequest {
+  string keycloak_id = 1;
+}
+
+message GetUserByKeycloakIdResponse {
+  User user = 1;
+}
+
+message DeactivateUserRequest {
+  string id = 1;
+}
+
+message DeactivateUserResponse {
+  User user = 1;
+}
+
+message ListUserOrganizationsRequest {
+  string user_id = 1;
+}
+
+message ListUserOrganizationsResponse {
+  repeated UserOrganization user_organizations = 1;
+}
+
+// User message referenced from main file
+message User {
+  string id = 1;
+  string keycloak_id = 2;
+  string email = 3;
+  string first_name = 4;
+  string last_name = 5;
+  string phone = 6;
+  bool is_active = 7;
+  google.protobuf.Timestamp created_at = 8;
+  google.protobuf.Timestamp updated_at = 9;
+}
+
+// UserOrganization message referenced from main file
+message UserOrganization {
+  string user_id = 1;
+  string organization_id = 2;
+  string role = 3;
+  google.protobuf.Timestamp joined_at = 4;
+}

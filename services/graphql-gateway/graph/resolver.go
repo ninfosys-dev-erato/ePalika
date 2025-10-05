@@ -1,8 +1,7 @@
 package graph
 
 import (
-	"net/http"
-	"time"
+	"git.ninjainfosys.com/ePalika/graphql-gateway/internal/clients"
 )
 
 // This file will not be regenerated automatically.
@@ -10,17 +9,15 @@ import (
 // It serves as dependency injection for your app, add any dependencies you require here.
 
 type Resolver struct {
-	DartaChalaniURL string
-	PDPURL          string
-	HTTPClient      *http.Client
+	DartaClient    clients.DartaService
+	IdentityClient clients.IdentityService
+	PDPClient      clients.PDPService
 }
 
-func NewResolver(dartaChalaniURL, pdpURL string) *Resolver {
+func NewResolver(dartaClient clients.DartaService, identityClient clients.IdentityService, pdpClient clients.PDPService) *Resolver {
 	return &Resolver{
-		DartaChalaniURL: dartaChalaniURL,
-		PDPURL:          pdpURL,
-		HTTPClient: &http.Client{
-			Timeout: 30 * time.Second,
-		},
+		DartaClient:    dartaClient,
+		IdentityClient: identityClient,
+		PDPClient:      pdpClient,
 	}
 }

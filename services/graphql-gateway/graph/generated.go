@@ -46,28 +46,61 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
-	AuthCheckResponse struct {
-		Allowed func(childComplexity int) int
-		Message func(childComplexity int) int
-		Reason  func(childComplexity int) int
-		Success func(childComplexity int) int
+	Applicant struct {
+		Address      func(childComplexity int) int
+		Email        func(childComplexity int) int
+		FullName     func(childComplexity int) int
+		ID           func(childComplexity int) int
+		Organization func(childComplexity int) int
+		Phone        func(childComplexity int) int
+		Type         func(childComplexity int) int
+	}
+
+	ChannelCount struct {
+		Channel func(childComplexity int) int
+		Count   func(childComplexity int) int
 	}
 
 	Darta struct {
-		CreatedAt   func(childComplexity int) int
-		Description func(childComplexity int) int
-		ID          func(childComplexity int) int
-		Status      func(childComplexity int) int
-		SubmittedBy func(childComplexity int) int
-		Title       func(childComplexity int) int
-		UpdatedAt   func(childComplexity int) int
+		Applicant            func(childComplexity int) int
+		CreatedAt            func(childComplexity int) int
+		CreatedBy            func(childComplexity int) int
+		DartaNumber          func(childComplexity int) int
+		EntryDate            func(childComplexity int) int
+		FiscalYearID         func(childComplexity int) int
+		FormattedDartaNumber func(childComplexity int) int
+		ID                   func(childComplexity int) int
+		IntakeChannel        func(childComplexity int) int
+		Priority             func(childComplexity int) int
+		ReceivedDate         func(childComplexity int) int
+		Scope                func(childComplexity int) int
+		Status               func(childComplexity int) int
+		Subject              func(childComplexity int) int
+		TenantID             func(childComplexity int) int
+		UpdatedAt            func(childComplexity int) int
+		WardID               func(childComplexity int) int
 	}
 
-	DartaList struct {
-		Items  func(childComplexity int) int
-		Limit  func(childComplexity int) int
-		Offset func(childComplexity int) int
-		Total  func(childComplexity int) int
+	DartaConnection struct {
+		Edges    func(childComplexity int) int
+		PageInfo func(childComplexity int) int
+	}
+
+	DartaEdge struct {
+		Cursor func(childComplexity int) int
+		Node   func(childComplexity int) int
+	}
+
+	DartaStats struct {
+		ByChannel    func(childComplexity int) int
+		ByStatus     func(childComplexity int) int
+		OverdueCount func(childComplexity int) int
+		Total        func(childComplexity int) int
+	}
+
+	DartaStatusCount struct {
+		Count  func(childComplexity int) int
+		Status func(childComplexity int) int
 	}
 
 	HealthStatus struct {
@@ -77,46 +110,47 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		Empty             func(childComplexity int) int
-		RegisterDarta     func(childComplexity int, input model.RegisterDartaInput) int
-		UpdateDartaStatus func(childComplexity int, id string, status model.DartaStatus) int
+		ClassifyDarta             func(childComplexity int, dartaID string, classificationCode string) int
+		CloseDarta                func(childComplexity int, dartaID string) int
+		CreateDarta               func(childComplexity int, input model.CreateDartaInput) int
+		FinalizeDartaRegistration func(childComplexity int, dartaID string) int
+		ReserveDartaNumber        func(childComplexity int, dartaID string) int
+		RouteDarta                func(childComplexity int, input model.RouteDartaInput) int
+		SubmitDartaForReview      func(childComplexity int, dartaID string) int
+		VoidDarta                 func(childComplexity int, dartaID string, reason string) int
+	}
+
+	PageInfo struct {
+		HasNextPage     func(childComplexity int) int
+		HasPreviousPage func(childComplexity int) int
+		TotalCount      func(childComplexity int) int
 	}
 
 	Query struct {
-		CheckAuthorization func(childComplexity int, input model.AuthCheckInput) int
-		DartaChalaniHealth func(childComplexity int) int
-		Empty              func(childComplexity int) int
-		GetDarta           func(childComplexity int, id string) int
-		ListDartas         func(childComplexity int, limit *int, offset *int) int
-		PdpHealth          func(childComplexity int) int
-	}
-
-	RegisterDartaResponse struct {
-		Darta   func(childComplexity int) int
-		DartaID func(childComplexity int) int
-		Message func(childComplexity int) int
-		Success func(childComplexity int) int
-	}
-
-	UpdateDartaResponse struct {
-		Darta   func(childComplexity int) int
-		Message func(childComplexity int) int
-		Success func(childComplexity int) int
+		Darta      func(childComplexity int, id string) int
+		DartaStats func(childComplexity int, scope *model.Scope, fiscalYearID *string, wardID *string) int
+		Dartas     func(childComplexity int, filter *model.DartaFilterInput, pagination *model.PaginationInput) int
+		Health     func(childComplexity int) int
+		MyDartas   func(childComplexity int, status *model.DartaStatus, pagination *model.PaginationInput) int
 	}
 }
 
 type MutationResolver interface {
-	Empty(ctx context.Context) (*string, error)
-	RegisterDarta(ctx context.Context, input model.RegisterDartaInput) (*model.RegisterDartaResponse, error)
-	UpdateDartaStatus(ctx context.Context, id string, status model.DartaStatus) (*model.UpdateDartaResponse, error)
+	CreateDarta(ctx context.Context, input model.CreateDartaInput) (*model.Darta, error)
+	SubmitDartaForReview(ctx context.Context, dartaID string) (*model.Darta, error)
+	ClassifyDarta(ctx context.Context, dartaID string, classificationCode string) (*model.Darta, error)
+	ReserveDartaNumber(ctx context.Context, dartaID string) (*model.Darta, error)
+	FinalizeDartaRegistration(ctx context.Context, dartaID string) (*model.Darta, error)
+	RouteDarta(ctx context.Context, input model.RouteDartaInput) (*model.Darta, error)
+	CloseDarta(ctx context.Context, dartaID string) (*model.Darta, error)
+	VoidDarta(ctx context.Context, dartaID string, reason string) (*model.Darta, error)
 }
 type QueryResolver interface {
-	Empty(ctx context.Context) (*string, error)
-	DartaChalaniHealth(ctx context.Context) (*model.HealthStatus, error)
-	GetDarta(ctx context.Context, id string) (*model.Darta, error)
-	ListDartas(ctx context.Context, limit *int, offset *int) (*model.DartaList, error)
-	PdpHealth(ctx context.Context) (*model.HealthStatus, error)
-	CheckAuthorization(ctx context.Context, input model.AuthCheckInput) (*model.AuthCheckResponse, error)
+	Health(ctx context.Context) (*model.HealthStatus, error)
+	Darta(ctx context.Context, id string) (*model.Darta, error)
+	Dartas(ctx context.Context, filter *model.DartaFilterInput, pagination *model.PaginationInput) (*model.DartaConnection, error)
+	MyDartas(ctx context.Context, status *model.DartaStatus, pagination *model.PaginationInput) (*model.DartaConnection, error)
+	DartaStats(ctx context.Context, scope *model.Scope, fiscalYearID *string, wardID *string) (*model.DartaStats, error)
 }
 
 type executableSchema struct {
@@ -138,98 +172,228 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 	_ = ec
 	switch typeName + "." + field {
 
-	case "AuthCheckResponse.allowed":
-		if e.complexity.AuthCheckResponse.Allowed == nil {
+	case "Applicant.address":
+		if e.complexity.Applicant.Address == nil {
 			break
 		}
 
-		return e.complexity.AuthCheckResponse.Allowed(childComplexity), true
-	case "AuthCheckResponse.message":
-		if e.complexity.AuthCheckResponse.Message == nil {
+		return e.complexity.Applicant.Address(childComplexity), true
+	case "Applicant.email":
+		if e.complexity.Applicant.Email == nil {
 			break
 		}
 
-		return e.complexity.AuthCheckResponse.Message(childComplexity), true
-	case "AuthCheckResponse.reason":
-		if e.complexity.AuthCheckResponse.Reason == nil {
+		return e.complexity.Applicant.Email(childComplexity), true
+	case "Applicant.fullName":
+		if e.complexity.Applicant.FullName == nil {
 			break
 		}
 
-		return e.complexity.AuthCheckResponse.Reason(childComplexity), true
-	case "AuthCheckResponse.success":
-		if e.complexity.AuthCheckResponse.Success == nil {
+		return e.complexity.Applicant.FullName(childComplexity), true
+	case "Applicant.id":
+		if e.complexity.Applicant.ID == nil {
 			break
 		}
 
-		return e.complexity.AuthCheckResponse.Success(childComplexity), true
+		return e.complexity.Applicant.ID(childComplexity), true
+	case "Applicant.organization":
+		if e.complexity.Applicant.Organization == nil {
+			break
+		}
 
+		return e.complexity.Applicant.Organization(childComplexity), true
+	case "Applicant.phone":
+		if e.complexity.Applicant.Phone == nil {
+			break
+		}
+
+		return e.complexity.Applicant.Phone(childComplexity), true
+	case "Applicant.type":
+		if e.complexity.Applicant.Type == nil {
+			break
+		}
+
+		return e.complexity.Applicant.Type(childComplexity), true
+
+	case "ChannelCount.channel":
+		if e.complexity.ChannelCount.Channel == nil {
+			break
+		}
+
+		return e.complexity.ChannelCount.Channel(childComplexity), true
+	case "ChannelCount.count":
+		if e.complexity.ChannelCount.Count == nil {
+			break
+		}
+
+		return e.complexity.ChannelCount.Count(childComplexity), true
+
+	case "Darta.applicant":
+		if e.complexity.Darta.Applicant == nil {
+			break
+		}
+
+		return e.complexity.Darta.Applicant(childComplexity), true
 	case "Darta.createdAt":
 		if e.complexity.Darta.CreatedAt == nil {
 			break
 		}
 
 		return e.complexity.Darta.CreatedAt(childComplexity), true
-	case "Darta.description":
-		if e.complexity.Darta.Description == nil {
+	case "Darta.createdBy":
+		if e.complexity.Darta.CreatedBy == nil {
 			break
 		}
 
-		return e.complexity.Darta.Description(childComplexity), true
+		return e.complexity.Darta.CreatedBy(childComplexity), true
+	case "Darta.dartaNumber":
+		if e.complexity.Darta.DartaNumber == nil {
+			break
+		}
+
+		return e.complexity.Darta.DartaNumber(childComplexity), true
+	case "Darta.entryDate":
+		if e.complexity.Darta.EntryDate == nil {
+			break
+		}
+
+		return e.complexity.Darta.EntryDate(childComplexity), true
+	case "Darta.fiscalYearId":
+		if e.complexity.Darta.FiscalYearID == nil {
+			break
+		}
+
+		return e.complexity.Darta.FiscalYearID(childComplexity), true
+	case "Darta.formattedDartaNumber":
+		if e.complexity.Darta.FormattedDartaNumber == nil {
+			break
+		}
+
+		return e.complexity.Darta.FormattedDartaNumber(childComplexity), true
 	case "Darta.id":
 		if e.complexity.Darta.ID == nil {
 			break
 		}
 
 		return e.complexity.Darta.ID(childComplexity), true
+	case "Darta.intakeChannel":
+		if e.complexity.Darta.IntakeChannel == nil {
+			break
+		}
+
+		return e.complexity.Darta.IntakeChannel(childComplexity), true
+	case "Darta.priority":
+		if e.complexity.Darta.Priority == nil {
+			break
+		}
+
+		return e.complexity.Darta.Priority(childComplexity), true
+	case "Darta.receivedDate":
+		if e.complexity.Darta.ReceivedDate == nil {
+			break
+		}
+
+		return e.complexity.Darta.ReceivedDate(childComplexity), true
+	case "Darta.scope":
+		if e.complexity.Darta.Scope == nil {
+			break
+		}
+
+		return e.complexity.Darta.Scope(childComplexity), true
 	case "Darta.status":
 		if e.complexity.Darta.Status == nil {
 			break
 		}
 
 		return e.complexity.Darta.Status(childComplexity), true
-	case "Darta.submittedBy":
-		if e.complexity.Darta.SubmittedBy == nil {
+	case "Darta.subject":
+		if e.complexity.Darta.Subject == nil {
 			break
 		}
 
-		return e.complexity.Darta.SubmittedBy(childComplexity), true
-	case "Darta.title":
-		if e.complexity.Darta.Title == nil {
+		return e.complexity.Darta.Subject(childComplexity), true
+	case "Darta.tenantId":
+		if e.complexity.Darta.TenantID == nil {
 			break
 		}
 
-		return e.complexity.Darta.Title(childComplexity), true
+		return e.complexity.Darta.TenantID(childComplexity), true
 	case "Darta.updatedAt":
 		if e.complexity.Darta.UpdatedAt == nil {
 			break
 		}
 
 		return e.complexity.Darta.UpdatedAt(childComplexity), true
-
-	case "DartaList.items":
-		if e.complexity.DartaList.Items == nil {
+	case "Darta.wardId":
+		if e.complexity.Darta.WardID == nil {
 			break
 		}
 
-		return e.complexity.DartaList.Items(childComplexity), true
-	case "DartaList.limit":
-		if e.complexity.DartaList.Limit == nil {
+		return e.complexity.Darta.WardID(childComplexity), true
+
+	case "DartaConnection.edges":
+		if e.complexity.DartaConnection.Edges == nil {
 			break
 		}
 
-		return e.complexity.DartaList.Limit(childComplexity), true
-	case "DartaList.offset":
-		if e.complexity.DartaList.Offset == nil {
+		return e.complexity.DartaConnection.Edges(childComplexity), true
+	case "DartaConnection.pageInfo":
+		if e.complexity.DartaConnection.PageInfo == nil {
 			break
 		}
 
-		return e.complexity.DartaList.Offset(childComplexity), true
-	case "DartaList.total":
-		if e.complexity.DartaList.Total == nil {
+		return e.complexity.DartaConnection.PageInfo(childComplexity), true
+
+	case "DartaEdge.cursor":
+		if e.complexity.DartaEdge.Cursor == nil {
 			break
 		}
 
-		return e.complexity.DartaList.Total(childComplexity), true
+		return e.complexity.DartaEdge.Cursor(childComplexity), true
+	case "DartaEdge.node":
+		if e.complexity.DartaEdge.Node == nil {
+			break
+		}
+
+		return e.complexity.DartaEdge.Node(childComplexity), true
+
+	case "DartaStats.byChannel":
+		if e.complexity.DartaStats.ByChannel == nil {
+			break
+		}
+
+		return e.complexity.DartaStats.ByChannel(childComplexity), true
+	case "DartaStats.byStatus":
+		if e.complexity.DartaStats.ByStatus == nil {
+			break
+		}
+
+		return e.complexity.DartaStats.ByStatus(childComplexity), true
+	case "DartaStats.overdueCount":
+		if e.complexity.DartaStats.OverdueCount == nil {
+			break
+		}
+
+		return e.complexity.DartaStats.OverdueCount(childComplexity), true
+	case "DartaStats.total":
+		if e.complexity.DartaStats.Total == nil {
+			break
+		}
+
+		return e.complexity.DartaStats.Total(childComplexity), true
+
+	case "DartaStatusCount.count":
+		if e.complexity.DartaStatusCount.Count == nil {
+			break
+		}
+
+		return e.complexity.DartaStatusCount.Count(childComplexity), true
+	case "DartaStatusCount.status":
+		if e.complexity.DartaStatusCount.Status == nil {
+			break
+		}
+
+		return e.complexity.DartaStatusCount.Status(childComplexity), true
 
 	case "HealthStatus.service":
 		if e.complexity.HealthStatus.Service == nil {
@@ -250,130 +414,164 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.HealthStatus.Timestamp(childComplexity), true
 
-	case "Mutation._empty":
-		if e.complexity.Mutation.Empty == nil {
+	case "Mutation.classifyDarta":
+		if e.complexity.Mutation.ClassifyDarta == nil {
 			break
 		}
 
-		return e.complexity.Mutation.Empty(childComplexity), true
-	case "Mutation.registerDarta":
-		if e.complexity.Mutation.RegisterDarta == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_registerDarta_args(ctx, rawArgs)
+		args, err := ec.field_Mutation_classifyDarta_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Mutation.RegisterDarta(childComplexity, args["input"].(model.RegisterDartaInput)), true
-	case "Mutation.updateDartaStatus":
-		if e.complexity.Mutation.UpdateDartaStatus == nil {
+		return e.complexity.Mutation.ClassifyDarta(childComplexity, args["dartaId"].(string), args["classificationCode"].(string)), true
+	case "Mutation.closeDarta":
+		if e.complexity.Mutation.CloseDarta == nil {
 			break
 		}
 
-		args, err := ec.field_Mutation_updateDartaStatus_args(ctx, rawArgs)
+		args, err := ec.field_Mutation_closeDarta_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdateDartaStatus(childComplexity, args["id"].(string), args["status"].(model.DartaStatus)), true
-
-	case "Query.checkAuthorization":
-		if e.complexity.Query.CheckAuthorization == nil {
+		return e.complexity.Mutation.CloseDarta(childComplexity, args["dartaId"].(string)), true
+	case "Mutation.createDarta":
+		if e.complexity.Mutation.CreateDarta == nil {
 			break
 		}
 
-		args, err := ec.field_Query_checkAuthorization_args(ctx, rawArgs)
+		args, err := ec.field_Mutation_createDarta_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Query.CheckAuthorization(childComplexity, args["input"].(model.AuthCheckInput)), true
-	case "Query.dartaChalaniHealth":
-		if e.complexity.Query.DartaChalaniHealth == nil {
+		return e.complexity.Mutation.CreateDarta(childComplexity, args["input"].(model.CreateDartaInput)), true
+	case "Mutation.finalizeDartaRegistration":
+		if e.complexity.Mutation.FinalizeDartaRegistration == nil {
 			break
 		}
 
-		return e.complexity.Query.DartaChalaniHealth(childComplexity), true
-	case "Query._empty":
-		if e.complexity.Query.Empty == nil {
-			break
-		}
-
-		return e.complexity.Query.Empty(childComplexity), true
-	case "Query.getDarta":
-		if e.complexity.Query.GetDarta == nil {
-			break
-		}
-
-		args, err := ec.field_Query_getDarta_args(ctx, rawArgs)
+		args, err := ec.field_Mutation_finalizeDartaRegistration_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Query.GetDarta(childComplexity, args["id"].(string)), true
-	case "Query.listDartas":
-		if e.complexity.Query.ListDartas == nil {
+		return e.complexity.Mutation.FinalizeDartaRegistration(childComplexity, args["dartaId"].(string)), true
+	case "Mutation.reserveDartaNumber":
+		if e.complexity.Mutation.ReserveDartaNumber == nil {
 			break
 		}
 
-		args, err := ec.field_Query_listDartas_args(ctx, rawArgs)
+		args, err := ec.field_Mutation_reserveDartaNumber_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Query.ListDartas(childComplexity, args["limit"].(*int), args["offset"].(*int)), true
-	case "Query.pdpHealth":
-		if e.complexity.Query.PdpHealth == nil {
+		return e.complexity.Mutation.ReserveDartaNumber(childComplexity, args["dartaId"].(string)), true
+	case "Mutation.routeDarta":
+		if e.complexity.Mutation.RouteDarta == nil {
 			break
 		}
 
-		return e.complexity.Query.PdpHealth(childComplexity), true
+		args, err := ec.field_Mutation_routeDarta_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
 
-	case "RegisterDartaResponse.darta":
-		if e.complexity.RegisterDartaResponse.Darta == nil {
+		return e.complexity.Mutation.RouteDarta(childComplexity, args["input"].(model.RouteDartaInput)), true
+	case "Mutation.submitDartaForReview":
+		if e.complexity.Mutation.SubmitDartaForReview == nil {
 			break
 		}
 
-		return e.complexity.RegisterDartaResponse.Darta(childComplexity), true
-	case "RegisterDartaResponse.dartaId":
-		if e.complexity.RegisterDartaResponse.DartaID == nil {
+		args, err := ec.field_Mutation_submitDartaForReview_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.SubmitDartaForReview(childComplexity, args["dartaId"].(string)), true
+	case "Mutation.voidDarta":
+		if e.complexity.Mutation.VoidDarta == nil {
 			break
 		}
 
-		return e.complexity.RegisterDartaResponse.DartaID(childComplexity), true
-	case "RegisterDartaResponse.message":
-		if e.complexity.RegisterDartaResponse.Message == nil {
+		args, err := ec.field_Mutation_voidDarta_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.VoidDarta(childComplexity, args["dartaId"].(string), args["reason"].(string)), true
+
+	case "PageInfo.hasNextPage":
+		if e.complexity.PageInfo.HasNextPage == nil {
 			break
 		}
 
-		return e.complexity.RegisterDartaResponse.Message(childComplexity), true
-	case "RegisterDartaResponse.success":
-		if e.complexity.RegisterDartaResponse.Success == nil {
+		return e.complexity.PageInfo.HasNextPage(childComplexity), true
+	case "PageInfo.hasPreviousPage":
+		if e.complexity.PageInfo.HasPreviousPage == nil {
 			break
 		}
 
-		return e.complexity.RegisterDartaResponse.Success(childComplexity), true
-
-	case "UpdateDartaResponse.darta":
-		if e.complexity.UpdateDartaResponse.Darta == nil {
+		return e.complexity.PageInfo.HasPreviousPage(childComplexity), true
+	case "PageInfo.totalCount":
+		if e.complexity.PageInfo.TotalCount == nil {
 			break
 		}
 
-		return e.complexity.UpdateDartaResponse.Darta(childComplexity), true
-	case "UpdateDartaResponse.message":
-		if e.complexity.UpdateDartaResponse.Message == nil {
+		return e.complexity.PageInfo.TotalCount(childComplexity), true
+
+	case "Query.darta":
+		if e.complexity.Query.Darta == nil {
 			break
 		}
 
-		return e.complexity.UpdateDartaResponse.Message(childComplexity), true
-	case "UpdateDartaResponse.success":
-		if e.complexity.UpdateDartaResponse.Success == nil {
+		args, err := ec.field_Query_darta_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Darta(childComplexity, args["id"].(string)), true
+	case "Query.dartaStats":
+		if e.complexity.Query.DartaStats == nil {
 			break
 		}
 
-		return e.complexity.UpdateDartaResponse.Success(childComplexity), true
+		args, err := ec.field_Query_dartaStats_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.DartaStats(childComplexity, args["scope"].(*model.Scope), args["fiscalYearId"].(*string), args["wardId"].(*string)), true
+	case "Query.dartas":
+		if e.complexity.Query.Dartas == nil {
+			break
+		}
+
+		args, err := ec.field_Query_dartas_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Dartas(childComplexity, args["filter"].(*model.DartaFilterInput), args["pagination"].(*model.PaginationInput)), true
+	case "Query.health":
+		if e.complexity.Query.Health == nil {
+			break
+		}
+
+		return e.complexity.Query.Health(childComplexity), true
+	case "Query.myDartas":
+		if e.complexity.Query.MyDartas == nil {
+			break
+		}
+
+		args, err := ec.field_Query_myDartas_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.MyDartas(childComplexity, args["status"].(*model.DartaStatus), args["pagination"].(*model.PaginationInput)), true
 
 	}
 	return 0, false
@@ -383,9 +581,11 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	opCtx := graphql.GetOperationContext(ctx)
 	ec := executionContext{opCtx, e, 0, 0, make(chan graphql.DeferredResult)}
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
-		ec.unmarshalInputAuthCheckInput,
-		ec.unmarshalInputRegisterDartaInput,
-		ec.unmarshalInputUpdateDartaStatusInput,
+		ec.unmarshalInputApplicantInput,
+		ec.unmarshalInputCreateDartaInput,
+		ec.unmarshalInputDartaFilterInput,
+		ec.unmarshalInputPaginationInput,
+		ec.unmarshalInputRouteDartaInput,
 	)
 	first := true
 
@@ -483,127 +683,208 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	{Name: "../schema/base/common.graphql", Input: `# Base schema with common types and root operations
+	{Name: "../schema/schema.graphql", Input: `# Import types from api-schema package
+# This will be the main schema file that combines everything
 
 type Query {
-  _empty: String
+  # Health check
+  health: HealthStatus!
+  
+  # Darta queries
+  darta(id: ID!): Darta
+  dartas(filter: DartaFilterInput, pagination: PaginationInput): DartaConnection!
+  myDartas(status: DartaStatus, pagination: PaginationInput): DartaConnection!
+  dartaStats(scope: Scope, fiscalYearId: String, wardId: String): DartaStats!
 }
 
 type Mutation {
-  _empty: String
+  # Darta mutations
+  createDarta(input: CreateDartaInput!): Darta!
+  submitDartaForReview(dartaId: ID!): Darta!
+  classifyDarta(dartaId: ID!, classificationCode: String!): Darta!
+  reserveDartaNumber(dartaId: ID!): Darta!
+  finalizeDartaRegistration(dartaId: ID!): Darta!
+  routeDarta(input: RouteDartaInput!): Darta!
+  closeDarta(dartaId: ID!): Darta!
+  voidDarta(dartaId: ID!, reason: String!): Darta!
 }
 
-# Common types used across services
+# Types
 type HealthStatus {
   status: String!
   service: String!
-  timestamp: String
+  timestamp: String!
 }
 
-# Common response interfaces
-interface Response {
-  success: Boolean!
-  message: String!
-}
-`, BuiltIn: false},
-	{Name: "../schema/darta-chalani/darta.graphql", Input: `# Darta Chalani Service Schema
-
-extend type Query {
-  # Get health status of darta-chalani service
-  dartaChalaniHealth: HealthStatus!
-
-  # Get darta by ID
-  getDarta(id: ID!): Darta
-
-  # List all dartas
-  listDartas(limit: Int, offset: Int): DartaList!
-}
-
-extend type Mutation {
-  # Register a new darta
-  registerDarta(input: RegisterDartaInput!): RegisterDartaResponse!
-
-  # Update darta status
-  updateDartaStatus(id: ID!, status: DartaStatus!): UpdateDartaResponse!
-}
-
-# Darta entity
 type Darta {
   id: ID!
-  title: String!
-  description: String!
-  submittedBy: String!
+  dartaNumber: Int
+  formattedDartaNumber: String
+  fiscalYearId: String!
+  scope: Scope!
+  wardId: String
+  subject: String!
+  applicant: Applicant!
+  intakeChannel: IntakeChannel!
+  receivedDate: String!
+  entryDate: String!
   status: DartaStatus!
+  priority: Priority!
+  createdBy: String!
   createdAt: String!
-  updatedAt: String
+  updatedAt: String!
+  tenantId: String!
 }
 
-# List response
-type DartaList {
-  items: [Darta!]!
+type Applicant {
+  id: ID!
+  type: ApplicantType!
+  fullName: String!
+  organization: String
+  email: String
+  phone: String
+  address: String
+}
+
+type DartaConnection {
+  edges: [DartaEdge!]!
+  pageInfo: PageInfo!
+}
+
+type DartaEdge {
+  cursor: String!
+  node: Darta!
+}
+
+type PageInfo {
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  totalCount: Int!
+}
+
+type DartaStats {
   total: Int!
-  limit: Int!
-  offset: Int!
+  byStatus: [DartaStatusCount!]!
+  byChannel: [ChannelCount!]!
+  overdueCount: Int!
 }
 
-# Input types
-input RegisterDartaInput {
-  title: String!
-  description: String!
-  submittedBy: String!
-}
-
-input UpdateDartaStatusInput {
+type DartaStatusCount {
   status: DartaStatus!
-  remarks: String
+  count: Int!
 }
 
-# Response types
-type RegisterDartaResponse implements Response {
-  success: Boolean!
-  message: String!
-  darta: Darta
-  dartaId: String
-}
-
-type UpdateDartaResponse implements Response {
-  success: Boolean!
-  message: String!
-  darta: Darta
+type ChannelCount {
+  channel: IntakeChannel!
+  count: Int!
 }
 
 # Enums
+enum Scope {
+  MUNICIPALITY
+  WARD
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum IntakeChannel {
+  COUNTER
+  POSTAL
+  EMAIL
+  EDARTA_PORTAL
+  COURIER
+}
+
 enum DartaStatus {
-  PENDING
-  IN_PROGRESS
-  APPROVED
-  REJECTED
-  COMPLETED
-}
-`, BuiltIn: false},
-	{Name: "../schema/pdp/authorization.graphql", Input: `# PDP (Policy Decision Point) Service Schema
-
-extend type Query {
-  # Get health status of PDP service
-  pdpHealth: HealthStatus!
-
-  # Check authorization
-  checkAuthorization(input: AuthCheckInput!): AuthCheckResponse!
-}
-
-# Input types
-input AuthCheckInput {
-  user: String!
-  relation: String!
-  object: String!
+  DRAFT
+  PENDING_REVIEW
+  CLASSIFICATION
+  NUMBER_RESERVED
+  REGISTERED
+  VOIDED
+  SCANNED
+  METADATA_ENRICHED
+  DIGITALLY_ARCHIVED
+  ASSIGNED
+  IN_REVIEW_BY_SECTION
+  NEEDS_CLARIFICATION
+  ACCEPTED
+  ACTION_TAKEN
+  RESPONSE_ISSUED
+  ACK_REQUESTED
+  ACK_RECEIVED
+  SUPERSEDED
+  CLOSED
 }
 
-# Response types
-type AuthCheckResponse implements Response {
-  success: Boolean!
-  message: String!
-  allowed: Boolean!
-  reason: String
+enum ApplicantType {
+  CITIZEN
+  ORGANIZATION
+  GOVERNMENT_OFFICE
+  OTHER
+}
+
+# Inputs
+input CreateDartaInput {
+  fiscalYearId: String!
+  scope: Scope!
+  wardId: String
+  subject: String!
+  applicant: ApplicantInput!
+  intakeChannel: IntakeChannel!
+  receivedDate: String!
+  primaryDocumentId: ID!
+  annexIds: [ID!]
+  priority: Priority!
+  idempotencyKey: String!
+}
+
+input ApplicantInput {
+  type: ApplicantType!
+  fullName: String!
+  organization: String
+  email: String
+  phone: String
+  address: String
+  identificationNumber: String
+}
+
+input RouteDartaInput {
+  dartaId: ID!
+  organizationalUnitId: String
+  assigneeId: String
+  priority: Priority
+  slaHours: Int
+  notes: String
+}
+
+input DartaFilterInput {
+  fiscalYearId: String
+  scope: Scope
+  wardId: String
+  status: DartaStatus
+  priority: Priority
+  organizationalUnitId: String
+  assigneeId: String
+  intakeChannel: IntakeChannel
+  fromDate: String
+  toDate: String
+  search: String
+  isOverdue: Boolean
+}
+
+input PaginationInput {
+  limit: Int
+  offset: Int
+  after: String
+  before: String
+  sortBy: String
+  sortDesc: Boolean
 }
 `, BuiltIn: false},
 }
@@ -613,10 +894,37 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
 // region    ***************************** args.gotpl *****************************
 
-func (ec *executionContext) field_Mutation_registerDarta_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+func (ec *executionContext) field_Mutation_classifyDarta_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNRegisterDartaInput2gitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐRegisterDartaInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "dartaId", ec.unmarshalNID2string)
+	if err != nil {
+		return nil, err
+	}
+	args["dartaId"] = arg0
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "classificationCode", ec.unmarshalNString2string)
+	if err != nil {
+		return nil, err
+	}
+	args["classificationCode"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_closeDarta_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "dartaId", ec.unmarshalNID2string)
+	if err != nil {
+		return nil, err
+	}
+	args["dartaId"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_createDarta_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNCreateDartaInput2gitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐCreateDartaInput)
 	if err != nil {
 		return nil, err
 	}
@@ -624,19 +932,63 @@ func (ec *executionContext) field_Mutation_registerDarta_args(ctx context.Contex
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_updateDartaStatus_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+func (ec *executionContext) field_Mutation_finalizeDartaRegistration_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "dartaId", ec.unmarshalNID2string)
 	if err != nil {
 		return nil, err
 	}
-	args["id"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "status", ec.unmarshalNDartaStatus2gitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐDartaStatus)
+	args["dartaId"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_reserveDartaNumber_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "dartaId", ec.unmarshalNID2string)
 	if err != nil {
 		return nil, err
 	}
-	args["status"] = arg1
+	args["dartaId"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_routeDarta_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNRouteDartaInput2gitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐRouteDartaInput)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_submitDartaForReview_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "dartaId", ec.unmarshalNID2string)
+	if err != nil {
+		return nil, err
+	}
+	args["dartaId"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_voidDarta_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "dartaId", ec.unmarshalNID2string)
+	if err != nil {
+		return nil, err
+	}
+	args["dartaId"] = arg0
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "reason", ec.unmarshalNString2string)
+	if err != nil {
+		return nil, err
+	}
+	args["reason"] = arg1
 	return args, nil
 }
 
@@ -651,18 +1003,28 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_checkAuthorization_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+func (ec *executionContext) field_Query_dartaStats_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNAuthCheckInput2gitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐAuthCheckInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "scope", ec.unmarshalOScope2ᚖgitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐScope)
 	if err != nil {
 		return nil, err
 	}
-	args["input"] = arg0
+	args["scope"] = arg0
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "fiscalYearId", ec.unmarshalOString2ᚖstring)
+	if err != nil {
+		return nil, err
+	}
+	args["fiscalYearId"] = arg1
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "wardId", ec.unmarshalOString2ᚖstring)
+	if err != nil {
+		return nil, err
+	}
+	args["wardId"] = arg2
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_getDarta_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+func (ec *executionContext) field_Query_darta_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2string)
@@ -673,19 +1035,35 @@ func (ec *executionContext) field_Query_getDarta_args(ctx context.Context, rawAr
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_listDartas_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+func (ec *executionContext) field_Query_dartas_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "limit", ec.unmarshalOInt2ᚖint)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "filter", ec.unmarshalODartaFilterInput2ᚖgitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐDartaFilterInput)
 	if err != nil {
 		return nil, err
 	}
-	args["limit"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "offset", ec.unmarshalOInt2ᚖint)
+	args["filter"] = arg0
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "pagination", ec.unmarshalOPaginationInput2ᚖgitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐPaginationInput)
 	if err != nil {
 		return nil, err
 	}
-	args["offset"] = arg1
+	args["pagination"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_myDartas_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "status", ec.unmarshalODartaStatus2ᚖgitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐDartaStatus)
+	if err != nil {
+		return nil, err
+	}
+	args["status"] = arg0
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "pagination", ec.unmarshalOPaginationInput2ᚖgitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐPaginationInput)
+	if err != nil {
+		return nil, err
+	}
+	args["pagination"] = arg1
 	return args, nil
 }
 
@@ -741,43 +1119,72 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 
 // region    **************************** field.gotpl *****************************
 
-func (ec *executionContext) _AuthCheckResponse_success(ctx context.Context, field graphql.CollectedField, obj *model.AuthCheckResponse) (ret graphql.Marshaler) {
+func (ec *executionContext) _Applicant_id(ctx context.Context, field graphql.CollectedField, obj *model.Applicant) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_AuthCheckResponse_success,
+		ec.fieldContext_Applicant_id,
 		func(ctx context.Context) (any, error) {
-			return obj.Success, nil
+			return obj.ID, nil
 		},
 		nil,
-		ec.marshalNBoolean2bool,
+		ec.marshalNID2string,
 		true,
 		true,
 	)
 }
 
-func (ec *executionContext) fieldContext_AuthCheckResponse_success(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Applicant_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "AuthCheckResponse",
+		Object:     "Applicant",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Boolean does not have child fields")
+			return nil, errors.New("field of type ID does not have child fields")
 		},
 	}
 	return fc, nil
 }
 
-func (ec *executionContext) _AuthCheckResponse_message(ctx context.Context, field graphql.CollectedField, obj *model.AuthCheckResponse) (ret graphql.Marshaler) {
+func (ec *executionContext) _Applicant_type(ctx context.Context, field graphql.CollectedField, obj *model.Applicant) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_AuthCheckResponse_message,
+		ec.fieldContext_Applicant_type,
 		func(ctx context.Context) (any, error) {
-			return obj.Message, nil
+			return obj.Type, nil
+		},
+		nil,
+		ec.marshalNApplicantType2gitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐApplicantType,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Applicant_type(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Applicant",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ApplicantType does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Applicant_fullName(ctx context.Context, field graphql.CollectedField, obj *model.Applicant) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Applicant_fullName,
+		func(ctx context.Context) (any, error) {
+			return obj.FullName, nil
 		},
 		nil,
 		ec.marshalNString2string,
@@ -786,9 +1193,9 @@ func (ec *executionContext) _AuthCheckResponse_message(ctx context.Context, fiel
 	)
 }
 
-func (ec *executionContext) fieldContext_AuthCheckResponse_message(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Applicant_fullName(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "AuthCheckResponse",
+		Object:     "Applicant",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -799,43 +1206,14 @@ func (ec *executionContext) fieldContext_AuthCheckResponse_message(_ context.Con
 	return fc, nil
 }
 
-func (ec *executionContext) _AuthCheckResponse_allowed(ctx context.Context, field graphql.CollectedField, obj *model.AuthCheckResponse) (ret graphql.Marshaler) {
+func (ec *executionContext) _Applicant_organization(ctx context.Context, field graphql.CollectedField, obj *model.Applicant) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_AuthCheckResponse_allowed,
+		ec.fieldContext_Applicant_organization,
 		func(ctx context.Context) (any, error) {
-			return obj.Allowed, nil
-		},
-		nil,
-		ec.marshalNBoolean2bool,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_AuthCheckResponse_allowed(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "AuthCheckResponse",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Boolean does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _AuthCheckResponse_reason(ctx context.Context, field graphql.CollectedField, obj *model.AuthCheckResponse) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_AuthCheckResponse_reason,
-		func(ctx context.Context) (any, error) {
-			return obj.Reason, nil
+			return obj.Organization, nil
 		},
 		nil,
 		ec.marshalOString2ᚖstring,
@@ -844,14 +1222,159 @@ func (ec *executionContext) _AuthCheckResponse_reason(ctx context.Context, field
 	)
 }
 
-func (ec *executionContext) fieldContext_AuthCheckResponse_reason(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Applicant_organization(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "AuthCheckResponse",
+		Object:     "Applicant",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Applicant_email(ctx context.Context, field graphql.CollectedField, obj *model.Applicant) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Applicant_email,
+		func(ctx context.Context) (any, error) {
+			return obj.Email, nil
+		},
+		nil,
+		ec.marshalOString2ᚖstring,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Applicant_email(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Applicant",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Applicant_phone(ctx context.Context, field graphql.CollectedField, obj *model.Applicant) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Applicant_phone,
+		func(ctx context.Context) (any, error) {
+			return obj.Phone, nil
+		},
+		nil,
+		ec.marshalOString2ᚖstring,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Applicant_phone(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Applicant",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Applicant_address(ctx context.Context, field graphql.CollectedField, obj *model.Applicant) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Applicant_address,
+		func(ctx context.Context) (any, error) {
+			return obj.Address, nil
+		},
+		nil,
+		ec.marshalOString2ᚖstring,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Applicant_address(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Applicant",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ChannelCount_channel(ctx context.Context, field graphql.CollectedField, obj *model.ChannelCount) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ChannelCount_channel,
+		func(ctx context.Context) (any, error) {
+			return obj.Channel, nil
+		},
+		nil,
+		ec.marshalNIntakeChannel2gitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐIntakeChannel,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_ChannelCount_channel(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ChannelCount",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type IntakeChannel does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ChannelCount_count(ctx context.Context, field graphql.CollectedField, obj *model.ChannelCount) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ChannelCount_count,
+		func(ctx context.Context) (any, error) {
+			return obj.Count, nil
+		},
+		nil,
+		ec.marshalNInt2int,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_ChannelCount_count(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ChannelCount",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
 		},
 	}
 	return fc, nil
@@ -886,23 +1409,52 @@ func (ec *executionContext) fieldContext_Darta_id(_ context.Context, field graph
 	return fc, nil
 }
 
-func (ec *executionContext) _Darta_title(ctx context.Context, field graphql.CollectedField, obj *model.Darta) (ret graphql.Marshaler) {
+func (ec *executionContext) _Darta_dartaNumber(ctx context.Context, field graphql.CollectedField, obj *model.Darta) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Darta_title,
+		ec.fieldContext_Darta_dartaNumber,
 		func(ctx context.Context) (any, error) {
-			return obj.Title, nil
+			return obj.DartaNumber, nil
 		},
 		nil,
-		ec.marshalNString2string,
+		ec.marshalOInt2ᚖint,
 		true,
-		true,
+		false,
 	)
 }
 
-func (ec *executionContext) fieldContext_Darta_title(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Darta_dartaNumber(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Darta",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Darta_formattedDartaNumber(ctx context.Context, field graphql.CollectedField, obj *model.Darta) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Darta_formattedDartaNumber,
+		func(ctx context.Context) (any, error) {
+			return obj.FormattedDartaNumber, nil
+		},
+		nil,
+		ec.marshalOString2ᚖstring,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Darta_formattedDartaNumber(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Darta",
 		Field:      field,
@@ -915,14 +1467,14 @@ func (ec *executionContext) fieldContext_Darta_title(_ context.Context, field gr
 	return fc, nil
 }
 
-func (ec *executionContext) _Darta_description(ctx context.Context, field graphql.CollectedField, obj *model.Darta) (ret graphql.Marshaler) {
+func (ec *executionContext) _Darta_fiscalYearId(ctx context.Context, field graphql.CollectedField, obj *model.Darta) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Darta_description,
+		ec.fieldContext_Darta_fiscalYearId,
 		func(ctx context.Context) (any, error) {
-			return obj.Description, nil
+			return obj.FiscalYearID, nil
 		},
 		nil,
 		ec.marshalNString2string,
@@ -931,7 +1483,7 @@ func (ec *executionContext) _Darta_description(ctx context.Context, field graphq
 	)
 }
 
-func (ec *executionContext) fieldContext_Darta_description(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Darta_fiscalYearId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Darta",
 		Field:      field,
@@ -944,14 +1496,72 @@ func (ec *executionContext) fieldContext_Darta_description(_ context.Context, fi
 	return fc, nil
 }
 
-func (ec *executionContext) _Darta_submittedBy(ctx context.Context, field graphql.CollectedField, obj *model.Darta) (ret graphql.Marshaler) {
+func (ec *executionContext) _Darta_scope(ctx context.Context, field graphql.CollectedField, obj *model.Darta) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Darta_submittedBy,
+		ec.fieldContext_Darta_scope,
 		func(ctx context.Context) (any, error) {
-			return obj.SubmittedBy, nil
+			return obj.Scope, nil
+		},
+		nil,
+		ec.marshalNScope2gitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐScope,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Darta_scope(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Darta",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Scope does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Darta_wardId(ctx context.Context, field graphql.CollectedField, obj *model.Darta) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Darta_wardId,
+		func(ctx context.Context) (any, error) {
+			return obj.WardID, nil
+		},
+		nil,
+		ec.marshalOString2ᚖstring,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Darta_wardId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Darta",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Darta_subject(ctx context.Context, field graphql.CollectedField, obj *model.Darta) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Darta_subject,
+		func(ctx context.Context) (any, error) {
+			return obj.Subject, nil
 		},
 		nil,
 		ec.marshalNString2string,
@@ -960,7 +1570,139 @@ func (ec *executionContext) _Darta_submittedBy(ctx context.Context, field graphq
 	)
 }
 
-func (ec *executionContext) fieldContext_Darta_submittedBy(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Darta_subject(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Darta",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Darta_applicant(ctx context.Context, field graphql.CollectedField, obj *model.Darta) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Darta_applicant,
+		func(ctx context.Context) (any, error) {
+			return obj.Applicant, nil
+		},
+		nil,
+		ec.marshalNApplicant2ᚖgitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐApplicant,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Darta_applicant(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Darta",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Applicant_id(ctx, field)
+			case "type":
+				return ec.fieldContext_Applicant_type(ctx, field)
+			case "fullName":
+				return ec.fieldContext_Applicant_fullName(ctx, field)
+			case "organization":
+				return ec.fieldContext_Applicant_organization(ctx, field)
+			case "email":
+				return ec.fieldContext_Applicant_email(ctx, field)
+			case "phone":
+				return ec.fieldContext_Applicant_phone(ctx, field)
+			case "address":
+				return ec.fieldContext_Applicant_address(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Applicant", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Darta_intakeChannel(ctx context.Context, field graphql.CollectedField, obj *model.Darta) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Darta_intakeChannel,
+		func(ctx context.Context) (any, error) {
+			return obj.IntakeChannel, nil
+		},
+		nil,
+		ec.marshalNIntakeChannel2gitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐIntakeChannel,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Darta_intakeChannel(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Darta",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type IntakeChannel does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Darta_receivedDate(ctx context.Context, field graphql.CollectedField, obj *model.Darta) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Darta_receivedDate,
+		func(ctx context.Context) (any, error) {
+			return obj.ReceivedDate, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Darta_receivedDate(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Darta",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Darta_entryDate(ctx context.Context, field graphql.CollectedField, obj *model.Darta) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Darta_entryDate,
+		func(ctx context.Context) (any, error) {
+			return obj.EntryDate, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Darta_entryDate(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Darta",
 		Field:      field,
@@ -997,6 +1739,64 @@ func (ec *executionContext) fieldContext_Darta_status(_ context.Context, field g
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type DartaStatus does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Darta_priority(ctx context.Context, field graphql.CollectedField, obj *model.Darta) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Darta_priority,
+		func(ctx context.Context) (any, error) {
+			return obj.Priority, nil
+		},
+		nil,
+		ec.marshalNPriority2gitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐPriority,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Darta_priority(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Darta",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Priority does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Darta_createdBy(ctx context.Context, field graphql.CollectedField, obj *model.Darta) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Darta_createdBy,
+		func(ctx context.Context) (any, error) {
+			return obj.CreatedBy, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Darta_createdBy(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Darta",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -1041,9 +1841,9 @@ func (ec *executionContext) _Darta_updatedAt(ctx context.Context, field graphql.
 			return obj.UpdatedAt, nil
 		},
 		nil,
-		ec.marshalOString2ᚖstring,
+		ec.marshalNString2string,
 		true,
-		false,
+		true,
 	)
 }
 
@@ -1060,25 +1860,155 @@ func (ec *executionContext) fieldContext_Darta_updatedAt(_ context.Context, fiel
 	return fc, nil
 }
 
-func (ec *executionContext) _DartaList_items(ctx context.Context, field graphql.CollectedField, obj *model.DartaList) (ret graphql.Marshaler) {
+func (ec *executionContext) _Darta_tenantId(ctx context.Context, field graphql.CollectedField, obj *model.Darta) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_DartaList_items,
+		ec.fieldContext_Darta_tenantId,
 		func(ctx context.Context) (any, error) {
-			return obj.Items, nil
+			return obj.TenantID, nil
 		},
 		nil,
-		ec.marshalNDarta2ᚕᚖgitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐDartaᚄ,
+		ec.marshalNString2string,
 		true,
 		true,
 	)
 }
 
-func (ec *executionContext) fieldContext_DartaList_items(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Darta_tenantId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "DartaList",
+		Object:     "Darta",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DartaConnection_edges(ctx context.Context, field graphql.CollectedField, obj *model.DartaConnection) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_DartaConnection_edges,
+		func(ctx context.Context) (any, error) {
+			return obj.Edges, nil
+		},
+		nil,
+		ec.marshalNDartaEdge2ᚕᚖgitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐDartaEdgeᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_DartaConnection_edges(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DartaConnection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "cursor":
+				return ec.fieldContext_DartaEdge_cursor(ctx, field)
+			case "node":
+				return ec.fieldContext_DartaEdge_node(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type DartaEdge", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DartaConnection_pageInfo(ctx context.Context, field graphql.CollectedField, obj *model.DartaConnection) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_DartaConnection_pageInfo,
+		func(ctx context.Context) (any, error) {
+			return obj.PageInfo, nil
+		},
+		nil,
+		ec.marshalNPageInfo2ᚖgitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐPageInfo,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_DartaConnection_pageInfo(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DartaConnection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "hasNextPage":
+				return ec.fieldContext_PageInfo_hasNextPage(ctx, field)
+			case "hasPreviousPage":
+				return ec.fieldContext_PageInfo_hasPreviousPage(ctx, field)
+			case "totalCount":
+				return ec.fieldContext_PageInfo_totalCount(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type PageInfo", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DartaEdge_cursor(ctx context.Context, field graphql.CollectedField, obj *model.DartaEdge) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_DartaEdge_cursor,
+		func(ctx context.Context) (any, error) {
+			return obj.Cursor, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_DartaEdge_cursor(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DartaEdge",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DartaEdge_node(ctx context.Context, field graphql.CollectedField, obj *model.DartaEdge) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_DartaEdge_node,
+		func(ctx context.Context) (any, error) {
+			return obj.Node, nil
+		},
+		nil,
+		ec.marshalNDarta2ᚖgitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐDarta,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_DartaEdge_node(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DartaEdge",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -1086,18 +2016,38 @@ func (ec *executionContext) fieldContext_DartaList_items(_ context.Context, fiel
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_Darta_id(ctx, field)
-			case "title":
-				return ec.fieldContext_Darta_title(ctx, field)
-			case "description":
-				return ec.fieldContext_Darta_description(ctx, field)
-			case "submittedBy":
-				return ec.fieldContext_Darta_submittedBy(ctx, field)
+			case "dartaNumber":
+				return ec.fieldContext_Darta_dartaNumber(ctx, field)
+			case "formattedDartaNumber":
+				return ec.fieldContext_Darta_formattedDartaNumber(ctx, field)
+			case "fiscalYearId":
+				return ec.fieldContext_Darta_fiscalYearId(ctx, field)
+			case "scope":
+				return ec.fieldContext_Darta_scope(ctx, field)
+			case "wardId":
+				return ec.fieldContext_Darta_wardId(ctx, field)
+			case "subject":
+				return ec.fieldContext_Darta_subject(ctx, field)
+			case "applicant":
+				return ec.fieldContext_Darta_applicant(ctx, field)
+			case "intakeChannel":
+				return ec.fieldContext_Darta_intakeChannel(ctx, field)
+			case "receivedDate":
+				return ec.fieldContext_Darta_receivedDate(ctx, field)
+			case "entryDate":
+				return ec.fieldContext_Darta_entryDate(ctx, field)
 			case "status":
 				return ec.fieldContext_Darta_status(ctx, field)
+			case "priority":
+				return ec.fieldContext_Darta_priority(ctx, field)
+			case "createdBy":
+				return ec.fieldContext_Darta_createdBy(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Darta_createdAt(ctx, field)
 			case "updatedAt":
 				return ec.fieldContext_Darta_updatedAt(ctx, field)
+			case "tenantId":
+				return ec.fieldContext_Darta_tenantId(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Darta", field.Name)
 		},
@@ -1105,12 +2055,12 @@ func (ec *executionContext) fieldContext_DartaList_items(_ context.Context, fiel
 	return fc, nil
 }
 
-func (ec *executionContext) _DartaList_total(ctx context.Context, field graphql.CollectedField, obj *model.DartaList) (ret graphql.Marshaler) {
+func (ec *executionContext) _DartaStats_total(ctx context.Context, field graphql.CollectedField, obj *model.DartaStats) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_DartaList_total,
+		ec.fieldContext_DartaStats_total,
 		func(ctx context.Context) (any, error) {
 			return obj.Total, nil
 		},
@@ -1121,9 +2071,9 @@ func (ec *executionContext) _DartaList_total(ctx context.Context, field graphql.
 	)
 }
 
-func (ec *executionContext) fieldContext_DartaList_total(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_DartaStats_total(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "DartaList",
+		Object:     "DartaStats",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -1134,14 +2084,84 @@ func (ec *executionContext) fieldContext_DartaList_total(_ context.Context, fiel
 	return fc, nil
 }
 
-func (ec *executionContext) _DartaList_limit(ctx context.Context, field graphql.CollectedField, obj *model.DartaList) (ret graphql.Marshaler) {
+func (ec *executionContext) _DartaStats_byStatus(ctx context.Context, field graphql.CollectedField, obj *model.DartaStats) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_DartaList_limit,
+		ec.fieldContext_DartaStats_byStatus,
 		func(ctx context.Context) (any, error) {
-			return obj.Limit, nil
+			return obj.ByStatus, nil
+		},
+		nil,
+		ec.marshalNDartaStatusCount2ᚕᚖgitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐDartaStatusCountᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_DartaStats_byStatus(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DartaStats",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "status":
+				return ec.fieldContext_DartaStatusCount_status(ctx, field)
+			case "count":
+				return ec.fieldContext_DartaStatusCount_count(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type DartaStatusCount", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DartaStats_byChannel(ctx context.Context, field graphql.CollectedField, obj *model.DartaStats) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_DartaStats_byChannel,
+		func(ctx context.Context) (any, error) {
+			return obj.ByChannel, nil
+		},
+		nil,
+		ec.marshalNChannelCount2ᚕᚖgitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐChannelCountᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_DartaStats_byChannel(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DartaStats",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "channel":
+				return ec.fieldContext_ChannelCount_channel(ctx, field)
+			case "count":
+				return ec.fieldContext_ChannelCount_count(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ChannelCount", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DartaStats_overdueCount(ctx context.Context, field graphql.CollectedField, obj *model.DartaStats) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_DartaStats_overdueCount,
+		func(ctx context.Context) (any, error) {
+			return obj.OverdueCount, nil
 		},
 		nil,
 		ec.marshalNInt2int,
@@ -1150,9 +2170,9 @@ func (ec *executionContext) _DartaList_limit(ctx context.Context, field graphql.
 	)
 }
 
-func (ec *executionContext) fieldContext_DartaList_limit(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_DartaStats_overdueCount(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "DartaList",
+		Object:     "DartaStats",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -1163,14 +2183,43 @@ func (ec *executionContext) fieldContext_DartaList_limit(_ context.Context, fiel
 	return fc, nil
 }
 
-func (ec *executionContext) _DartaList_offset(ctx context.Context, field graphql.CollectedField, obj *model.DartaList) (ret graphql.Marshaler) {
+func (ec *executionContext) _DartaStatusCount_status(ctx context.Context, field graphql.CollectedField, obj *model.DartaStatusCount) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_DartaList_offset,
+		ec.fieldContext_DartaStatusCount_status,
 		func(ctx context.Context) (any, error) {
-			return obj.Offset, nil
+			return obj.Status, nil
+		},
+		nil,
+		ec.marshalNDartaStatus2gitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐDartaStatus,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_DartaStatusCount_status(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DartaStatusCount",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type DartaStatus does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DartaStatusCount_count(ctx context.Context, field graphql.CollectedField, obj *model.DartaStatusCount) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_DartaStatusCount_count,
+		func(ctx context.Context) (any, error) {
+			return obj.Count, nil
 		},
 		nil,
 		ec.marshalNInt2int,
@@ -1179,9 +2228,9 @@ func (ec *executionContext) _DartaList_offset(ctx context.Context, field graphql
 	)
 }
 
-func (ec *executionContext) fieldContext_DartaList_offset(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_DartaStatusCount_count(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "DartaList",
+		Object:     "DartaStatusCount",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -1260,9 +2309,9 @@ func (ec *executionContext) _HealthStatus_timestamp(ctx context.Context, field g
 			return obj.Timestamp, nil
 		},
 		nil,
-		ec.marshalOString2ᚖstring,
+		ec.marshalNString2string,
 		true,
-		false,
+		true,
 	)
 }
 
@@ -1279,221 +2328,26 @@ func (ec *executionContext) fieldContext_HealthStatus_timestamp(_ context.Contex
 	return fc, nil
 }
 
-func (ec *executionContext) _Mutation__empty(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Mutation_createDarta(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Mutation__empty,
-		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Mutation().Empty(ctx)
-		},
-		nil,
-		ec.marshalOString2ᚖstring,
-		true,
-		false,
-	)
-}
-
-func (ec *executionContext) fieldContext_Mutation__empty(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_registerDarta(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Mutation_registerDarta,
+		ec.fieldContext_Mutation_createDarta,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().RegisterDarta(ctx, fc.Args["input"].(model.RegisterDartaInput))
+			return ec.resolvers.Mutation().CreateDarta(ctx, fc.Args["input"].(model.CreateDartaInput))
 		},
 		nil,
-		ec.marshalNRegisterDartaResponse2ᚖgitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐRegisterDartaResponse,
+		ec.marshalNDarta2ᚖgitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐDarta,
 		true,
 		true,
 	)
 }
 
-func (ec *executionContext) fieldContext_Mutation_registerDarta(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Mutation_createDarta(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "success":
-				return ec.fieldContext_RegisterDartaResponse_success(ctx, field)
-			case "message":
-				return ec.fieldContext_RegisterDartaResponse_message(ctx, field)
-			case "darta":
-				return ec.fieldContext_RegisterDartaResponse_darta(ctx, field)
-			case "dartaId":
-				return ec.fieldContext_RegisterDartaResponse_dartaId(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type RegisterDartaResponse", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_registerDarta_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_updateDartaStatus(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Mutation_updateDartaStatus,
-		func(ctx context.Context) (any, error) {
-			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().UpdateDartaStatus(ctx, fc.Args["id"].(string), fc.Args["status"].(model.DartaStatus))
-		},
-		nil,
-		ec.marshalNUpdateDartaResponse2ᚖgitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐUpdateDartaResponse,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_Mutation_updateDartaStatus(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "success":
-				return ec.fieldContext_UpdateDartaResponse_success(ctx, field)
-			case "message":
-				return ec.fieldContext_UpdateDartaResponse_message(ctx, field)
-			case "darta":
-				return ec.fieldContext_UpdateDartaResponse_darta(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type UpdateDartaResponse", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_updateDartaStatus_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Query__empty(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Query__empty,
-		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().Empty(ctx)
-		},
-		nil,
-		ec.marshalOString2ᚖstring,
-		true,
-		false,
-	)
-}
-
-func (ec *executionContext) fieldContext_Query__empty(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Query_dartaChalaniHealth(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Query_dartaChalaniHealth,
-		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().DartaChalaniHealth(ctx)
-		},
-		nil,
-		ec.marshalNHealthStatus2ᚖgitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐHealthStatus,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_Query_dartaChalaniHealth(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "status":
-				return ec.fieldContext_HealthStatus_status(ctx, field)
-			case "service":
-				return ec.fieldContext_HealthStatus_service(ctx, field)
-			case "timestamp":
-				return ec.fieldContext_HealthStatus_timestamp(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type HealthStatus", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Query_getDarta(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Query_getDarta,
-		func(ctx context.Context) (any, error) {
-			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().GetDarta(ctx, fc.Args["id"].(string))
-		},
-		nil,
-		ec.marshalODarta2ᚖgitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐDarta,
-		true,
-		false,
-	)
-}
-
-func (ec *executionContext) fieldContext_Query_getDarta(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
 		Field:      field,
 		IsMethod:   true,
 		IsResolver: true,
@@ -1501,18 +2355,38 @@ func (ec *executionContext) fieldContext_Query_getDarta(ctx context.Context, fie
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_Darta_id(ctx, field)
-			case "title":
-				return ec.fieldContext_Darta_title(ctx, field)
-			case "description":
-				return ec.fieldContext_Darta_description(ctx, field)
-			case "submittedBy":
-				return ec.fieldContext_Darta_submittedBy(ctx, field)
+			case "dartaNumber":
+				return ec.fieldContext_Darta_dartaNumber(ctx, field)
+			case "formattedDartaNumber":
+				return ec.fieldContext_Darta_formattedDartaNumber(ctx, field)
+			case "fiscalYearId":
+				return ec.fieldContext_Darta_fiscalYearId(ctx, field)
+			case "scope":
+				return ec.fieldContext_Darta_scope(ctx, field)
+			case "wardId":
+				return ec.fieldContext_Darta_wardId(ctx, field)
+			case "subject":
+				return ec.fieldContext_Darta_subject(ctx, field)
+			case "applicant":
+				return ec.fieldContext_Darta_applicant(ctx, field)
+			case "intakeChannel":
+				return ec.fieldContext_Darta_intakeChannel(ctx, field)
+			case "receivedDate":
+				return ec.fieldContext_Darta_receivedDate(ctx, field)
+			case "entryDate":
+				return ec.fieldContext_Darta_entryDate(ctx, field)
 			case "status":
 				return ec.fieldContext_Darta_status(ctx, field)
+			case "priority":
+				return ec.fieldContext_Darta_priority(ctx, field)
+			case "createdBy":
+				return ec.fieldContext_Darta_createdBy(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Darta_createdAt(ctx, field)
 			case "updatedAt":
 				return ec.fieldContext_Darta_updatedAt(ctx, field)
+			case "tenantId":
+				return ec.fieldContext_Darta_tenantId(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Darta", field.Name)
 		},
@@ -1524,48 +2398,74 @@ func (ec *executionContext) fieldContext_Query_getDarta(ctx context.Context, fie
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_getDarta_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Mutation_createDarta_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
 	return fc, nil
 }
 
-func (ec *executionContext) _Query_listDartas(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Mutation_submitDartaForReview(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_listDartas,
+		ec.fieldContext_Mutation_submitDartaForReview,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().ListDartas(ctx, fc.Args["limit"].(*int), fc.Args["offset"].(*int))
+			return ec.resolvers.Mutation().SubmitDartaForReview(ctx, fc.Args["dartaId"].(string))
 		},
 		nil,
-		ec.marshalNDartaList2ᚖgitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐDartaList,
+		ec.marshalNDarta2ᚖgitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐDarta,
 		true,
 		true,
 	)
 }
 
-func (ec *executionContext) fieldContext_Query_listDartas(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Mutation_submitDartaForReview(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "Query",
+		Object:     "Mutation",
 		Field:      field,
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "items":
-				return ec.fieldContext_DartaList_items(ctx, field)
-			case "total":
-				return ec.fieldContext_DartaList_total(ctx, field)
-			case "limit":
-				return ec.fieldContext_DartaList_limit(ctx, field)
-			case "offset":
-				return ec.fieldContext_DartaList_offset(ctx, field)
+			case "id":
+				return ec.fieldContext_Darta_id(ctx, field)
+			case "dartaNumber":
+				return ec.fieldContext_Darta_dartaNumber(ctx, field)
+			case "formattedDartaNumber":
+				return ec.fieldContext_Darta_formattedDartaNumber(ctx, field)
+			case "fiscalYearId":
+				return ec.fieldContext_Darta_fiscalYearId(ctx, field)
+			case "scope":
+				return ec.fieldContext_Darta_scope(ctx, field)
+			case "wardId":
+				return ec.fieldContext_Darta_wardId(ctx, field)
+			case "subject":
+				return ec.fieldContext_Darta_subject(ctx, field)
+			case "applicant":
+				return ec.fieldContext_Darta_applicant(ctx, field)
+			case "intakeChannel":
+				return ec.fieldContext_Darta_intakeChannel(ctx, field)
+			case "receivedDate":
+				return ec.fieldContext_Darta_receivedDate(ctx, field)
+			case "entryDate":
+				return ec.fieldContext_Darta_entryDate(ctx, field)
+			case "status":
+				return ec.fieldContext_Darta_status(ctx, field)
+			case "priority":
+				return ec.fieldContext_Darta_priority(ctx, field)
+			case "createdBy":
+				return ec.fieldContext_Darta_createdBy(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Darta_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Darta_updatedAt(ctx, field)
+			case "tenantId":
+				return ec.fieldContext_Darta_tenantId(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type DartaList", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type Darta", field.Name)
 		},
 	}
 	defer func() {
@@ -1575,21 +2475,570 @@ func (ec *executionContext) fieldContext_Query_listDartas(ctx context.Context, f
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_listDartas_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Mutation_submitDartaForReview_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
 	return fc, nil
 }
 
-func (ec *executionContext) _Query_pdpHealth(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Mutation_classifyDarta(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_pdpHealth,
+		ec.fieldContext_Mutation_classifyDarta,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().PdpHealth(ctx)
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Mutation().ClassifyDarta(ctx, fc.Args["dartaId"].(string), fc.Args["classificationCode"].(string))
+		},
+		nil,
+		ec.marshalNDarta2ᚖgitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐDarta,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_classifyDarta(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Darta_id(ctx, field)
+			case "dartaNumber":
+				return ec.fieldContext_Darta_dartaNumber(ctx, field)
+			case "formattedDartaNumber":
+				return ec.fieldContext_Darta_formattedDartaNumber(ctx, field)
+			case "fiscalYearId":
+				return ec.fieldContext_Darta_fiscalYearId(ctx, field)
+			case "scope":
+				return ec.fieldContext_Darta_scope(ctx, field)
+			case "wardId":
+				return ec.fieldContext_Darta_wardId(ctx, field)
+			case "subject":
+				return ec.fieldContext_Darta_subject(ctx, field)
+			case "applicant":
+				return ec.fieldContext_Darta_applicant(ctx, field)
+			case "intakeChannel":
+				return ec.fieldContext_Darta_intakeChannel(ctx, field)
+			case "receivedDate":
+				return ec.fieldContext_Darta_receivedDate(ctx, field)
+			case "entryDate":
+				return ec.fieldContext_Darta_entryDate(ctx, field)
+			case "status":
+				return ec.fieldContext_Darta_status(ctx, field)
+			case "priority":
+				return ec.fieldContext_Darta_priority(ctx, field)
+			case "createdBy":
+				return ec.fieldContext_Darta_createdBy(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Darta_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Darta_updatedAt(ctx, field)
+			case "tenantId":
+				return ec.fieldContext_Darta_tenantId(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Darta", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_classifyDarta_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_reserveDartaNumber(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_reserveDartaNumber,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Mutation().ReserveDartaNumber(ctx, fc.Args["dartaId"].(string))
+		},
+		nil,
+		ec.marshalNDarta2ᚖgitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐDarta,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_reserveDartaNumber(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Darta_id(ctx, field)
+			case "dartaNumber":
+				return ec.fieldContext_Darta_dartaNumber(ctx, field)
+			case "formattedDartaNumber":
+				return ec.fieldContext_Darta_formattedDartaNumber(ctx, field)
+			case "fiscalYearId":
+				return ec.fieldContext_Darta_fiscalYearId(ctx, field)
+			case "scope":
+				return ec.fieldContext_Darta_scope(ctx, field)
+			case "wardId":
+				return ec.fieldContext_Darta_wardId(ctx, field)
+			case "subject":
+				return ec.fieldContext_Darta_subject(ctx, field)
+			case "applicant":
+				return ec.fieldContext_Darta_applicant(ctx, field)
+			case "intakeChannel":
+				return ec.fieldContext_Darta_intakeChannel(ctx, field)
+			case "receivedDate":
+				return ec.fieldContext_Darta_receivedDate(ctx, field)
+			case "entryDate":
+				return ec.fieldContext_Darta_entryDate(ctx, field)
+			case "status":
+				return ec.fieldContext_Darta_status(ctx, field)
+			case "priority":
+				return ec.fieldContext_Darta_priority(ctx, field)
+			case "createdBy":
+				return ec.fieldContext_Darta_createdBy(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Darta_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Darta_updatedAt(ctx, field)
+			case "tenantId":
+				return ec.fieldContext_Darta_tenantId(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Darta", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_reserveDartaNumber_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_finalizeDartaRegistration(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_finalizeDartaRegistration,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Mutation().FinalizeDartaRegistration(ctx, fc.Args["dartaId"].(string))
+		},
+		nil,
+		ec.marshalNDarta2ᚖgitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐDarta,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_finalizeDartaRegistration(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Darta_id(ctx, field)
+			case "dartaNumber":
+				return ec.fieldContext_Darta_dartaNumber(ctx, field)
+			case "formattedDartaNumber":
+				return ec.fieldContext_Darta_formattedDartaNumber(ctx, field)
+			case "fiscalYearId":
+				return ec.fieldContext_Darta_fiscalYearId(ctx, field)
+			case "scope":
+				return ec.fieldContext_Darta_scope(ctx, field)
+			case "wardId":
+				return ec.fieldContext_Darta_wardId(ctx, field)
+			case "subject":
+				return ec.fieldContext_Darta_subject(ctx, field)
+			case "applicant":
+				return ec.fieldContext_Darta_applicant(ctx, field)
+			case "intakeChannel":
+				return ec.fieldContext_Darta_intakeChannel(ctx, field)
+			case "receivedDate":
+				return ec.fieldContext_Darta_receivedDate(ctx, field)
+			case "entryDate":
+				return ec.fieldContext_Darta_entryDate(ctx, field)
+			case "status":
+				return ec.fieldContext_Darta_status(ctx, field)
+			case "priority":
+				return ec.fieldContext_Darta_priority(ctx, field)
+			case "createdBy":
+				return ec.fieldContext_Darta_createdBy(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Darta_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Darta_updatedAt(ctx, field)
+			case "tenantId":
+				return ec.fieldContext_Darta_tenantId(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Darta", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_finalizeDartaRegistration_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_routeDarta(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_routeDarta,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Mutation().RouteDarta(ctx, fc.Args["input"].(model.RouteDartaInput))
+		},
+		nil,
+		ec.marshalNDarta2ᚖgitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐDarta,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_routeDarta(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Darta_id(ctx, field)
+			case "dartaNumber":
+				return ec.fieldContext_Darta_dartaNumber(ctx, field)
+			case "formattedDartaNumber":
+				return ec.fieldContext_Darta_formattedDartaNumber(ctx, field)
+			case "fiscalYearId":
+				return ec.fieldContext_Darta_fiscalYearId(ctx, field)
+			case "scope":
+				return ec.fieldContext_Darta_scope(ctx, field)
+			case "wardId":
+				return ec.fieldContext_Darta_wardId(ctx, field)
+			case "subject":
+				return ec.fieldContext_Darta_subject(ctx, field)
+			case "applicant":
+				return ec.fieldContext_Darta_applicant(ctx, field)
+			case "intakeChannel":
+				return ec.fieldContext_Darta_intakeChannel(ctx, field)
+			case "receivedDate":
+				return ec.fieldContext_Darta_receivedDate(ctx, field)
+			case "entryDate":
+				return ec.fieldContext_Darta_entryDate(ctx, field)
+			case "status":
+				return ec.fieldContext_Darta_status(ctx, field)
+			case "priority":
+				return ec.fieldContext_Darta_priority(ctx, field)
+			case "createdBy":
+				return ec.fieldContext_Darta_createdBy(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Darta_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Darta_updatedAt(ctx, field)
+			case "tenantId":
+				return ec.fieldContext_Darta_tenantId(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Darta", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_routeDarta_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_closeDarta(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_closeDarta,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Mutation().CloseDarta(ctx, fc.Args["dartaId"].(string))
+		},
+		nil,
+		ec.marshalNDarta2ᚖgitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐDarta,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_closeDarta(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Darta_id(ctx, field)
+			case "dartaNumber":
+				return ec.fieldContext_Darta_dartaNumber(ctx, field)
+			case "formattedDartaNumber":
+				return ec.fieldContext_Darta_formattedDartaNumber(ctx, field)
+			case "fiscalYearId":
+				return ec.fieldContext_Darta_fiscalYearId(ctx, field)
+			case "scope":
+				return ec.fieldContext_Darta_scope(ctx, field)
+			case "wardId":
+				return ec.fieldContext_Darta_wardId(ctx, field)
+			case "subject":
+				return ec.fieldContext_Darta_subject(ctx, field)
+			case "applicant":
+				return ec.fieldContext_Darta_applicant(ctx, field)
+			case "intakeChannel":
+				return ec.fieldContext_Darta_intakeChannel(ctx, field)
+			case "receivedDate":
+				return ec.fieldContext_Darta_receivedDate(ctx, field)
+			case "entryDate":
+				return ec.fieldContext_Darta_entryDate(ctx, field)
+			case "status":
+				return ec.fieldContext_Darta_status(ctx, field)
+			case "priority":
+				return ec.fieldContext_Darta_priority(ctx, field)
+			case "createdBy":
+				return ec.fieldContext_Darta_createdBy(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Darta_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Darta_updatedAt(ctx, field)
+			case "tenantId":
+				return ec.fieldContext_Darta_tenantId(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Darta", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_closeDarta_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_voidDarta(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_voidDarta,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Mutation().VoidDarta(ctx, fc.Args["dartaId"].(string), fc.Args["reason"].(string))
+		},
+		nil,
+		ec.marshalNDarta2ᚖgitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐDarta,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_voidDarta(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Darta_id(ctx, field)
+			case "dartaNumber":
+				return ec.fieldContext_Darta_dartaNumber(ctx, field)
+			case "formattedDartaNumber":
+				return ec.fieldContext_Darta_formattedDartaNumber(ctx, field)
+			case "fiscalYearId":
+				return ec.fieldContext_Darta_fiscalYearId(ctx, field)
+			case "scope":
+				return ec.fieldContext_Darta_scope(ctx, field)
+			case "wardId":
+				return ec.fieldContext_Darta_wardId(ctx, field)
+			case "subject":
+				return ec.fieldContext_Darta_subject(ctx, field)
+			case "applicant":
+				return ec.fieldContext_Darta_applicant(ctx, field)
+			case "intakeChannel":
+				return ec.fieldContext_Darta_intakeChannel(ctx, field)
+			case "receivedDate":
+				return ec.fieldContext_Darta_receivedDate(ctx, field)
+			case "entryDate":
+				return ec.fieldContext_Darta_entryDate(ctx, field)
+			case "status":
+				return ec.fieldContext_Darta_status(ctx, field)
+			case "priority":
+				return ec.fieldContext_Darta_priority(ctx, field)
+			case "createdBy":
+				return ec.fieldContext_Darta_createdBy(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Darta_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Darta_updatedAt(ctx, field)
+			case "tenantId":
+				return ec.fieldContext_Darta_tenantId(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Darta", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_voidDarta_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _PageInfo_hasNextPage(ctx context.Context, field graphql.CollectedField, obj *model.PageInfo) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PageInfo_hasNextPage,
+		func(ctx context.Context) (any, error) {
+			return obj.HasNextPage, nil
+		},
+		nil,
+		ec.marshalNBoolean2bool,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_PageInfo_hasNextPage(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PageInfo",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _PageInfo_hasPreviousPage(ctx context.Context, field graphql.CollectedField, obj *model.PageInfo) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PageInfo_hasPreviousPage,
+		func(ctx context.Context) (any, error) {
+			return obj.HasPreviousPage, nil
+		},
+		nil,
+		ec.marshalNBoolean2bool,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_PageInfo_hasPreviousPage(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PageInfo",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _PageInfo_totalCount(ctx context.Context, field graphql.CollectedField, obj *model.PageInfo) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_PageInfo_totalCount,
+		func(ctx context.Context) (any, error) {
+			return obj.TotalCount, nil
+		},
+		nil,
+		ec.marshalNInt2int,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_PageInfo_totalCount(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PageInfo",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_health(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_health,
+		func(ctx context.Context) (any, error) {
+			return ec.resolvers.Query().Health(ctx)
 		},
 		nil,
 		ec.marshalNHealthStatus2ᚖgitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐHealthStatus,
@@ -1598,7 +3047,7 @@ func (ec *executionContext) _Query_pdpHealth(ctx context.Context, field graphql.
 	)
 }
 
-func (ec *executionContext) fieldContext_Query_pdpHealth(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_health(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -1619,24 +3068,24 @@ func (ec *executionContext) fieldContext_Query_pdpHealth(_ context.Context, fiel
 	return fc, nil
 }
 
-func (ec *executionContext) _Query_checkAuthorization(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Query_darta(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_checkAuthorization,
+		ec.fieldContext_Query_darta,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().CheckAuthorization(ctx, fc.Args["input"].(model.AuthCheckInput))
+			return ec.resolvers.Query().Darta(ctx, fc.Args["id"].(string))
 		},
 		nil,
-		ec.marshalNAuthCheckResponse2ᚖgitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐAuthCheckResponse,
+		ec.marshalODarta2ᚖgitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐDarta,
 		true,
-		true,
+		false,
 	)
 }
 
-func (ec *executionContext) fieldContext_Query_checkAuthorization(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_darta(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -1644,16 +3093,42 @@ func (ec *executionContext) fieldContext_Query_checkAuthorization(ctx context.Co
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "success":
-				return ec.fieldContext_AuthCheckResponse_success(ctx, field)
-			case "message":
-				return ec.fieldContext_AuthCheckResponse_message(ctx, field)
-			case "allowed":
-				return ec.fieldContext_AuthCheckResponse_allowed(ctx, field)
-			case "reason":
-				return ec.fieldContext_AuthCheckResponse_reason(ctx, field)
+			case "id":
+				return ec.fieldContext_Darta_id(ctx, field)
+			case "dartaNumber":
+				return ec.fieldContext_Darta_dartaNumber(ctx, field)
+			case "formattedDartaNumber":
+				return ec.fieldContext_Darta_formattedDartaNumber(ctx, field)
+			case "fiscalYearId":
+				return ec.fieldContext_Darta_fiscalYearId(ctx, field)
+			case "scope":
+				return ec.fieldContext_Darta_scope(ctx, field)
+			case "wardId":
+				return ec.fieldContext_Darta_wardId(ctx, field)
+			case "subject":
+				return ec.fieldContext_Darta_subject(ctx, field)
+			case "applicant":
+				return ec.fieldContext_Darta_applicant(ctx, field)
+			case "intakeChannel":
+				return ec.fieldContext_Darta_intakeChannel(ctx, field)
+			case "receivedDate":
+				return ec.fieldContext_Darta_receivedDate(ctx, field)
+			case "entryDate":
+				return ec.fieldContext_Darta_entryDate(ctx, field)
+			case "status":
+				return ec.fieldContext_Darta_status(ctx, field)
+			case "priority":
+				return ec.fieldContext_Darta_priority(ctx, field)
+			case "createdBy":
+				return ec.fieldContext_Darta_createdBy(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Darta_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Darta_updatedAt(ctx, field)
+			case "tenantId":
+				return ec.fieldContext_Darta_tenantId(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type AuthCheckResponse", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type Darta", field.Name)
 		},
 	}
 	defer func() {
@@ -1663,7 +3138,152 @@ func (ec *executionContext) fieldContext_Query_checkAuthorization(ctx context.Co
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_checkAuthorization_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Query_darta_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_dartas(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_dartas,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Query().Dartas(ctx, fc.Args["filter"].(*model.DartaFilterInput), fc.Args["pagination"].(*model.PaginationInput))
+		},
+		nil,
+		ec.marshalNDartaConnection2ᚖgitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐDartaConnection,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_dartas(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "edges":
+				return ec.fieldContext_DartaConnection_edges(ctx, field)
+			case "pageInfo":
+				return ec.fieldContext_DartaConnection_pageInfo(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type DartaConnection", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_dartas_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_myDartas(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_myDartas,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Query().MyDartas(ctx, fc.Args["status"].(*model.DartaStatus), fc.Args["pagination"].(*model.PaginationInput))
+		},
+		nil,
+		ec.marshalNDartaConnection2ᚖgitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐDartaConnection,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_myDartas(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "edges":
+				return ec.fieldContext_DartaConnection_edges(ctx, field)
+			case "pageInfo":
+				return ec.fieldContext_DartaConnection_pageInfo(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type DartaConnection", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_myDartas_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_dartaStats(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_dartaStats,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Query().DartaStats(ctx, fc.Args["scope"].(*model.Scope), fc.Args["fiscalYearId"].(*string), fc.Args["wardId"].(*string))
+		},
+		nil,
+		ec.marshalNDartaStats2ᚖgitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐDartaStats,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_dartaStats(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "total":
+				return ec.fieldContext_DartaStats_total(ctx, field)
+			case "byStatus":
+				return ec.fieldContext_DartaStats_byStatus(ctx, field)
+			case "byChannel":
+				return ec.fieldContext_DartaStats_byChannel(ctx, field)
+			case "overdueCount":
+				return ec.fieldContext_DartaStats_overdueCount(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type DartaStats", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_dartaStats_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -1773,241 +3393,6 @@ func (ec *executionContext) fieldContext_Query___schema(_ context.Context, field
 				return ec.fieldContext___Schema_directives(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type __Schema", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _RegisterDartaResponse_success(ctx context.Context, field graphql.CollectedField, obj *model.RegisterDartaResponse) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_RegisterDartaResponse_success,
-		func(ctx context.Context) (any, error) {
-			return obj.Success, nil
-		},
-		nil,
-		ec.marshalNBoolean2bool,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_RegisterDartaResponse_success(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "RegisterDartaResponse",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Boolean does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _RegisterDartaResponse_message(ctx context.Context, field graphql.CollectedField, obj *model.RegisterDartaResponse) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_RegisterDartaResponse_message,
-		func(ctx context.Context) (any, error) {
-			return obj.Message, nil
-		},
-		nil,
-		ec.marshalNString2string,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_RegisterDartaResponse_message(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "RegisterDartaResponse",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _RegisterDartaResponse_darta(ctx context.Context, field graphql.CollectedField, obj *model.RegisterDartaResponse) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_RegisterDartaResponse_darta,
-		func(ctx context.Context) (any, error) {
-			return obj.Darta, nil
-		},
-		nil,
-		ec.marshalODarta2ᚖgitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐDarta,
-		true,
-		false,
-	)
-}
-
-func (ec *executionContext) fieldContext_RegisterDartaResponse_darta(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "RegisterDartaResponse",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Darta_id(ctx, field)
-			case "title":
-				return ec.fieldContext_Darta_title(ctx, field)
-			case "description":
-				return ec.fieldContext_Darta_description(ctx, field)
-			case "submittedBy":
-				return ec.fieldContext_Darta_submittedBy(ctx, field)
-			case "status":
-				return ec.fieldContext_Darta_status(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_Darta_createdAt(ctx, field)
-			case "updatedAt":
-				return ec.fieldContext_Darta_updatedAt(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Darta", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _RegisterDartaResponse_dartaId(ctx context.Context, field graphql.CollectedField, obj *model.RegisterDartaResponse) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_RegisterDartaResponse_dartaId,
-		func(ctx context.Context) (any, error) {
-			return obj.DartaID, nil
-		},
-		nil,
-		ec.marshalOString2ᚖstring,
-		true,
-		false,
-	)
-}
-
-func (ec *executionContext) fieldContext_RegisterDartaResponse_dartaId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "RegisterDartaResponse",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _UpdateDartaResponse_success(ctx context.Context, field graphql.CollectedField, obj *model.UpdateDartaResponse) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_UpdateDartaResponse_success,
-		func(ctx context.Context) (any, error) {
-			return obj.Success, nil
-		},
-		nil,
-		ec.marshalNBoolean2bool,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_UpdateDartaResponse_success(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "UpdateDartaResponse",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Boolean does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _UpdateDartaResponse_message(ctx context.Context, field graphql.CollectedField, obj *model.UpdateDartaResponse) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_UpdateDartaResponse_message,
-		func(ctx context.Context) (any, error) {
-			return obj.Message, nil
-		},
-		nil,
-		ec.marshalNString2string,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_UpdateDartaResponse_message(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "UpdateDartaResponse",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _UpdateDartaResponse_darta(ctx context.Context, field graphql.CollectedField, obj *model.UpdateDartaResponse) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_UpdateDartaResponse_darta,
-		func(ctx context.Context) (any, error) {
-			return obj.Darta, nil
-		},
-		nil,
-		ec.marshalODarta2ᚖgitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐDarta,
-		true,
-		false,
-	)
-}
-
-func (ec *executionContext) fieldContext_UpdateDartaResponse_darta(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "UpdateDartaResponse",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Darta_id(ctx, field)
-			case "title":
-				return ec.fieldContext_Darta_title(ctx, field)
-			case "description":
-				return ec.fieldContext_Darta_description(ctx, field)
-			case "submittedBy":
-				return ec.fieldContext_Darta_submittedBy(ctx, field)
-			case "status":
-				return ec.fieldContext_Darta_status(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_Darta_createdAt(ctx, field)
-			case "updatedAt":
-				return ec.fieldContext_Darta_updatedAt(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Darta", field.Name)
 		},
 	}
 	return fc, nil
@@ -3459,116 +4844,394 @@ func (ec *executionContext) fieldContext___Type_isOneOf(_ context.Context, field
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputAuthCheckInput(ctx context.Context, obj any) (model.AuthCheckInput, error) {
-	var it model.AuthCheckInput
+func (ec *executionContext) unmarshalInputApplicantInput(ctx context.Context, obj any) (model.ApplicantInput, error) {
+	var it model.ApplicantInput
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"user", "relation", "object"}
+	fieldsInOrder := [...]string{"type", "fullName", "organization", "email", "phone", "address", "identificationNumber"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "user":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("user"))
+		case "type":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("type"))
+			data, err := ec.unmarshalNApplicantType2gitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐApplicantType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Type = data
+		case "fullName":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("fullName"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.User = data
-		case "relation":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("relation"))
-			data, err := ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Relation = data
-		case "object":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("object"))
-			data, err := ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Object = data
-		}
-	}
-
-	return it, nil
-}
-
-func (ec *executionContext) unmarshalInputRegisterDartaInput(ctx context.Context, obj any) (model.RegisterDartaInput, error) {
-	var it model.RegisterDartaInput
-	asMap := map[string]any{}
-	for k, v := range obj.(map[string]any) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"title", "description", "submittedBy"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "title":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("title"))
-			data, err := ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Title = data
-		case "description":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("description"))
-			data, err := ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Description = data
-		case "submittedBy":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("submittedBy"))
-			data, err := ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.SubmittedBy = data
-		}
-	}
-
-	return it, nil
-}
-
-func (ec *executionContext) unmarshalInputUpdateDartaStatusInput(ctx context.Context, obj any) (model.UpdateDartaStatusInput, error) {
-	var it model.UpdateDartaStatusInput
-	asMap := map[string]any{}
-	for k, v := range obj.(map[string]any) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"status", "remarks"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "status":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("status"))
-			data, err := ec.unmarshalNDartaStatus2gitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐDartaStatus(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Status = data
-		case "remarks":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("remarks"))
+			it.FullName = data
+		case "organization":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("organization"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.Remarks = data
+			it.Organization = data
+		case "email":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Email = data
+		case "phone":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("phone"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Phone = data
+		case "address":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("address"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Address = data
+		case "identificationNumber":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("identificationNumber"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.IdentificationNumber = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputCreateDartaInput(ctx context.Context, obj any) (model.CreateDartaInput, error) {
+	var it model.CreateDartaInput
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"fiscalYearId", "scope", "wardId", "subject", "applicant", "intakeChannel", "receivedDate", "primaryDocumentId", "annexIds", "priority", "idempotencyKey"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "fiscalYearId":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("fiscalYearId"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FiscalYearID = data
+		case "scope":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("scope"))
+			data, err := ec.unmarshalNScope2gitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐScope(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Scope = data
+		case "wardId":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("wardId"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.WardID = data
+		case "subject":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("subject"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Subject = data
+		case "applicant":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("applicant"))
+			data, err := ec.unmarshalNApplicantInput2ᚖgitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐApplicantInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Applicant = data
+		case "intakeChannel":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("intakeChannel"))
+			data, err := ec.unmarshalNIntakeChannel2gitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐIntakeChannel(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.IntakeChannel = data
+		case "receivedDate":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("receivedDate"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ReceivedDate = data
+		case "primaryDocumentId":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("primaryDocumentId"))
+			data, err := ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.PrimaryDocumentID = data
+		case "annexIds":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("annexIds"))
+			data, err := ec.unmarshalOID2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.AnnexIds = data
+		case "priority":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("priority"))
+			data, err := ec.unmarshalNPriority2gitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐPriority(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Priority = data
+		case "idempotencyKey":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idempotencyKey"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.IdempotencyKey = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputDartaFilterInput(ctx context.Context, obj any) (model.DartaFilterInput, error) {
+	var it model.DartaFilterInput
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"fiscalYearId", "scope", "wardId", "status", "priority", "organizationalUnitId", "assigneeId", "intakeChannel", "fromDate", "toDate", "search", "isOverdue"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "fiscalYearId":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("fiscalYearId"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FiscalYearID = data
+		case "scope":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("scope"))
+			data, err := ec.unmarshalOScope2ᚖgitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐScope(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Scope = data
+		case "wardId":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("wardId"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.WardID = data
+		case "status":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("status"))
+			data, err := ec.unmarshalODartaStatus2ᚖgitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐDartaStatus(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Status = data
+		case "priority":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("priority"))
+			data, err := ec.unmarshalOPriority2ᚖgitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐPriority(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Priority = data
+		case "organizationalUnitId":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("organizationalUnitId"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.OrganizationalUnitID = data
+		case "assigneeId":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("assigneeId"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.AssigneeID = data
+		case "intakeChannel":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("intakeChannel"))
+			data, err := ec.unmarshalOIntakeChannel2ᚖgitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐIntakeChannel(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.IntakeChannel = data
+		case "fromDate":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("fromDate"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FromDate = data
+		case "toDate":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("toDate"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ToDate = data
+		case "search":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("search"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Search = data
+		case "isOverdue":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("isOverdue"))
+			data, err := ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.IsOverdue = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputPaginationInput(ctx context.Context, obj any) (model.PaginationInput, error) {
+	var it model.PaginationInput
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"limit", "offset", "after", "before", "sortBy", "sortDesc"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "limit":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("limit"))
+			data, err := ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Limit = data
+		case "offset":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("offset"))
+			data, err := ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Offset = data
+		case "after":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.After = data
+		case "before":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("before"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Before = data
+		case "sortBy":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sortBy"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.SortBy = data
+		case "sortDesc":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sortDesc"))
+			data, err := ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.SortDesc = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputRouteDartaInput(ctx context.Context, obj any) (model.RouteDartaInput, error) {
+	var it model.RouteDartaInput
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"dartaId", "organizationalUnitId", "assigneeId", "priority", "slaHours", "notes"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "dartaId":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("dartaId"))
+			data, err := ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.DartaID = data
+		case "organizationalUnitId":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("organizationalUnitId"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.OrganizationalUnitID = data
+		case "assigneeId":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("assigneeId"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.AssigneeID = data
+		case "priority":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("priority"))
+			data, err := ec.unmarshalOPriority2ᚖgitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐPriority(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Priority = data
+		case "slaHours":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("slaHours"))
+			data, err := ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.SLAHours = data
+		case "notes":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("notes"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Notes = data
 		}
 	}
 
@@ -3579,68 +5242,88 @@ func (ec *executionContext) unmarshalInputUpdateDartaStatusInput(ctx context.Con
 
 // region    ************************** interface.gotpl ***************************
 
-func (ec *executionContext) _Response(ctx context.Context, sel ast.SelectionSet, obj model.Response) graphql.Marshaler {
-	switch obj := (obj).(type) {
-	case nil:
-		return graphql.Null
-	case model.UpdateDartaResponse:
-		return ec._UpdateDartaResponse(ctx, sel, &obj)
-	case *model.UpdateDartaResponse:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._UpdateDartaResponse(ctx, sel, obj)
-	case model.RegisterDartaResponse:
-		return ec._RegisterDartaResponse(ctx, sel, &obj)
-	case *model.RegisterDartaResponse:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._RegisterDartaResponse(ctx, sel, obj)
-	case model.AuthCheckResponse:
-		return ec._AuthCheckResponse(ctx, sel, &obj)
-	case *model.AuthCheckResponse:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._AuthCheckResponse(ctx, sel, obj)
-	default:
-		panic(fmt.Errorf("unexpected type %T", obj))
-	}
-}
-
 // endregion ************************** interface.gotpl ***************************
 
 // region    **************************** object.gotpl ****************************
 
-var authCheckResponseImplementors = []string{"AuthCheckResponse", "Response"}
+var applicantImplementors = []string{"Applicant"}
 
-func (ec *executionContext) _AuthCheckResponse(ctx context.Context, sel ast.SelectionSet, obj *model.AuthCheckResponse) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, authCheckResponseImplementors)
+func (ec *executionContext) _Applicant(ctx context.Context, sel ast.SelectionSet, obj *model.Applicant) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, applicantImplementors)
 
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("AuthCheckResponse")
-		case "success":
-			out.Values[i] = ec._AuthCheckResponse_success(ctx, field, obj)
+			out.Values[i] = graphql.MarshalString("Applicant")
+		case "id":
+			out.Values[i] = ec._Applicant_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "message":
-			out.Values[i] = ec._AuthCheckResponse_message(ctx, field, obj)
+		case "type":
+			out.Values[i] = ec._Applicant_type(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "allowed":
-			out.Values[i] = ec._AuthCheckResponse_allowed(ctx, field, obj)
+		case "fullName":
+			out.Values[i] = ec._Applicant_fullName(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "reason":
-			out.Values[i] = ec._AuthCheckResponse_reason(ctx, field, obj)
+		case "organization":
+			out.Values[i] = ec._Applicant_organization(ctx, field, obj)
+		case "email":
+			out.Values[i] = ec._Applicant_email(ctx, field, obj)
+		case "phone":
+			out.Values[i] = ec._Applicant_phone(ctx, field, obj)
+		case "address":
+			out.Values[i] = ec._Applicant_address(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var channelCountImplementors = []string{"ChannelCount"}
+
+func (ec *executionContext) _ChannelCount(ctx context.Context, sel ast.SelectionSet, obj *model.ChannelCount) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, channelCountImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ChannelCount")
+		case "channel":
+			out.Values[i] = ec._ChannelCount_channel(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "count":
+			out.Values[i] = ec._ChannelCount_count(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3680,23 +5363,59 @@ func (ec *executionContext) _Darta(ctx context.Context, sel ast.SelectionSet, ob
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "title":
-			out.Values[i] = ec._Darta_title(ctx, field, obj)
+		case "dartaNumber":
+			out.Values[i] = ec._Darta_dartaNumber(ctx, field, obj)
+		case "formattedDartaNumber":
+			out.Values[i] = ec._Darta_formattedDartaNumber(ctx, field, obj)
+		case "fiscalYearId":
+			out.Values[i] = ec._Darta_fiscalYearId(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "description":
-			out.Values[i] = ec._Darta_description(ctx, field, obj)
+		case "scope":
+			out.Values[i] = ec._Darta_scope(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "submittedBy":
-			out.Values[i] = ec._Darta_submittedBy(ctx, field, obj)
+		case "wardId":
+			out.Values[i] = ec._Darta_wardId(ctx, field, obj)
+		case "subject":
+			out.Values[i] = ec._Darta_subject(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "applicant":
+			out.Values[i] = ec._Darta_applicant(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "intakeChannel":
+			out.Values[i] = ec._Darta_intakeChannel(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "receivedDate":
+			out.Values[i] = ec._Darta_receivedDate(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "entryDate":
+			out.Values[i] = ec._Darta_entryDate(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
 		case "status":
 			out.Values[i] = ec._Darta_status(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "priority":
+			out.Values[i] = ec._Darta_priority(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "createdBy":
+			out.Values[i] = ec._Darta_createdBy(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -3707,6 +5426,14 @@ func (ec *executionContext) _Darta(ctx context.Context, sel ast.SelectionSet, ob
 			}
 		case "updatedAt":
 			out.Values[i] = ec._Darta_updatedAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "tenantId":
+			out.Values[i] = ec._Darta_tenantId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3730,34 +5457,166 @@ func (ec *executionContext) _Darta(ctx context.Context, sel ast.SelectionSet, ob
 	return out
 }
 
-var dartaListImplementors = []string{"DartaList"}
+var dartaConnectionImplementors = []string{"DartaConnection"}
 
-func (ec *executionContext) _DartaList(ctx context.Context, sel ast.SelectionSet, obj *model.DartaList) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, dartaListImplementors)
+func (ec *executionContext) _DartaConnection(ctx context.Context, sel ast.SelectionSet, obj *model.DartaConnection) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, dartaConnectionImplementors)
 
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("DartaList")
-		case "items":
-			out.Values[i] = ec._DartaList_items(ctx, field, obj)
+			out.Values[i] = graphql.MarshalString("DartaConnection")
+		case "edges":
+			out.Values[i] = ec._DartaConnection_edges(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "pageInfo":
+			out.Values[i] = ec._DartaConnection_pageInfo(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var dartaEdgeImplementors = []string{"DartaEdge"}
+
+func (ec *executionContext) _DartaEdge(ctx context.Context, sel ast.SelectionSet, obj *model.DartaEdge) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, dartaEdgeImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("DartaEdge")
+		case "cursor":
+			out.Values[i] = ec._DartaEdge_cursor(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "node":
+			out.Values[i] = ec._DartaEdge_node(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var dartaStatsImplementors = []string{"DartaStats"}
+
+func (ec *executionContext) _DartaStats(ctx context.Context, sel ast.SelectionSet, obj *model.DartaStats) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, dartaStatsImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("DartaStats")
 		case "total":
-			out.Values[i] = ec._DartaList_total(ctx, field, obj)
+			out.Values[i] = ec._DartaStats_total(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "limit":
-			out.Values[i] = ec._DartaList_limit(ctx, field, obj)
+		case "byStatus":
+			out.Values[i] = ec._DartaStats_byStatus(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "offset":
-			out.Values[i] = ec._DartaList_offset(ctx, field, obj)
+		case "byChannel":
+			out.Values[i] = ec._DartaStats_byChannel(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "overdueCount":
+			out.Values[i] = ec._DartaStats_overdueCount(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var dartaStatusCountImplementors = []string{"DartaStatusCount"}
+
+func (ec *executionContext) _DartaStatusCount(ctx context.Context, sel ast.SelectionSet, obj *model.DartaStatusCount) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, dartaStatusCountImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("DartaStatusCount")
+		case "status":
+			out.Values[i] = ec._DartaStatusCount_status(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "count":
+			out.Values[i] = ec._DartaStatusCount_count(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -3807,6 +5666,9 @@ func (ec *executionContext) _HealthStatus(ctx context.Context, sel ast.Selection
 			}
 		case "timestamp":
 			out.Values[i] = ec._HealthStatus_timestamp(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3849,21 +5711,108 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Mutation")
-		case "_empty":
+		case "createDarta":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation__empty(ctx, field)
-			})
-		case "registerDarta":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_registerDarta(ctx, field)
+				return ec._Mutation_createDarta(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "updateDartaStatus":
+		case "submitDartaForReview":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_updateDartaStatus(ctx, field)
+				return ec._Mutation_submitDartaForReview(ctx, field)
 			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "classifyDarta":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_classifyDarta(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "reserveDartaNumber":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_reserveDartaNumber(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "finalizeDartaRegistration":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_finalizeDartaRegistration(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "routeDarta":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_routeDarta(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "closeDarta":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_closeDarta(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "voidDarta":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_voidDarta(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var pageInfoImplementors = []string{"PageInfo"}
+
+func (ec *executionContext) _PageInfo(ctx context.Context, sel ast.SelectionSet, obj *model.PageInfo) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, pageInfoImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PageInfo")
+		case "hasNextPage":
+			out.Values[i] = ec._PageInfo_hasNextPage(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "hasPreviousPage":
+			out.Values[i] = ec._PageInfo_hasPreviousPage(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "totalCount":
+			out.Values[i] = ec._PageInfo_totalCount(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -3909,7 +5858,29 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Query")
-		case "_empty":
+		case "health":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_health(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "darta":
 			field := field
 
 			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
@@ -3918,7 +5889,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query__empty(ctx, field)
+				res = ec._Query_darta(ctx, field)
 				return res
 			}
 
@@ -3928,7 +5899,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "dartaChalaniHealth":
+		case "dartas":
 			field := field
 
 			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
@@ -3937,7 +5908,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_dartaChalaniHealth(ctx, field)
+				res = ec._Query_dartas(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
@@ -3950,26 +5921,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "getDarta":
-			field := field
-
-			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_getDarta(ctx, field)
-				return res
-			}
-
-			rrm := func(ctx context.Context) graphql.Marshaler {
-				return ec.OperationContext.RootResolverMiddleware(ctx,
-					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "listDartas":
+		case "myDartas":
 			field := field
 
 			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
@@ -3978,7 +5930,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_listDartas(ctx, field)
+				res = ec._Query_myDartas(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
@@ -3991,7 +5943,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "pdpHealth":
+		case "dartaStats":
 			field := field
 
 			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
@@ -4000,29 +5952,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_pdpHealth(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&fs.Invalids, 1)
-				}
-				return res
-			}
-
-			rrm := func(ctx context.Context) graphql.Marshaler {
-				return ec.OperationContext.RootResolverMiddleware(ctx,
-					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "checkAuthorization":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_checkAuthorization(ctx, field)
+				res = ec._Query_dartaStats(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
@@ -4043,100 +5973,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Query___schema(ctx, field)
 			})
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch(ctx)
-	if out.Invalids > 0 {
-		return graphql.Null
-	}
-
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
-
-	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
-			Label:    label,
-			Path:     graphql.GetPath(ctx),
-			FieldSet: dfs,
-			Context:  ctx,
-		})
-	}
-
-	return out
-}
-
-var registerDartaResponseImplementors = []string{"RegisterDartaResponse", "Response"}
-
-func (ec *executionContext) _RegisterDartaResponse(ctx context.Context, sel ast.SelectionSet, obj *model.RegisterDartaResponse) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, registerDartaResponseImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	deferred := make(map[string]*graphql.FieldSet)
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("RegisterDartaResponse")
-		case "success":
-			out.Values[i] = ec._RegisterDartaResponse_success(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "message":
-			out.Values[i] = ec._RegisterDartaResponse_message(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "darta":
-			out.Values[i] = ec._RegisterDartaResponse_darta(ctx, field, obj)
-		case "dartaId":
-			out.Values[i] = ec._RegisterDartaResponse_dartaId(ctx, field, obj)
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch(ctx)
-	if out.Invalids > 0 {
-		return graphql.Null
-	}
-
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
-
-	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
-			Label:    label,
-			Path:     graphql.GetPath(ctx),
-			FieldSet: dfs,
-			Context:  ctx,
-		})
-	}
-
-	return out
-}
-
-var updateDartaResponseImplementors = []string{"UpdateDartaResponse", "Response"}
-
-func (ec *executionContext) _UpdateDartaResponse(ctx context.Context, sel ast.SelectionSet, obj *model.UpdateDartaResponse) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, updateDartaResponseImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	deferred := make(map[string]*graphql.FieldSet)
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("UpdateDartaResponse")
-		case "success":
-			out.Values[i] = ec._UpdateDartaResponse_success(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "message":
-			out.Values[i] = ec._UpdateDartaResponse_message(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "darta":
-			out.Values[i] = ec._UpdateDartaResponse_darta(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -4495,23 +6331,29 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) unmarshalNAuthCheckInput2gitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐAuthCheckInput(ctx context.Context, v any) (model.AuthCheckInput, error) {
-	res, err := ec.unmarshalInputAuthCheckInput(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNAuthCheckResponse2gitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐAuthCheckResponse(ctx context.Context, sel ast.SelectionSet, v model.AuthCheckResponse) graphql.Marshaler {
-	return ec._AuthCheckResponse(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNAuthCheckResponse2ᚖgitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐAuthCheckResponse(ctx context.Context, sel ast.SelectionSet, v *model.AuthCheckResponse) graphql.Marshaler {
+func (ec *executionContext) marshalNApplicant2ᚖgitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐApplicant(ctx context.Context, sel ast.SelectionSet, v *model.Applicant) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
-	return ec._AuthCheckResponse(ctx, sel, v)
+	return ec._Applicant(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNApplicantInput2ᚖgitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐApplicantInput(ctx context.Context, v any) (*model.ApplicantInput, error) {
+	res, err := ec.unmarshalInputApplicantInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNApplicantType2gitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐApplicantType(ctx context.Context, v any) (model.ApplicantType, error) {
+	var res model.ApplicantType
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNApplicantType2gitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐApplicantType(ctx context.Context, sel ast.SelectionSet, v model.ApplicantType) graphql.Marshaler {
+	return v
 }
 
 func (ec *executionContext) unmarshalNBoolean2bool(ctx context.Context, v any) (bool, error) {
@@ -4530,7 +6372,7 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
-func (ec *executionContext) marshalNDarta2ᚕᚖgitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐDartaᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Darta) graphql.Marshaler {
+func (ec *executionContext) marshalNChannelCount2ᚕᚖgitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐChannelCountᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.ChannelCount) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -4554,7 +6396,7 @@ func (ec *executionContext) marshalNDarta2ᚕᚖgitᚗninjainfosysᚗcomᚋePali
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNDarta2ᚖgitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐDarta(ctx, sel, v[i])
+			ret[i] = ec.marshalNChannelCount2ᚖgitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐChannelCount(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -4574,6 +6416,25 @@ func (ec *executionContext) marshalNDarta2ᚕᚖgitᚗninjainfosysᚗcomᚋePali
 	return ret
 }
 
+func (ec *executionContext) marshalNChannelCount2ᚖgitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐChannelCount(ctx context.Context, sel ast.SelectionSet, v *model.ChannelCount) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._ChannelCount(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNCreateDartaInput2gitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐCreateDartaInput(ctx context.Context, v any) (model.CreateDartaInput, error) {
+	res, err := ec.unmarshalInputCreateDartaInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNDarta2gitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐDarta(ctx context.Context, sel ast.SelectionSet, v model.Darta) graphql.Marshaler {
+	return ec._Darta(ctx, sel, &v)
+}
+
 func (ec *executionContext) marshalNDarta2ᚖgitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐDarta(ctx context.Context, sel ast.SelectionSet, v *model.Darta) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -4584,18 +6445,86 @@ func (ec *executionContext) marshalNDarta2ᚖgitᚗninjainfosysᚗcomᚋePalika�
 	return ec._Darta(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNDartaList2gitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐDartaList(ctx context.Context, sel ast.SelectionSet, v model.DartaList) graphql.Marshaler {
-	return ec._DartaList(ctx, sel, &v)
+func (ec *executionContext) marshalNDartaConnection2gitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐDartaConnection(ctx context.Context, sel ast.SelectionSet, v model.DartaConnection) graphql.Marshaler {
+	return ec._DartaConnection(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNDartaList2ᚖgitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐDartaList(ctx context.Context, sel ast.SelectionSet, v *model.DartaList) graphql.Marshaler {
+func (ec *executionContext) marshalNDartaConnection2ᚖgitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐDartaConnection(ctx context.Context, sel ast.SelectionSet, v *model.DartaConnection) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
-	return ec._DartaList(ctx, sel, v)
+	return ec._DartaConnection(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNDartaEdge2ᚕᚖgitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐDartaEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.DartaEdge) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNDartaEdge2ᚖgitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐDartaEdge(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNDartaEdge2ᚖgitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐDartaEdge(ctx context.Context, sel ast.SelectionSet, v *model.DartaEdge) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._DartaEdge(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNDartaStats2gitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐDartaStats(ctx context.Context, sel ast.SelectionSet, v model.DartaStats) graphql.Marshaler {
+	return ec._DartaStats(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNDartaStats2ᚖgitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐDartaStats(ctx context.Context, sel ast.SelectionSet, v *model.DartaStats) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._DartaStats(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNDartaStatus2gitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐDartaStatus(ctx context.Context, v any) (model.DartaStatus, error) {
@@ -4606,6 +6535,60 @@ func (ec *executionContext) unmarshalNDartaStatus2gitᚗninjainfosysᚗcomᚋePa
 
 func (ec *executionContext) marshalNDartaStatus2gitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐDartaStatus(ctx context.Context, sel ast.SelectionSet, v model.DartaStatus) graphql.Marshaler {
 	return v
+}
+
+func (ec *executionContext) marshalNDartaStatusCount2ᚕᚖgitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐDartaStatusCountᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.DartaStatusCount) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNDartaStatusCount2ᚖgitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐDartaStatusCount(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNDartaStatusCount2ᚖgitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐDartaStatusCount(ctx context.Context, sel ast.SelectionSet, v *model.DartaStatusCount) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._DartaStatusCount(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNHealthStatus2gitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐHealthStatus(ctx context.Context, sel ast.SelectionSet, v model.HealthStatus) graphql.Marshaler {
@@ -4654,23 +6637,49 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 	return res
 }
 
-func (ec *executionContext) unmarshalNRegisterDartaInput2gitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐRegisterDartaInput(ctx context.Context, v any) (model.RegisterDartaInput, error) {
-	res, err := ec.unmarshalInputRegisterDartaInput(ctx, v)
+func (ec *executionContext) unmarshalNIntakeChannel2gitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐIntakeChannel(ctx context.Context, v any) (model.IntakeChannel, error) {
+	var res model.IntakeChannel
+	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNRegisterDartaResponse2gitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐRegisterDartaResponse(ctx context.Context, sel ast.SelectionSet, v model.RegisterDartaResponse) graphql.Marshaler {
-	return ec._RegisterDartaResponse(ctx, sel, &v)
+func (ec *executionContext) marshalNIntakeChannel2gitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐIntakeChannel(ctx context.Context, sel ast.SelectionSet, v model.IntakeChannel) graphql.Marshaler {
+	return v
 }
 
-func (ec *executionContext) marshalNRegisterDartaResponse2ᚖgitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐRegisterDartaResponse(ctx context.Context, sel ast.SelectionSet, v *model.RegisterDartaResponse) graphql.Marshaler {
+func (ec *executionContext) marshalNPageInfo2ᚖgitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐPageInfo(ctx context.Context, sel ast.SelectionSet, v *model.PageInfo) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
-	return ec._RegisterDartaResponse(ctx, sel, v)
+	return ec._PageInfo(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNPriority2gitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐPriority(ctx context.Context, v any) (model.Priority, error) {
+	var res model.Priority
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNPriority2gitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐPriority(ctx context.Context, sel ast.SelectionSet, v model.Priority) graphql.Marshaler {
+	return v
+}
+
+func (ec *executionContext) unmarshalNRouteDartaInput2gitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐRouteDartaInput(ctx context.Context, v any) (model.RouteDartaInput, error) {
+	res, err := ec.unmarshalInputRouteDartaInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNScope2gitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐScope(ctx context.Context, v any) (model.Scope, error) {
+	var res model.Scope
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNScope2gitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐScope(ctx context.Context, sel ast.SelectionSet, v model.Scope) graphql.Marshaler {
+	return v
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v any) (string, error) {
@@ -4687,20 +6696,6 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 		}
 	}
 	return res
-}
-
-func (ec *executionContext) marshalNUpdateDartaResponse2gitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐUpdateDartaResponse(ctx context.Context, sel ast.SelectionSet, v model.UpdateDartaResponse) graphql.Marshaler {
-	return ec._UpdateDartaResponse(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNUpdateDartaResponse2ᚖgitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐUpdateDartaResponse(ctx context.Context, sel ast.SelectionSet, v *model.UpdateDartaResponse) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-		return graphql.Null
-	}
-	return ec._UpdateDartaResponse(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v introspection.Directive) graphql.Marshaler {
@@ -4993,6 +6988,66 @@ func (ec *executionContext) marshalODarta2ᚖgitᚗninjainfosysᚗcomᚋePalika�
 	return ec._Darta(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalODartaFilterInput2ᚖgitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐDartaFilterInput(ctx context.Context, v any) (*model.DartaFilterInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputDartaFilterInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalODartaStatus2ᚖgitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐDartaStatus(ctx context.Context, v any) (*model.DartaStatus, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var res = new(model.DartaStatus)
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalODartaStatus2ᚖgitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐDartaStatus(ctx context.Context, sel ast.SelectionSet, v *model.DartaStatus) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return v
+}
+
+func (ec *executionContext) unmarshalOID2ᚕstringᚄ(ctx context.Context, v any) ([]string, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []any
+	vSlice = graphql.CoerceList(v)
+	var err error
+	res := make([]string, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNID2string(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalOID2ᚕstringᚄ(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalNID2string(ctx, sel, v[i])
+	}
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
 func (ec *executionContext) unmarshalOInt2ᚖint(ctx context.Context, v any) (*int, error) {
 	if v == nil {
 		return nil, nil
@@ -5009,6 +7064,62 @@ func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.Sele
 	_ = ctx
 	res := graphql.MarshalInt(*v)
 	return res
+}
+
+func (ec *executionContext) unmarshalOIntakeChannel2ᚖgitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐIntakeChannel(ctx context.Context, v any) (*model.IntakeChannel, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var res = new(model.IntakeChannel)
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOIntakeChannel2ᚖgitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐIntakeChannel(ctx context.Context, sel ast.SelectionSet, v *model.IntakeChannel) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return v
+}
+
+func (ec *executionContext) unmarshalOPaginationInput2ᚖgitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐPaginationInput(ctx context.Context, v any) (*model.PaginationInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputPaginationInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalOPriority2ᚖgitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐPriority(ctx context.Context, v any) (*model.Priority, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var res = new(model.Priority)
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOPriority2ᚖgitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐPriority(ctx context.Context, sel ast.SelectionSet, v *model.Priority) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return v
+}
+
+func (ec *executionContext) unmarshalOScope2ᚖgitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐScope(ctx context.Context, v any) (*model.Scope, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var res = new(model.Scope)
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOScope2ᚖgitᚗninjainfosysᚗcomᚋePalikaᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐScope(ctx context.Context, sel ast.SelectionSet, v *model.Scope) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return v
 }
 
 func (ec *executionContext) unmarshalOString2ᚖstring(ctx context.Context, v any) (*string, error) {

@@ -1,7 +1,8 @@
 go 1.25.1
 
 use (
-    ./services/darta-chalani
-    ./services/graphql-gateway
-    ./services/pdp
+	./proto
+	./services/darta-chalani
+	./services/graphql-gateway
+	./services/pdp
 )

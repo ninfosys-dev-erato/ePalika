@@ -1,0 +1,185 @@
+syntax = "proto3";
+
+package darta.v1;
+
+option go_package = "git.ninjainfosys.com/ePalika/proto/gen/darta/v1;dartav1";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/struct.proto";
+
+// ============================================================================
+// ENUMS - Common Enumerations
+// ============================================================================
+
+enum Scope {
+  SCOPE_UNSPECIFIED = 0;
+  SCOPE_MUNICIPALITY = 1;
+  SCOPE_WARD = 2;
+}
+
+enum Priority {
+  PRIORITY_UNSPECIFIED = 0;
+  PRIORITY_LOW = 1;
+  PRIORITY_MEDIUM = 2;
+  PRIORITY_HIGH = 3;
+  PRIORITY_URGENT = 4;
+}
+
+enum IntakeChannel {
+  INTAKE_CHANNEL_UNSPECIFIED = 0;
+  INTAKE_CHANNEL_COUNTER = 1;
+  INTAKE_CHANNEL_POSTAL = 2;
+  INTAKE_CHANNEL_EMAIL = 3;
+  INTAKE_CHANNEL_EDARTA_PORTAL = 4;
+  INTAKE_CHANNEL_COURIER = 5;
+}
+
+enum DispatchChannel {
+  DISPATCH_CHANNEL_UNSPECIFIED = 0;
+  DISPATCH_CHANNEL_POSTAL = 1;
+  DISPATCH_CHANNEL_COURIER = 2;
+  DISPATCH_CHANNEL_EMAIL = 3;
+  DISPATCH_CHANNEL_HAND_DELIVERY = 4;
+  DISPATCH_CHANNEL_EDARTA_PORTAL = 5;
+}
+
+// ============================================================================
+// MESSAGES - Common Types
+// ============================================================================
+
+// FiscalYear represents a Nepali fiscal year
+message FiscalYear {
+  string id = 1;
+  string code = 2; // e.g., "2081-82"
+  string name = 3; // e.g., "2081/2082"
+  int32 start_year = 4; // 2081
+  int32 end_year = 5; // 2082
+  google.protobuf.Timestamp start_date = 6;
+  google.protobuf.Timestamp end_date = 7;
+  bool is_active = 8;
+}
+
+// Ward represents a ward within a municipality
+message Ward {
+  string id = 1;
+  int32 ward_number = 2;
+  string name = 3;
+  string name_nepali = 4;
+  string municipality_id = 5;
+  bool is_active = 6;
+}
+
+// User represents a user reference
+message User {
+  string id = 1;
+  string keycloak_id = 2;
+  string email = 3;
+  string first_name = 4;
+  string last_name = 5;
+  string full_name = 6; // Computed: first_name + last_name
+  string phone = 7;
+  bool is_active = 8;
+}
+
+// Role represents a user role
+message Role {
+  string id = 1;
+  string name = 2;
+  string code = 3;
+  string description = 4;
+  repeated string permissions = 5;
+}
+
+// OrganizationalUnit represents a department/office/section
+message OrganizationalUnit {
+  string id = 1;
+  string name = 2;
+  string code = 3;
+  string type = 4; // "DEPARTMENT", "SECTION", "UNIT"
+  string parent_id = 5;
+  int32 level = 6;
+  bool is_active = 7;
+}
+
+// Attachment represents a file attachment
+message Attachment {
+  string id = 1;
+  string filename = 2;
+  string original_filename = 3;
+  string mime_type = 4;
+  int64 size_bytes = 5;
+  string storage_path = 6;
+  string checksum = 7; // SHA-256 hash
+  string uploaded_by = 8;
+  google.protobuf.Timestamp uploaded_at = 9;
+  google.protobuf.Struct metadata = 10; // Additional metadata (dimensions, etc.)
+}
+
+// AuditEntry represents an audit trail entry
+message AuditEntry {
+  string id = 1;
+  string entity_type = 2; // "DARTA", "CHALANI"
+  string entity_id = 3;
+  string action = 4; // "CREATED", "UPDATED", "STATUS_CHANGED", etc.
+  string performed_by = 5; // User ID
+  User performed_by_user = 6; // User details
+  google.protobuf.Timestamp performed_at = 7;
+  google.protobuf.Struct changes = 8; // Before/after values
+  string ip_address = 9;
+  string user_agent = 10;
+  string notes = 11;
+}
+
+// PageInfo for cursor-based pagination
+message PageInfo {
+  bool has_next_page = 1;
+  bool has_previous_page = 2;
+  string start_cursor = 3;
+  string end_cursor = 4;
+  int64 total_count = 5;
+}
+
+// PaginationInput for queries
+message PaginationInput {
+  int32 limit = 1; // Max items per page
+  int32 offset = 2; // Offset for offset-based pagination
+  string after = 3; // Cursor for cursor-based pagination
+  string before = 4; // Cursor for backward pagination
+  string sort_by = 5; // Field to sort by
+  bool sort_desc = 6; // Sort descending
+}
+
+// DateTimeRange for filtering by date ranges
+message DateTimeRange {
+  google.protobuf.Timestamp from = 1;
+  google.protobuf.Timestamp to = 2;
+}
+
+// ErrorDetail for structured error responses
+message ErrorDetail {
+  string code = 1;
+  string message = 2;
+  string field = 3;
+  google.protobuf.Struct metadata = 4;
+}
+
+// OperationMetadata for tracking operation context
+message OperationMetadata {
+  string request_id = 1;
+  string user_id = 2;
+  string tenant_id = 3;
+  repeated string roles = 4;
+  string locale = 5;
+  string trace_parent = 6;
+  string ip_address = 7;
+}
+
+// HealthCheckRequest for health check
+message HealthCheckRequest {}
+
+// HealthCheckResponse for health check response
+message HealthCheckResponse {
+  string status = 1;
+  string service = 2;
+  google.protobuf.Timestamp timestamp = 3;
+}

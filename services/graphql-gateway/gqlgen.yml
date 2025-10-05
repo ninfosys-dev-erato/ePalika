@@ -1,10 +1,8 @@
-# gqlgen.yml - Configuration for gqlgen code generation with modular schema
+# gqlgen.yml - Configuration for gqlgen code generation
 
-# Schema files - organized by microservice
+# Schema files
 schema:
-  - schema/base/*.graphql
-  - schema/darta-chalani/*.graphql
-  - schema/pdp/*.graphql
+  - schema/*.graphql
 
 # Executable schema generation
 exec:
@@ -23,9 +21,4 @@ resolver:
   package: graph
   filename_template: "{name}.resolvers.go"
 
-# Automatically bind to generated models
-autobind:
-  - "git.ninjainfosys.com/ePalika/graphql-gateway/graph/model"
-
-# Skip generating resolvers for specific fields (they're just placeholders)
 omit_slice_element_pointers: false

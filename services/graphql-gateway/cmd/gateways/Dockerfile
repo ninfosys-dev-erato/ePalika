@@ -4,6 +4,10 @@ WORKDIR /app
 
 # Copy go mod files
 COPY services/graphql-gateway/go.mod services/graphql-gateway/go.sum* ./
+
+# Provide local proto module for replace directive
+COPY proto /proto
+
 RUN go mod download
 
 # Copy source code

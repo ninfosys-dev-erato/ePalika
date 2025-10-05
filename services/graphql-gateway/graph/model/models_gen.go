@@ -9,111 +9,246 @@ import (
 	"strconv"
 )
 
-type Response interface {
-	IsResponse()
-	GetSuccess() bool
-	GetMessage() string
+type Applicant struct {
+	ID           string        `json:"id"`
+	Type         ApplicantType `json:"type"`
+	FullName     string        `json:"fullName"`
+	Organization *string       `json:"organization,omitempty"`
+	Email        *string       `json:"email,omitempty"`
+	Phone        *string       `json:"phone,omitempty"`
+	Address      *string       `json:"address,omitempty"`
 }
 
-type AuthCheckInput struct {
-	User     string `json:"user"`
-	Relation string `json:"relation"`
-	Object   string `json:"object"`
+type ApplicantInput struct {
+	Type                 ApplicantType `json:"type"`
+	FullName             string        `json:"fullName"`
+	Organization         *string       `json:"organization,omitempty"`
+	Email                *string       `json:"email,omitempty"`
+	Phone                *string       `json:"phone,omitempty"`
+	Address              *string       `json:"address,omitempty"`
+	IdentificationNumber *string       `json:"identificationNumber,omitempty"`
 }
 
-type AuthCheckResponse struct {
-	Success bool    `json:"success"`
-	Message string  `json:"message"`
-	Allowed bool    `json:"allowed"`
-	Reason  *string `json:"reason,omitempty"`
+type ChannelCount struct {
+	Channel IntakeChannel `json:"channel"`
+	Count   int           `json:"count"`
 }
 
-func (AuthCheckResponse) IsResponse()             {}
-func (this AuthCheckResponse) GetSuccess() bool   { return this.Success }
-func (this AuthCheckResponse) GetMessage() string { return this.Message }
+type CreateDartaInput struct {
+	FiscalYearID      string          `json:"fiscalYearId"`
+	Scope             Scope           `json:"scope"`
+	WardID            *string         `json:"wardId,omitempty"`
+	Subject           string          `json:"subject"`
+	Applicant         *ApplicantInput `json:"applicant"`
+	IntakeChannel     IntakeChannel   `json:"intakeChannel"`
+	ReceivedDate      string          `json:"receivedDate"`
+	PrimaryDocumentID string          `json:"primaryDocumentId"`
+	AnnexIds          []string        `json:"annexIds,omitempty"`
+	Priority          Priority        `json:"priority"`
+	IdempotencyKey    string          `json:"idempotencyKey"`
+}
 
 type Darta struct {
-	ID          string      `json:"id"`
-	Title       string      `json:"title"`
-	Description string      `json:"description"`
-	SubmittedBy string      `json:"submittedBy"`
-	Status      DartaStatus `json:"status"`
-	CreatedAt   string      `json:"createdAt"`
-	UpdatedAt   *string     `json:"updatedAt,omitempty"`
+	ID                   string        `json:"id"`
+	DartaNumber          *int          `json:"dartaNumber,omitempty"`
+	FormattedDartaNumber *string       `json:"formattedDartaNumber,omitempty"`
+	FiscalYearID         string        `json:"fiscalYearId"`
+	Scope                Scope         `json:"scope"`
+	WardID               *string       `json:"wardId,omitempty"`
+	Subject              string        `json:"subject"`
+	Applicant            *Applicant    `json:"applicant"`
+	IntakeChannel        IntakeChannel `json:"intakeChannel"`
+	ReceivedDate         string        `json:"receivedDate"`
+	EntryDate            string        `json:"entryDate"`
+	Status               DartaStatus   `json:"status"`
+	Priority             Priority      `json:"priority"`
+	CreatedBy            string        `json:"createdBy"`
+	CreatedAt            string        `json:"createdAt"`
+	UpdatedAt            string        `json:"updatedAt"`
+	TenantID             string        `json:"tenantId"`
 }
 
-type DartaList struct {
-	Items  []*Darta `json:"items"`
-	Total  int      `json:"total"`
-	Limit  int      `json:"limit"`
-	Offset int      `json:"offset"`
+type DartaConnection struct {
+	Edges    []*DartaEdge `json:"edges"`
+	PageInfo *PageInfo    `json:"pageInfo"`
+}
+
+type DartaEdge struct {
+	Cursor string `json:"cursor"`
+	Node   *Darta `json:"node"`
+}
+
+type DartaFilterInput struct {
+	FiscalYearID         *string        `json:"fiscalYearId,omitempty"`
+	Scope                *Scope         `json:"scope,omitempty"`
+	WardID               *string        `json:"wardId,omitempty"`
+	Status               *DartaStatus   `json:"status,omitempty"`
+	Priority             *Priority      `json:"priority,omitempty"`
+	OrganizationalUnitID *string        `json:"organizationalUnitId,omitempty"`
+	AssigneeID           *string        `json:"assigneeId,omitempty"`
+	IntakeChannel        *IntakeChannel `json:"intakeChannel,omitempty"`
+	FromDate             *string        `json:"fromDate,omitempty"`
+	ToDate               *string        `json:"toDate,omitempty"`
+	Search               *string        `json:"search,omitempty"`
+	IsOverdue            *bool          `json:"isOverdue,omitempty"`
+}
+
+type DartaStats struct {
+	Total        int                 `json:"total"`
+	ByStatus     []*DartaStatusCount `json:"byStatus"`
+	ByChannel    []*ChannelCount     `json:"byChannel"`
+	OverdueCount int                 `json:"overdueCount"`
+}
+
+type DartaStatusCount struct {
+	Status DartaStatus `json:"status"`
+	Count  int         `json:"count"`
 }
 
 type HealthStatus struct {
-	Status    string  `json:"status"`
-	Service   string  `json:"service"`
-	Timestamp *string `json:"timestamp,omitempty"`
+	Status    string `json:"status"`
+	Service   string `json:"service"`
+	Timestamp string `json:"timestamp"`
 }
 
 type Mutation struct {
 }
 
+type PageInfo struct {
+	HasNextPage     bool `json:"hasNextPage"`
+	HasPreviousPage bool `json:"hasPreviousPage"`
+	TotalCount      int  `json:"totalCount"`
+}
+
+type PaginationInput struct {
+	Limit    *int    `json:"limit,omitempty"`
+	Offset   *int    `json:"offset,omitempty"`
+	After    *string `json:"after,omitempty"`
+	Before   *string `json:"before,omitempty"`
+	SortBy   *string `json:"sortBy,omitempty"`
+	SortDesc *bool   `json:"sortDesc,omitempty"`
+}
+
 type Query struct {
 }
 
-type RegisterDartaInput struct {
-	Title       string `json:"title"`
-	Description string `json:"description"`
-	SubmittedBy string `json:"submittedBy"`
+type RouteDartaInput struct {
+	DartaID              string    `json:"dartaId"`
+	OrganizationalUnitID *string   `json:"organizationalUnitId,omitempty"`
+	AssigneeID           *string   `json:"assigneeId,omitempty"`
+	Priority             *Priority `json:"priority,omitempty"`
+	SLAHours             *int      `json:"slaHours,omitempty"`
+	Notes                *string   `json:"notes,omitempty"`
 }
 
-type RegisterDartaResponse struct {
-	Success bool    `json:"success"`
-	Message string  `json:"message"`
-	Darta   *Darta  `json:"darta,omitempty"`
-	DartaID *string `json:"dartaId,omitempty"`
+type ApplicantType string
+
+const (
+	ApplicantTypeCitizen          ApplicantType = "CITIZEN"
+	ApplicantTypeOrganization     ApplicantType = "ORGANIZATION"
+	ApplicantTypeGovernmentOffice ApplicantType = "GOVERNMENT_OFFICE"
+	ApplicantTypeOther            ApplicantType = "OTHER"
+)
+
+var AllApplicantType = []ApplicantType{
+	ApplicantTypeCitizen,
+	ApplicantTypeOrganization,
+	ApplicantTypeGovernmentOffice,
+	ApplicantTypeOther,
 }
 
-func (RegisterDartaResponse) IsResponse()             {}
-func (this RegisterDartaResponse) GetSuccess() bool   { return this.Success }
-func (this RegisterDartaResponse) GetMessage() string { return this.Message }
-
-type UpdateDartaResponse struct {
-	Success bool   `json:"success"`
-	Message string `json:"message"`
-	Darta   *Darta `json:"darta,omitempty"`
+func (e ApplicantType) IsValid() bool {
+	switch e {
+	case ApplicantTypeCitizen, ApplicantTypeOrganization, ApplicantTypeGovernmentOffice, ApplicantTypeOther:
+		return true
+	}
+	return false
 }
 
-func (UpdateDartaResponse) IsResponse()             {}
-func (this UpdateDartaResponse) GetSuccess() bool   { return this.Success }
-func (this UpdateDartaResponse) GetMessage() string { return this.Message }
+func (e ApplicantType) String() string {
+	return string(e)
+}
 
-type UpdateDartaStatusInput struct {
-	Status  DartaStatus `json:"status"`
-	Remarks *string     `json:"remarks,omitempty"`
+func (e *ApplicantType) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ApplicantType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ApplicantType", str)
+	}
+	return nil
+}
+
+func (e ApplicantType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *ApplicantType) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e ApplicantType) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 type DartaStatus string
 
 const (
-	DartaStatusPending    DartaStatus = "PENDING"
-	DartaStatusInProgress DartaStatus = "IN_PROGRESS"
-	DartaStatusApproved   DartaStatus = "APPROVED"
-	DartaStatusRejected   DartaStatus = "REJECTED"
-	DartaStatusCompleted  DartaStatus = "COMPLETED"
+	DartaStatusDraft              DartaStatus = "DRAFT"
+	DartaStatusPendingReview      DartaStatus = "PENDING_REVIEW"
+	DartaStatusClassification     DartaStatus = "CLASSIFICATION"
+	DartaStatusNumberReserved     DartaStatus = "NUMBER_RESERVED"
+	DartaStatusRegistered         DartaStatus = "REGISTERED"
+	DartaStatusVoided             DartaStatus = "VOIDED"
+	DartaStatusScanned            DartaStatus = "SCANNED"
+	DartaStatusMetadataEnriched   DartaStatus = "METADATA_ENRICHED"
+	DartaStatusDigitallyArchived  DartaStatus = "DIGITALLY_ARCHIVED"
+	DartaStatusAssigned           DartaStatus = "ASSIGNED"
+	DartaStatusInReviewBySection  DartaStatus = "IN_REVIEW_BY_SECTION"
+	DartaStatusNeedsClarification DartaStatus = "NEEDS_CLARIFICATION"
+	DartaStatusAccepted           DartaStatus = "ACCEPTED"
+	DartaStatusActionTaken        DartaStatus = "ACTION_TAKEN"
+	DartaStatusResponseIssued     DartaStatus = "RESPONSE_ISSUED"
+	DartaStatusAckRequested       DartaStatus = "ACK_REQUESTED"
+	DartaStatusAckReceived        DartaStatus = "ACK_RECEIVED"
+	DartaStatusSuperseded         DartaStatus = "SUPERSEDED"
+	DartaStatusClosed             DartaStatus = "CLOSED"
 )
 
 var AllDartaStatus = []DartaStatus{
-	DartaStatusPending,
-	DartaStatusInProgress,
-	DartaStatusApproved,
-	DartaStatusRejected,
-	DartaStatusCompleted,
+	DartaStatusDraft,
+	DartaStatusPendingReview,
+	DartaStatusClassification,
+	DartaStatusNumberReserved,
+	DartaStatusRegistered,
+	DartaStatusVoided,
+	DartaStatusScanned,
+	DartaStatusMetadataEnriched,
+	DartaStatusDigitallyArchived,
+	DartaStatusAssigned,
+	DartaStatusInReviewBySection,
+	DartaStatusNeedsClarification,
+	DartaStatusAccepted,
+	DartaStatusActionTaken,
+	DartaStatusResponseIssued,
+	DartaStatusAckRequested,
+	DartaStatusAckReceived,
+	DartaStatusSuperseded,
+	DartaStatusClosed,
 }
 
 func (e DartaStatus) IsValid() bool {
 	switch e {
-	case DartaStatusPending, DartaStatusInProgress, DartaStatusApproved, DartaStatusRejected, DartaStatusCompleted:
+	case DartaStatusDraft, DartaStatusPendingReview, DartaStatusClassification, DartaStatusNumberReserved, DartaStatusRegistered, DartaStatusVoided, DartaStatusScanned, DartaStatusMetadataEnriched, DartaStatusDigitallyArchived, DartaStatusAssigned, DartaStatusInReviewBySection, DartaStatusNeedsClarification, DartaStatusAccepted, DartaStatusActionTaken, DartaStatusResponseIssued, DartaStatusAckRequested, DartaStatusAckReceived, DartaStatusSuperseded, DartaStatusClosed:
 		return true
 	}
 	return false
@@ -149,6 +284,181 @@ func (e *DartaStatus) UnmarshalJSON(b []byte) error {
 }
 
 func (e DartaStatus) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type IntakeChannel string
+
+const (
+	IntakeChannelCounter      IntakeChannel = "COUNTER"
+	IntakeChannelPostal       IntakeChannel = "POSTAL"
+	IntakeChannelEmail        IntakeChannel = "EMAIL"
+	IntakeChannelEdartaPortal IntakeChannel = "EDARTA_PORTAL"
+	IntakeChannelCourier      IntakeChannel = "COURIER"
+)
+
+var AllIntakeChannel = []IntakeChannel{
+	IntakeChannelCounter,
+	IntakeChannelPostal,
+	IntakeChannelEmail,
+	IntakeChannelEdartaPortal,
+	IntakeChannelCourier,
+}
+
+func (e IntakeChannel) IsValid() bool {
+	switch e {
+	case IntakeChannelCounter, IntakeChannelPostal, IntakeChannelEmail, IntakeChannelEdartaPortal, IntakeChannelCourier:
+		return true
+	}
+	return false
+}
+
+func (e IntakeChannel) String() string {
+	return string(e)
+}
+
+func (e *IntakeChannel) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = IntakeChannel(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid IntakeChannel", str)
+	}
+	return nil
+}
+
+func (e IntakeChannel) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *IntakeChannel) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e IntakeChannel) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type Priority string
+
+const (
+	PriorityLow    Priority = "LOW"
+	PriorityMedium Priority = "MEDIUM"
+	PriorityHigh   Priority = "HIGH"
+	PriorityUrgent Priority = "URGENT"
+)
+
+var AllPriority = []Priority{
+	PriorityLow,
+	PriorityMedium,
+	PriorityHigh,
+	PriorityUrgent,
+}
+
+func (e Priority) IsValid() bool {
+	switch e {
+	case PriorityLow, PriorityMedium, PriorityHigh, PriorityUrgent:
+		return true
+	}
+	return false
+}
+
+func (e Priority) String() string {
+	return string(e)
+}
+
+func (e *Priority) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = Priority(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid Priority", str)
+	}
+	return nil
+}
+
+func (e Priority) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *Priority) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e Priority) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type Scope string
+
+const (
+	ScopeMunicipality Scope = "MUNICIPALITY"
+	ScopeWard         Scope = "WARD"
+)
+
+var AllScope = []Scope{
+	ScopeMunicipality,
+	ScopeWard,
+}
+
+func (e Scope) IsValid() bool {
+	switch e {
+	case ScopeMunicipality, ScopeWard:
+		return true
+	}
+	return false
+}
+
+func (e Scope) String() string {
+	return string(e)
+}
+
+func (e *Scope) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = Scope(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid Scope", str)
+	}
+	return nil
+}
+
+func (e Scope) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *Scope) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e Scope) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil

@@ -1,0 +1,484 @@
+syntax = "proto3";
+
+package identity.v1;
+
+option go_package = "git.ninjainfosys.com/ePalika/proto/gen/identity/v1;identityv1";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/struct.proto";
+
+// ============================================================================
+// ENUMS
+// ============================================================================
+
+enum UserStatus {
+  USER_STATUS_UNSPECIFIED = 0;
+  USER_STATUS_ACTIVE = 1;
+  USER_STATUS_INACTIVE = 2;
+  USER_STATUS_PENDING_VERIFICATION = 3;
+  USER_STATUS_LOCKED = 4;
+  USER_STATUS_DISABLED = 5;
+  USER_STATUS_DEPROVISIONED = 6;
+  USER_STATUS_ARCHIVED = 7;
+}
+
+enum GrantStatus {
+  GRANT_STATUS_UNSPECIFIED = 0;
+  GRANT_STATUS_REQUESTED = 1;
+  GRANT_STATUS_APPROVED = 2;
+  GRANT_STATUS_ACTIVE = 3;
+  GRANT_STATUS_SUSPENDED = 4;
+  GRANT_STATUS_REVOKED = 5;
+  GRANT_STATUS_EXPIRED = 6;
+}
+
+enum DelegationStatus {
+  DELEGATION_STATUS_UNSPECIFIED = 0;
+  DELEGATION_STATUS_PENDING = 1;
+  DELEGATION_STATUS_ACTIVE = 2;
+  DELEGATION_STATUS_SUSPENDED = 3;
+  DELEGATION_STATUS_REVOKED = 4;
+  DELEGATION_STATUS_COMPLETED = 5;
+  DELEGATION_STATUS_EXPIRED = 6;
+}
+
+enum OrgUnitType {
+  ORG_UNIT_TYPE_UNSPECIFIED = 0;
+  ORG_UNIT_TYPE_ADMINISTRATION = 1;
+  ORG_UNIT_TYPE_ACCOUNT = 2;
+  ORG_UNIT_TYPE_REVENUE = 3;
+  ORG_UNIT_TYPE_ENGINEERING = 4;
+  ORG_UNIT_TYPE_EDUCATION = 5;
+  ORG_UNIT_TYPE_HEALTH = 6;
+  ORG_UNIT_TYPE_AGRICULTURE = 7;
+  ORG_UNIT_TYPE_PLANNING = 8;
+  ORG_UNIT_TYPE_SOCIAL_DEVELOPMENT = 9;
+  ORG_UNIT_TYPE_INFORMATION_TECHNOLOGY = 10;
+  ORG_UNIT_TYPE_GENERAL_SERVICE = 11;
+  ORG_UNIT_TYPE_OTHER = 12;
+}
+
+enum VerificationMethod {
+  VERIFICATION_METHOD_UNSPECIFIED = 0;
+  VERIFICATION_METHOD_MANUAL_REVIEW = 1;
+  VERIFICATION_METHOD_DOCUMENT_VERIFICATION = 2;
+  VERIFICATION_METHOD_FIELD_INSPECTION = 3;
+  VERIFICATION_METHOD_DIGITAL_SIGNATURE = 4;
+  VERIFICATION_METHOD_OTP_VERIFICATION = 5;
+  VERIFICATION_METHOD_BIOMETRIC_VERIFICATION = 6;
+  VERIFICATION_METHOD_SYSTEM_AUTO_VERIFY = 7;
+  VERIFICATION_METHOD_THIRD_PARTY_API = 8;
+  VERIFICATION_METHOD_OTHER = 9;
+}
+
+enum CredentialType {
+  CREDENTIAL_TYPE_UNSPECIFIED = 0;
+  CREDENTIAL_TYPE_CITIZENSHIP = 1;
+  CREDENTIAL_TYPE_DISABILITY_CARD = 2;
+  CREDENTIAL_TYPE_WARD_RECOMMENDATION = 3;
+  CREDENTIAL_TYPE_TAX_CLEARANCE = 4;
+  CREDENTIAL_TYPE_BUSINESS_REGISTRATION = 5;
+  CREDENTIAL_TYPE_LAND_OWNERSHIP = 6;
+  CREDENTIAL_TYPE_EDUCATIONAL_CERTIFICATE = 7;
+  CREDENTIAL_TYPE_OTHER = 8;
+}
+
+enum CredentialStatus {
+  CREDENTIAL_STATUS_UNSPECIFIED = 0;
+  CREDENTIAL_STATUS_PENDING = 1;
+  CREDENTIAL_STATUS_ACTIVE = 2;
+  CREDENTIAL_STATUS_EXPIRED = 3;
+  CREDENTIAL_STATUS_REVOKED = 4;
+  CREDENTIAL_STATUS_SUSPENDED = 5;
+}
+
+enum AddressStatus {
+  ADDRESS_STATUS_UNSPECIFIED = 0;
+  ADDRESS_STATUS_UNVERIFIED = 1;
+  ADDRESS_STATUS_VERIFIED = 2;
+  ADDRESS_STATUS_REJECTED = 3;
+}
+
+// ============================================================================
+// MESSAGES - Core Types
+// ============================================================================
+
+message User {
+  string id = 1;
+  string username = 2;
+  string email = 3;
+  string phone = 4;
+  string full_name = 5;
+  Person person = 6;
+  UserStatus status = 7;
+  repeated string roles = 8;
+  google.protobuf.Struct attributes = 9;
+  google.protobuf.Timestamp created_at = 10;
+  google.protobuf.Timestamp updated_at = 11;
+  string tenant_id = 12;
+}
+
+message Person {
+  string id = 1;
+  string legal_name = 2;
+  string preferred_name = 3;
+  string date_of_birth = 4;
+  repeated GovIdRef gov_id_refs = 5;
+  repeated Contact contacts = 6;
+  Address primary_address = 7;
+  google.protobuf.Timestamp created_at = 8;
+  google.protobuf.Timestamp updated_at = 9;
+}
+
+message GovIdRef {
+  string type = 1;
+  string value = 2;
+  string issued_by = 3;
+  google.protobuf.Timestamp expires_at = 4;
+}
+
+message Contact {
+  string type = 1;
+  string value = 2;
+  bool verified = 3;
+  google.protobuf.Timestamp verified_at = 4;
+}
+
+message Address {
+  string id = 1;
+  string raw = 2;
+  google.protobuf.Struct normalized = 3;
+  GeoPoint geo = 4;
+  AddressStatus status = 5;
+  repeated AddressEvidence evidence = 6;
+  google.protobuf.Timestamp created_at = 7;
+  google.protobuf.Timestamp verified_at = 8;
+}
+
+message GeoPoint {
+  double lat = 1;
+  double lng = 2;
+}
+
+message AddressEvidence {
+  string id = 1;
+  string kind = 2;
+  string file_id = 3;
+  google.protobuf.Timestamp uploaded_at = 4;
+}
+
+message OrgUnit {
+  string id = 1;
+  string name = 2;
+  string code = 3;
+  OrgUnitType type = 4;
+  OrgUnit parent = 5;
+  repeated OrgUnit children = 6;
+  int32 ward_number = 7;
+  google.protobuf.Timestamp created_at = 8;
+  google.protobuf.Timestamp updated_at = 9;
+}
+
+message Role {
+  string id = 1;
+  string key = 2;
+  string name = 3;
+  string description = 4;
+  repeated Permission permissions = 5;
+  RoleConstraints constraints = 6;
+  google.protobuf.Timestamp created_at = 7;
+  google.protobuf.Timestamp updated_at = 8;
+}
+
+message Permission {
+  string resource = 1;
+  string action = 2;
+}
+
+message RoleConstraints {
+  repeated OrgUnitType scope_types = 1;
+  bool requires_mfa = 2;
+  repeated string sod_conflicts = 3;
+}
+
+message Group {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  repeated User members = 4;
+  google.protobuf.Timestamp created_at = 5;
+  google.protobuf.Timestamp updated_at = 6;
+}
+
+message Grant {
+  string id = 1;
+  Role role = 2;
+  GrantSubject subject = 3;
+  ScopeRef scope = 4;
+  GrantStatus status = 5;
+  User requested_by = 6;
+  google.protobuf.Timestamp requested_at = 7;
+  User decided_by = 8;
+  google.protobuf.Timestamp decided_at = 9;
+  google.protobuf.Timestamp start_at = 10;
+  google.protobuf.Timestamp end_at = 11;
+  google.protobuf.Struct conditions = 12;
+  string decision_reason = 13;
+  google.protobuf.Timestamp created_at = 14;
+  google.protobuf.Timestamp updated_at = 15;
+}
+
+message GrantSubject {
+  string type = 1;
+  User user = 2;
+  Group group = 3;
+}
+
+message ScopeRef {
+  OrgUnit org_unit = 1;
+}
+
+message Delegation {
+  string id = 1;
+  Grant from_grant = 2;
+  User to_user = 3;
+  DelegationStatus status = 4;
+  google.protobuf.Timestamp start_at = 5;
+  google.protobuf.Timestamp end_at = 6;
+  google.protobuf.Struct constraints = 7;
+  google.protobuf.Timestamp created_at = 8;
+  google.protobuf.Timestamp ended_at = 9;
+  string reason = 10;
+}
+
+message Credential {
+  string id = 1;
+  CredentialType type = 2;
+  CredentialStatus status = 3;
+  google.protobuf.Timestamp created_at = 4;
+  google.protobuf.Timestamp last_used_at = 5;
+  google.protobuf.Timestamp rotated_at = 6;
+  google.protobuf.Timestamp expires_at = 7;
+}
+
+// ============================================================================
+// REQUEST/RESPONSE MESSAGES
+// ============================================================================
+
+// GetMe - Get current authenticated user
+message GetMeRequest {}
+message GetMeResponse {
+  User user = 1;
+}
+
+// GetUser - Get user by ID
+message GetUserRequest {
+  string id = 1;
+}
+message GetUserResponse {
+  User user = 1;
+}
+
+// ListUsers
+message ListUsersRequest {
+  UserStatus status = 1;
+  string org_unit_id = 2;
+  string search = 3;
+  int32 limit = 4;
+  int32 offset = 5;
+}
+message ListUsersResponse {
+  repeated User users = 1;
+  int64 total = 2;
+}
+
+// InviteUser
+message InviteUserInput {
+  string username = 1;
+  string email = 2;
+  string phone = 3;
+  PersonInput person = 4;
+  string org_unit_id = 5;
+  string actor_type = 6;
+  google.protobuf.Struct attributes = 7;
+}
+
+message PersonInput {
+  string legal_name = 1;
+  string preferred_name = 2;
+  string date_of_birth = 3;
+  repeated ContactInput contacts = 4;
+  AddressInput primary_address = 5;
+  repeated GovIdRefInput gov_id_refs = 6;
+}
+
+message ContactInput {
+  string type = 1;
+  string value = 2;
+}
+
+message AddressInput {
+  string raw = 1;
+  google.protobuf.Struct normalized = 2;
+  double lat = 3;
+  double lng = 4;
+}
+
+message GovIdRefInput {
+  string type = 1;
+  string value = 2;
+  string issued_by = 3;
+  google.protobuf.Timestamp expires_at = 4;
+}
+
+message InviteUserRequest {
+  InviteUserInput input = 1;
+}
+message InviteUserResponse {
+  User user = 1;
+}
+
+// OrgUnit operations
+message GetOrgUnitRequest {
+  string id = 1;
+}
+message GetOrgUnitResponse {
+  OrgUnit org_unit = 1;
+}
+
+message ListOrgUnitsRequest {
+  string parent_id = 1;
+  OrgUnitType type = 2;
+  string search = 3;
+}
+message ListOrgUnitsResponse {
+  repeated OrgUnit org_units = 1;
+}
+
+message CreateOrgUnitInput {
+  string name = 1;
+  string code = 2;
+  OrgUnitType type = 3;
+  string parent_id = 4;
+  int32 ward_number = 5;
+}
+
+message CreateOrgUnitRequest {
+  CreateOrgUnitInput input = 1;
+}
+message CreateOrgUnitResponse {
+  OrgUnit org_unit = 1;
+}
+
+// Role operations
+message GetRoleRequest {
+  string key = 1;
+}
+message GetRoleResponse {
+  Role role = 1;
+}
+
+message ListRolesRequest {
+  string search = 1;
+  int32 limit = 2;
+  int32 offset = 3;
+}
+message ListRolesResponse {
+  repeated Role roles = 1;
+  int64 total = 2;
+}
+
+// Grant operations
+message GetGrantRequest {
+  string id = 1;
+}
+message GetGrantResponse {
+  Grant grant = 1;
+}
+
+message ListGrantsRequest {
+  string user_id = 1;
+  string role_key = 2;
+  string org_unit_id = 3;
+  GrantStatus status = 4;
+  int32 limit = 5;
+  int32 offset = 6;
+}
+message ListGrantsResponse {
+  repeated Grant grants = 1;
+  int64 total = 2;
+}
+
+message RequestGrantInput {
+  string user_id = 1;
+  string role_key = 2;
+  string org_unit_id = 3;
+  string reason = 4;
+  google.protobuf.Timestamp start_at = 5;
+  google.protobuf.Timestamp end_at = 6;
+}
+
+message RequestGrantRequest {
+  RequestGrantInput input = 1;
+}
+message RequestGrantResponse {
+  Grant grant = 1;
+}
+
+// Permission check
+message PermissionCheckInput {
+  string user_id = 1;
+  string resource_type = 2;
+  string resource_id = 3;
+  string action = 4;
+  string org_unit_id = 5;
+}
+
+message CheckPermissionRequest {
+  PermissionCheckInput input = 1;
+}
+message CheckPermissionResponse {
+  bool allowed = 1;
+  repeated string matched_grant_ids = 2;
+  string reason = 3;
+}
+
+// Health check
+message HealthCheckRequest {}
+message HealthCheckResponse {
+  string status = 1;
+  string service = 2;
+  google.protobuf.Timestamp timestamp = 3;
+}
+
+// ============================================================================
+// SERVICE DEFINITION
+// ============================================================================
+
+service IdentityService {
+  // User operations
+  rpc GetMe(GetMeRequest) returns (GetMeResponse);
+  rpc GetUser(GetUserRequest) returns (GetUserResponse);
+  rpc ListUsers(ListUsersRequest) returns (ListUsersResponse);
+  rpc InviteUser(InviteUserRequest) returns (InviteUserResponse);
+
+  // OrgUnit operations
+  rpc GetOrgUnit(GetOrgUnitRequest) returns (GetOrgUnitResponse);
+  rpc ListOrgUnits(ListOrgUnitsRequest) returns (ListOrgUnitsResponse);
+  rpc CreateOrgUnit(CreateOrgUnitRequest) returns (CreateOrgUnitResponse);
+
+  // Role operations
+  rpc GetRole(GetRoleRequest) returns (GetRoleResponse);
+  rpc ListRoles(ListRolesRequest) returns (ListRolesResponse);
+
+  // Grant operations
+  rpc GetGrant(GetGrantRequest) returns (GetGrantResponse);
+  rpc ListGrants(ListGrantsRequest) returns (ListGrantsResponse);
+  rpc RequestGrant(RequestGrantRequest) returns (RequestGrantResponse);
+
+  // Permission check
+  rpc CheckPermission(CheckPermissionRequest) returns (CheckPermissionResponse);
+
+  // Health
+  rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse);
+}
