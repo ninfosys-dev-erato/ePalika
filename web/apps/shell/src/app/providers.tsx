@@ -5,6 +5,7 @@ import { ApolloProvider } from '@apollo/client/react'
 import { makeApolloClient } from '@egov/apollo'
 import { CarbonProviders } from '../ui/CarbonProviders'
 import { initAuth, getAuthHeader, isAuthenticated, login } from '@egov/auth'
+import { useUIStore } from '@egov/state-core'
 
 const cfg = {
   url: import.meta.env.VITE_KEYCLOAK_URL!,
@@ -17,10 +18,17 @@ const cfg = {
 export function Providers({ children }: { children: React.ReactNode }) {
   const [ready, setReady] = useState(false)
   const [qc, setQc] = useState<any>(null)
+  const theme = useUIStore((state) => state.theme)
 
   // Build Apollo once; auth header is injected per-request (fresh token)
   const apollo = useMemo(
-    () => makeApolloClient({ url: import.meta.env.VITE_GRAPHQL_URL!, getAuthHeader }),
+    () => makeApolloClient({
+      url: import.meta.env.VITE_GRAPHQL_URL!,
+      getAuthHeader: () => {
+        const header = getAuthHeader()
+        return header?.Authorization ? header : undefined
+      }
+    }),
     []
   )
 
@@ -44,7 +52,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   if (!isAuthenticated()) {
     return (
-      <CarbonProviders theme="g10">
+      <CarbonProviders theme={theme}>
         <div className="app">
           <h2>Session</h2>
           <p>You need to sign in to continue.</p>
@@ -55,7 +63,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <CarbonProviders theme="g10">
+    <CarbonProviders theme={theme}>
       <ApolloProvider client={apollo}>
         <QueryClientProvider client={qc}>{children}</QueryClientProvider>
       </ApolloProvider>

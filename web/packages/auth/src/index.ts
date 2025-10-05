@@ -21,6 +21,29 @@ export async function initAuth(cfg: KeycloakConfig): Promise<{ authenticated: bo
   if (initPromise) return initPromise
 
   initPromise = (async () => {
+    // Check if Web Crypto API is available (required for PKCE)
+    const isLocalhost = typeof window !== 'undefined' &&
+                        (window.location.hostname === 'localhost' ||
+                         window.location.hostname === '127.0.0.1' ||
+                         window.location.hostname === '[::1]')
+
+    const hasCrypto = typeof window !== 'undefined' &&
+                      typeof window.crypto !== 'undefined' &&
+                      typeof window.crypto.subtle !== 'undefined' &&
+                      (window.isSecureContext || isLocalhost)
+
+    if (!hasCrypto) {
+      console.warn('⚠️ Web Crypto API not available. Authentication disabled.')
+      console.warn('   Current context:', {
+        hostname: window.location.hostname,
+        isSecureContext: window.isSecureContext,
+        hasCrypto: typeof window.crypto !== 'undefined',
+        hasSubtle: typeof window.crypto?.subtle !== 'undefined'
+      })
+      // Return mock unauthenticated state for development
+      return { authenticated: false }
+    }
+
     // One-time BroadcastChannel (tab-wide logout)
     if ('BroadcastChannel' in window && !bc) {
       bc = new BroadcastChannel(AUTH_CHANNEL)
@@ -40,29 +63,35 @@ export async function initAuth(cfg: KeycloakConfig): Promise<{ authenticated: bo
       })
     }
 
-    const authenticated = await kc.init({
-      onLoad: cfg.autoLogin ? 'login-required' : 'check-sso',
-      pkceMethod: 'S256',
-      checkLoginIframe: false,
-    })
+    try {
+      const authenticated = await kc.init({
+        onLoad: cfg.autoLogin ? 'login-required' : 'check-sso',
+        pkceMethod: 'S256',
+        checkLoginIframe: false,
+      })
 
-    // Background refresh (single interval)
-    if (refreshTimer == null) {
-      refreshTimer = window.setInterval(async () => {
-        try { await kc?.updateToken(60) } catch {}
-      }, 20_000)
+      // Background refresh (single interval)
+      if (refreshTimer == null) {
+        refreshTimer = window.setInterval(async () => {
+          try { await kc?.updateToken(60) } catch {}
+        }, 20_000)
+      }
+
+      if (!authenticated && cfg.autoLogin) {
+        await kc.login({ prompt: 'login' })
+      }
+
+      // Clean up any leftover #state&code fragment (belt & suspenders)
+      if (location.hash.includes('state=') && location.hash.includes('code=')) {
+        history.replaceState(null, '', location.pathname + location.search)
+      }
+
+      return { authenticated: !!kc?.authenticated }
+    } catch (error) {
+      console.error('⚠️ Authentication initialization failed:', error)
+      // Allow app to continue without auth in dev mode
+      return { authenticated: false }
     }
-
-    if (!authenticated && cfg.autoLogin) {
-      await kc.login({ prompt: 'login' })
-    }
-
-    // Clean up any leftover #state&code fragment (belt & suspenders)
-    if (location.hash.includes('state=') && location.hash.includes('code=')) {
-      history.replaceState(null, '', location.pathname + location.search)
-    }
-
-    return { authenticated: !!kc?.authenticated }
   })()
 
   return initPromise

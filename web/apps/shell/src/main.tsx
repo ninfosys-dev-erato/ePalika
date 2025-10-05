@@ -4,10 +4,20 @@ import './App.css'
 import { Providers } from './app/providers'
 import { AppRouter } from './app/routes/router'
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <Providers>
-      <AppRouter />
-    </Providers>
-  </React.StrictMode>
-)
+// Start MSW in development (lazy loaded)
+async function init() {
+  if (import.meta.env.DEV) {
+    const { startMockServiceWorker } = await import('@egov/graphql-schema/mocks')
+    await startMockServiceWorker()
+  }
+
+  ReactDOM.createRoot(document.getElementById('root')!).render(
+    <React.StrictMode>
+      <Providers>
+        <AppRouter />
+      </Providers>
+    </React.StrictMode>
+  )
+}
+
+init()

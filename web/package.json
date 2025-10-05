@@ -3,8 +3,15 @@
   "private": true,
   "packageManager": "pnpm@9.0.0",
   "scripts": {
+    "dev": "concurrently --kill-others --names \"SHELL,DARTA,CHALANI\" -c \"bgBlue.bold,bgMagenta.bold,bgCyan.bold\" \"pnpm dev:shell\" \"pnpm dev:darta\" \"pnpm dev:chalani\"",
+    "dev:shell": "pnpm --filter @egov/shell dev --host",
+    "dev:darta": "pnpm --filter @egov/mfe-darta dev --host",
+    "dev:chalani": "pnpm --filter @egov/mfe-chalani dev --host",
+    "preview:darta": "pnpm --filter @egov/mfe-darta preview --host",
+    "preview:chalani": "pnpm --filter @egov/mfe-chalani preview --host",
+    "build:mfes": "pnpm --filter @egov/mfe-darta build && pnpm --filter @egov/mfe-chalani build",
+    "dev:all": "pnpm -r --parallel dev",
     "build": "pnpm -r build",
-    "dev": "pnpm -r --parallel dev",
     "typecheck": "pnpm -r typecheck",
     "lint": "pnpm -r lint",
     "clean": "git clean -xfd -e node_modules",
@@ -12,9 +19,11 @@
     "guard:css": "grep -R \"@carbon/styles\" apps/mfe-* || true && if grep -R \"@carbon/styles\" apps/mfe-*; then echo '❌ MFEs must not import Carbon CSS'; exit 1; else echo '✅ CSS ownership OK'; fi"
   },
   "devDependencies": {
+    "@module-federation/vite": "^1.8.1",
+    "concurrently": "^9.2.1",
     "sass": "^1.93.2",
     "typescript": "^5.6.3",
-    "vite": "^7.1.7",
+    "vite": "^7.1.9",
     "vite-plugin-beasties": "^0.3.5",
     "vite-tsconfig-paths": "^5.1.4"
   },
@@ -25,6 +34,8 @@
   "dependencies": {
     "@carbon/react": "^1.92.1",
     "@carbon/styles": "^1.91.0",
+    "@vitejs/plugin-react": "^5.0.4",
+    "glob": "^11.0.3",
     "react-is": "18.3.1"
   },
   "pnpm": {

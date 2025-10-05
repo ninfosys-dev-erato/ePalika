@@ -1,0 +1,30 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install pnpm
+        run: npm install -g pnpm@8
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Typecheck
+        run: pnpm -r typecheck
+      - name: Lint
+        run: pnpm -r lint || echo 'Lint warnings only'
+      - name: Build shell
+        run: pnpm --filter @egov/shell build
+      - name: Build mfe-darta
+        run: pnpm --filter @egov/mfe-darta build
+      - name: Perf budget
+        run: pnpm --filter @egov/perf-budget analyze

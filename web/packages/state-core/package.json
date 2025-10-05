@@ -1,0 +1,24 @@
+{
+  "name": "@egov/state-core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./stores/*": "./src/stores/*.ts"
+  },
+  "peerDependencies": {
+    "react": "^18.3.0",
+    "zustand": "^5.0.0"
+  },
+  "dependencies": {
+    "@egov/graphql-schema": "workspace:*",
+    "immer": "^10.1.1",
+    "idb-keyval": "^6.2.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.7",
+    "zustand": "^5.0.2"
+  }
+}
