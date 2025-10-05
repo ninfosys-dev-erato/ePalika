@@ -413,6 +413,9 @@ importers:
 
   packages/runtime:
     dependencies:
+      '@apollo/client':
+        specifier: ^3.10.0
+        version: 3.14.0(@types/react@18.3.24)(graphql-ws@6.0.6(graphql@16.11.0)(ws@8.18.3))(graphql@16.11.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@egov/apollo':
         specifier: workspace:*
         version: link:../apollo

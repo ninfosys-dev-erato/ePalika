@@ -10,6 +10,7 @@
   "peerDependencies": {
     "react": "^18.3.0",
     "react-dom": "^18.3.0",
+    "@apollo/client": "^3.10.0",
     "@egov/apollo": "workspace:*",
     "@egov/auth": "workspace:*",
     "@egov/state-core": "workspace:*",
