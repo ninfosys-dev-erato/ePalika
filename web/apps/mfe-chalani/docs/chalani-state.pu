@@ -1,0 +1,43 @@
+@startuml chalani-state
+skinparam shadowing false
+skinparam dpi 150
+skinparam state {
+  BackgroundColor #f4f4f4
+  BorderColor #0f62fe
+  FontColor #161616
+  ArrowColor #0f62fe
+  FontSize 12
+  RoundCorner 8
+}
+
+[*] --> DRAFT
+
+DRAFT --> PENDING_REVIEW : submit
+PENDING_REVIEW --> DRAFT : editRequired
+PENDING_REVIEW --> PENDING_APPROVAL : approveReview
+
+PENDING_APPROVAL --> APPROVED : approve
+PENDING_APPROVAL --> DRAFT : reject
+
+APPROVED --> NUMBER_RESERVED : reserveNo
+NUMBER_RESERVED --> REGISTERED : finalize
+APPROVED --> REGISTERED : directRegister
+
+REGISTERED --> SIGNED : sign
+SIGNED --> SEALED : seal
+REGISTERED --> VOIDED : void
+
+SEALED --> DISPATCHED : dispatch
+SIGNED --> DISPATCHED : dispatch
+REGISTERED --> DISPATCHED : quickDispatch
+
+DISPATCHED --> IN_TRANSIT : physicalSent
+IN_TRANSIT --> DELIVERED : delivered
+DISPATCHED --> ACKNOWLEDGED : digitalAck
+ACKNOWLEDGED --> DELIVERED : confirm
+DISPATCHED --> RETURNED_UNDELIVERED : undelivered
+RETURNED_UNDELIVERED --> DISPATCHED : resend
+
+DELIVERED --> CLOSED : archive
+REGISTERED --> SUPERSEDED : supersede
+@enduml

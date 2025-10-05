@@ -8,6 +8,8 @@
 
 /* Only the components you actually need */
 @use '@carbon/styles/scss/components/button';
+@use '@carbon/styles/scss/components/text-input';
+@use '@carbon/styles/scss/components/text-area';
 @use '@carbon/styles/scss/components/inline-loading';
 @use '@carbon/styles/scss/components/notification';
 @use '@carbon/styles/scss/components/data-table';

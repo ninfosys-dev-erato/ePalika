@@ -5,10 +5,9 @@ import { TextArea } from '@egov/ui/primitives/TextArea'
 import { Select } from '@egov/ui/primitives/Select'
 import {
   DocumentUpload,
-  type UploadedDocument,
+  type UploadedDocument,  
 } from '@egov/ui/patterns/DocumentUpload'
 import { useChalaniStore, useUIStore, type ChalaniDraft } from '@egov/state-core'
-import styles from './ChalaniCompose.module.css'
 
 const CHANNEL_OPTIONS = [
   { value: 'POSTAL', label: 'हुलाक' },
@@ -73,46 +72,73 @@ export function ChalaniCompose() {
   }
 
   return (
-    <section className={styles.container}>
-      <form className={styles.composer} onSubmit={handleSubmit}>
-        <header className={styles.header}>
-          <h1 className={styles.title}>चलानी तयार गर्नुहोस्</h1>
-          <p className={styles.subtitle}>
+    <section>
+      <form onSubmit={handleSubmit}>
+        <header>
+          <h1>चलानी तयार गर्नुहोस्</h1>
+          <p>
             दर्ता गरिएको पत्राचारलाई उपयुक्त टेम्पलेट र हस्ताक्षरकर्तासहित पठाउनुहोस्।
           </p>
         </header>
 
-        <div className={styles.section}>
-          <div className={styles.twoColumn}>
-            <TextInput
-              label="विषय"
-              placeholder="उदा. भवन निर्माण बुध्दीपत्र"
-              value={chalaniDraft.subject || ''}
-              onChange={(event: ChangeEvent<HTMLInputElement>) =>
-                handleDraftChange('subject', event.target.value)
-              }
-              required
-            />
-            <TextInput
-              label="प्राप्तकर्ता"
-              placeholder="संस्था वा व्यक्तिको नाम"
-              value={chalaniDraft.recipientName || ''}
-              onChange={(event: ChangeEvent<HTMLInputElement>) =>
-                handleDraftChange('recipientName', event.target.value)
-              }
-              required
-            />
-          </div>
+        <div>
+          <div>
+           <TextInput
+    className="input-test-class"
 
-          <div className={styles.twoColumn}>
-            <TextInput
-              label="गन्तव्य ठेगाना"
-              placeholder="नगरपालिका, वडा, जिल्ला"
-              value={chalaniDraft.recipientAddress || ''}
-              onChange={(event: ChangeEvent<HTMLInputElement>) =>
-                handleDraftChange('recipientAddress', event.target.value)
-              }
-            />
+    helperText="Helper text"
+    id="subject-input"
+    invalidText="Error message goes here"
+    labelText="विषय"
+    onChange={(event: ChangeEvent<HTMLInputElement>) =>
+      handleDraftChange('subject', event.target.value)
+    }
+    onClick={() => {}}
+    placeholder="उदा. भवन निर्माण बुध्दीपत्र"
+    size="md"
+    type="text"
+    warnText="Warning message that is really long can wrap to more lines but should not be excessively long."
+    value={chalaniDraft.subject || ''}
+    required
+  />
+           <TextInput
+    className="input-test-class"
+
+    helperText="Helper text"
+    id="recipient-input"
+    invalidText="Error message goes here"
+    labelText="प्राप्तकर्ता"
+    onChange={(event: ChangeEvent<HTMLInputElement>) =>
+      handleDraftChange('recipientName', event.target.value)
+    }
+    onClick={() => {}}
+    placeholder="संस्था वा व्यक्तिको नाम"
+    size="md"
+    type="text"
+    warnText="Warning message that is really long can wrap to more lines but should not be excessively long."
+    value={chalaniDraft.recipientName || ''}
+    required
+  />
+      </div>
+
+      <div>
+              <TextInput
+    className="input-test-class"
+
+    helperText="Helper text"
+    id="address-input"
+    invalidText="Error message goes here"
+    labelText="गन्तव्य ठेगाना"
+    onChange={(event: ChangeEvent<HTMLInputElement>) =>
+      handleDraftChange('recipientAddress', event.target.value)
+    }
+    onClick={() => {}}
+    placeholder="नगरपालिका, वडा, जिल्ला"
+    size="md"
+    type="text"
+    warnText="Warning message that is really long can wrap to more lines but should not be excessively long."
+    value={chalaniDraft.recipientAddress || ''}
+/>
             <Select
               label="पठाउने माध्यम"
               options={CHANNEL_OPTIONS}
@@ -134,18 +160,18 @@ export function ChalaniCompose() {
           />
         </div>
 
-        <div className={styles.section}>
-          <div className={styles.metaRow}>
-            <span className={styles.metaPrimary}>चलानी विवरण</span>
-            <span className={styles.metaSecondary}>
+        <div>
+          <div>
+            <span>चलानी विवरण</span>
+            <span>
               टेम्पलेट परिवर्तन गर्दा पुरानो नोटहरू हटिन सक्छन्।
             </span>
           </div>
-          <div className={styles.badges}>
-            <span className={styles.badge}>चलानी नम्बर: TBD</span>
-            <span className={styles.badge}>मसौदा: स्वचालित रूपमा सुरक्षित हुन्छ</span>
+          <div>
+            <span>चलानी नम्बर: TBD</span>
+            <span>मसौदा: स्वचालित रूपमा सुरक्षित हुन्छ</span>
           </div>
-          <label className={styles.bodyLabel} htmlFor="chalani-body">
+          <label htmlFor="chalani-body">
             पत्रको मुख्य भाग
           </label>
          <TextArea
@@ -157,12 +183,12 @@ export function ChalaniCompose() {
               handleDraftChange('body', event.target.value)
             }
           />
-          <span className={styles.hint}>
+          <span>
             नोट: कार्यालयको आधिकारिक footnote स्वचालित रूपमा थपिनेछ।
           </span>
         </div>
 
-        <div className={styles.section}>
+        <div>
           <DocumentUpload
             label="संलग्नक"
             helperText="परिपत्र, तालिम वा पुराना पत्रहरू जोड्नुहोस्"
@@ -172,9 +198,9 @@ export function ChalaniCompose() {
           />
         </div>
 
-        {isSubmitting && <span className={styles.processing}>चलानी तयार गर्दै...</span>}
+        {isSubmitting && <span>चलानी तयार गर्दै...</span>}
 
-        <div className={styles.actions}>
+        <div>
           <Button type="button" variant="ghost" onClick={resetDraft} disabled={isSubmitting}>
             रद्द गर्नुहोस्
           </Button>

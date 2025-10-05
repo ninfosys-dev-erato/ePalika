@@ -16,7 +16,7 @@ export interface AppSelectProps extends Omit<SelectProps, 'children'> {
 
 export const Select: React.FC<AppSelectProps> = ({
   options,
-  size = 'sm',
+  size = 'md',
   ...rest
 }) => {
   return (
