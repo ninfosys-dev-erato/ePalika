@@ -1,5 +1,5 @@
 {
-  "name": "@egov/graphql-schema",
+  "name": "@egov/api-schema",
   "version": "0.1.0",
   "private": true,
   "type": "module",

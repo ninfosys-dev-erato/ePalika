@@ -15,7 +15,7 @@
     "@egov/apollo": "workspace:*",
     "@egov/auth": "workspace:*",
     "@egov/design-system": "workspace:*",
-    "@egov/graphql-schema": "workspace:*",
+    "@egov/api-schema": "workspace:*",
     "@egov/perf-budget": "workspace:*",
     "@egov/query": "workspace:*",
     "@egov/state-core": "workspace:*",

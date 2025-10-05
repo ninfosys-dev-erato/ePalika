@@ -13,7 +13,7 @@
     "zustand": "^5.0.0"
   },
   "dependencies": {
-    "@egov/graphql-schema": "workspace:*",
+    "@egov/api-schema": "workspace:*",
     "immer": "^10.1.1",
     "idb-keyval": "^6.2.1"
   },

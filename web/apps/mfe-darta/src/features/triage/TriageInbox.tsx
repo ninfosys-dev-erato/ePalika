@@ -8,7 +8,7 @@ import {
   IntakeChannel,
   Scope,
   Darta,
-} from '@egov/graphql-schema/generated'
+} from '@egov/api-schema/generated'
 import { useDartaStore, useUIStore } from '@egov/state-core'
 import styles from './TriageInbox.module.css'
 

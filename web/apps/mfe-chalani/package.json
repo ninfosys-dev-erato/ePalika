@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@apollo/client": "^4.0.6",
-    "@egov/graphql-schema": "workspace:*",
+    "@egov/api-schema": "workspace:*",
     "@egov/state-core": "workspace:*",
     "@egov/ui": "workspace:*",
     "@module-federation/vite": "^1.8.1",

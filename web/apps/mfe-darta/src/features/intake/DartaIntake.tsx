@@ -11,7 +11,7 @@ import {
   Scope,
   CaseStatus,
   type CreateDartaMutation,
-} from '@egov/graphql-schema/generated'
+} from '@egov/api-schema/generated'
 import styles from './DartaIntake.module.css'
 
 interface DartaDraft {

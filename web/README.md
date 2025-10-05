@@ -74,7 +74,7 @@ web/
 │       └── vite.config.ts  # Exposes components
 │
 ├── packages/
-│   ├── graphql-schema/     # GraphQL schema + types + MSW mocks
+│   ├── api-schema/     # GraphQL schema + types + MSW mocks
 │   ├── state-core/         # Zustand stores (darta, chalani, ui)
 │   ├── ui/          # Mobile-first design system
 │   └── ...                 # 7 more packages

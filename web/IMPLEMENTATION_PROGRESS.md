@@ -10,7 +10,7 @@
 - [x] Performance budgets defined (strict mobile-first)
 
 ### 1.2 GraphQL Schema Package ✅
-**Location:** `packages/graphql-schema/`
+**Location:** `packages/api-schema/`
 
 - [x] Complete schema with 7 domains (Darta, Chalani, Numbering, Audit, FY, Actors, Common)
 - [x] TypeScript types generated (18KB)
@@ -140,12 +140,12 @@
 - [x] Touch-optimized inputs (44px)
 - [x] Framer Motion animations
 - [x] Routes: `/darta` (list) and `/darta/new` (intake)
-- [x] **GraphQL Operations** (`packages/graphql-schema/src/operations/darta.graphql`)
+- [x] **GraphQL Operations** (`packages/api-schema/src/operations/darta.graphql`)
   - [x] `Dartas` query with pagination
   - [x] `Darta` single query
   - [x] `CreateDarta` mutation
   - [x] `RouteDarta` mutation
-- [x] **Generated TypeScript Hooks** (`packages/graphql-schema/src/generated/index.ts`)
+- [x] **Generated TypeScript Hooks** (`packages/api-schema/src/generated/index.ts`)
   - [x] `useDartasQuery` - Fetch list with pagination
   - [x] `useCreateDartaMutation` - Create new darta
   - [x] All types and enums auto-generated
@@ -243,7 +243,7 @@
 ## 📊 Current Stats
 
 ### Packages Created (10 total)
-- ✅ `@egov/graphql-schema` (complete with types + mocks)
+- ✅ `@egov/api-schema` (complete with types + mocks)
 - ✅ `@egov/perf-budget` (complete with Vite plugin)
 - ✅ `@egov/ui` (design tokens + components)
 - ✅ `@egov/state-core` (Zustand stores)

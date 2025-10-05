@@ -11,14 +11,14 @@ Successfully built the **foundational infrastructure** for the enterprise-grade 
 
 ## 📦 Packages Created (7)
 
-### 1. **@egov/graphql-schema** ✅
+### 1. **@egov/api-schema** ✅
 - Complete GraphQL schema (600+ lines)
 - Generated TypeScript types (18KB)
 - MSW mock handlers with realistic Nepali data
 - 50+ mock Dartas, 40+ mock Chalanis
 - Idempotent numbering service simulation
 
-**Location:** `packages/graphql-schema/`
+**Location:** `packages/api-schema/`
 
 ### 2. **@egov/perf-budget** ✅
 - Strict performance budgets (mobile-first)
@@ -120,11 +120,11 @@ pnpm build            # Build all packages
 pnpm typecheck        # TypeScript check
 
 # GraphQL
-pnpm --filter @egov/graphql-schema codegen  # Generate types
+pnpm --filter @egov/api-schema codegen  # Generate types
 
 # Individual packages
 pnpm --filter @egov/shell dev
-pnpm --filter @egov/graphql-schema codegen:watch
+pnpm --filter @egov/api-schema codegen:watch
 ```
 
 ---
@@ -134,7 +134,7 @@ pnpm --filter @egov/graphql-schema codegen:watch
 ```
 web/
 ├── packages/
-│   ├── graphql-schema/        (~20 files) ✅
+│   ├── api-schema/        (~20 files) ✅
 │   ├── perf-budget/           (~8 files) ✅
 │   ├── ui/             (~15 files) ✅
 │   ├── auth/                  (existing) ✅
@@ -204,8 +204,8 @@ Visit http://localhost:5200
 
 ### Test GraphQL Types:
 ```typescript
-import { Darta, Chalani } from '@egov/graphql-schema'
-import { mockDartas } from '@egov/graphql-schema/mocks'
+import { Darta, Chalani } from '@egov/api-schema'
+import { mockDartas } from '@egov/api-schema/mocks'
 ```
 
 ### Use UI Components:
@@ -246,8 +246,8 @@ import { Button, BottomSheet, tokens } from '@egov/ui'
 ### Import Paths:
 ```typescript
 // GraphQL
-import { Darta, Chalani } from '@egov/graphql-schema'
-import { startMockServiceWorker } from '@egov/graphql-schema/mocks'
+import { Darta, Chalani } from '@egov/api-schema'
+import { startMockServiceWorker } from '@egov/api-schema/mocks'
 
 // UI Components
 import { Button, BottomSheet, tokens } from '@egov/ui'
@@ -259,9 +259,9 @@ import { analyzeBundles } from '@egov/perf-budget'
 ```
 
 ### Key Files:
-- Schema: `packages/graphql-schema/src/schema/schema.graphql`
-- Types: `packages/graphql-schema/src/generated/graphql.ts`
-- Mocks: `packages/graphql-schema/src/mocks/`
+- Schema: `packages/api-schema/src/schema/schema.graphql`
+- Types: `packages/api-schema/src/generated/graphql.ts`
+- Mocks: `packages/api-schema/src/mocks/`
 - Tokens: `packages/ui/src/tokens/`
 - Components: `packages/ui/src/primitives/`
 
