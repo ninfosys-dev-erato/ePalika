@@ -1,0 +1,23 @@
+input DartaFilterInput {
+  fiscalYear: FiscalYear scope: Scope wardId: ID status: DartaStatus
+  priority: Priority organizationalUnitId: ID assigneeId: ID
+  intakeChannel: IntakeChannel fromDate: DateTime toDate: DateTime
+  search: String isOverdue: Boolean
+}
+input CreateDartaInput {
+  scope: Scope! wardId: ID subject: String! applicant: ApplicantInput!
+  intakeChannel: IntakeChannel! receivedDate: DateTime!
+  primaryDocumentId: ID! annexIds: [ID!] priority: Priority idempotencyKey: String!
+}
+input ApplicantInput {
+  type: ApplicantType! fullName: String! organization: String
+  email: String phone: String address: String identificationNumber: String
+}
+input RouteDartaInput {
+  dartaId: ID! organizationalUnitId: ID! assigneeId: ID
+  priority: Priority slaHours: Int notes: String
+}
+input ReviewDartaInput {
+  dartaId: ID! notes: String! decision: DartaReviewDecision! requestedInfo: String
+}
+enum DartaReviewDecision { APPROVE_REVIEW EDIT_REQUIRED }

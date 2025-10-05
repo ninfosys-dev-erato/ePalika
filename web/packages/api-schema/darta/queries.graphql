@@ -1,0 +1,7 @@
+extend type Query {
+  darta(id: ID!): Darta
+  dartaByNumber(dartaNumber: Int!, fiscalYear: FiscalYear!, scope: Scope!, wardId: ID): Darta
+  dartas(filter: DartaFilterInput, pagination: PaginationInput): DartaConnection!
+  myDartas(status: DartaStatus, pagination: PaginationInput): DartaConnection!
+  dartaStats(scope: Scope, fiscalYear: FiscalYear, wardId: ID): DartaStats!
+}

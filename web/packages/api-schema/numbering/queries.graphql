@@ -1,0 +1,10 @@
+extend type Query {
+  counter(scope: Scope!, type: CounterType!, fiscalYear: FiscalYear!, wardId: ID): Counter
+  numberAllocation(id: ID!): NumberAllocation
+  counters(scope: Scope, fiscalYear: FiscalYear): [Counter!]!
+}
+extend type Mutation {
+  allocateNumber(input: NumberAllocationInput!): NumberAllocation!
+  commitNumber(input: CommitNumberInput!): NumberAllocation!
+  voidNumber(input: VoidNumberInput!): NumberAllocation!
+}

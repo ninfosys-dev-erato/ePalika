@@ -1,0 +1,24 @@
+extend type Mutation {
+  createDarta(input: CreateDartaInput!): Darta!
+  submitDartaForReview(dartaId: ID!): Darta!
+  reviewDarta(input: ReviewDartaInput!): Darta!
+  classifyDarta(dartaId: ID!, classificationCode: String!): Darta!
+  reserveDartaNumber(dartaId: ID!, allocationId: ID!): Darta!
+  finalizeDartaRegistration(dartaId: ID!, allocationId: ID!): Darta!
+  directRegisterDarta(dartaId: ID!): Darta!
+  voidDarta(dartaId: ID!, reason: String!): Darta!
+  scanDarta(dartaId: ID!, scanAttachmentId: ID!): Darta!
+  enrichDartaMetadata(dartaId: ID!, metadata: JSON!): Darta!
+  finalizeDartaArchive(dartaId: ID!): Darta!
+  routeDarta(input: RouteDartaInput!): Darta!
+  sectionReviewDarta(dartaId: ID!): Darta!
+  requestDartaClarification(dartaId: ID!, note: String!): Darta!
+  provideDartaClarification(dartaId: ID!, note: String!): Darta!
+  acceptDarta(dartaId: ID!): Darta!
+  markDartaAction(dartaId: ID!, actionNote: String!): Darta!
+  issueDartaResponse(dartaId: ID!, responseChalaniId: ID, docAttachmentId: ID): Darta!
+  requestDartaAck(dartaId: ID!): Darta!
+  receiveDartaAck(dartaId: ID!): Darta!
+  supersedeDartaRecord(dartaId: ID!, reason: String!, newDartaId: ID): Darta!
+  closeDarta(dartaId: ID!): Darta!
+}

@@ -1,0 +1,16 @@
+type Counter {
+  id: ID! scope: Scope! type: CounterType! fiscalYear: FiscalYear!
+  currentValue: Int! lastIssuedAt: DateTime isLocked: Boolean!
+  lockedBy: User lockedReason: String ward: Ward
+}
+enum CounterType { DARTA CHALANI }
+
+type NumberAllocation {
+  id: ID! number: Int! formattedNumber: String! scope: Scope!
+  type: CounterType! fiscalYear: FiscalYear! ward: Ward
+  status: AllocationStatus! expiresAt: DateTime
+  allocatedBy: User! allocatedAt: DateTime! committedAt: DateTime
+  committedEntityType: String committedEntityId: ID
+  voidedAt: DateTime voidReason: String
+}
+enum AllocationStatus { PROVISIONAL COMMITTED EXPIRED VOIDED }
