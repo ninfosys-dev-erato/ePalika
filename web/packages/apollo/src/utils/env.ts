@@ -27,7 +27,7 @@ export function resolveMode(): GraphQLMode {
     "simulated"
   ).toLowerCase();
   const v = (fromQuery || fromEnv) as GraphQLMode;
-  return v === "federated" ? "federated" : "simulated";
+  return v === "live" ? "live" : "simulated";
 }
 
 export function resolveUrl(): string {

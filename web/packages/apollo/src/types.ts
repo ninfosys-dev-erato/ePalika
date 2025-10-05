@@ -1,9 +1,9 @@
 import type { ApolloClient, NormalizedCacheObject } from "@apollo/client";
 
-export type GraphQLMode = "simulated" | "federated";
+export type GraphQLMode = "simulated" | "live";
 
 export type CreateClientOptions = {
-  /** HTTP endpoint for federated mode */
+  /** HTTP endpoint for live mode */
   url?: string;
   /** Attach Authorization header synchronously */
   getAuthHeader?: () => Record<string, string> | undefined;
