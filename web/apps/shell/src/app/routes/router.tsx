@@ -22,6 +22,21 @@ const Root = createRootRoute({
       </Suspense>
     </div>
   ),
+  errorComponent: ({ error }) => (
+    <div style={{ padding: '2rem', color: '#dc2626' }}>
+      <h2>त्रुटि</h2>
+      <p>माफ गर्नुहोस्, केही गलत भयो।</p>
+      <details style={{ marginTop: '1rem', padding: '1rem', background: '#fee', borderRadius: '4px' }}>
+        <summary style={{ cursor: 'pointer', fontWeight: 'bold' }}>त्रुटि विवरण</summary>
+        <pre style={{ marginTop: '0.5rem', fontSize: '0.875rem', overflow: 'auto' }}>
+          {error.message || String(error)}
+        </pre>
+      </details>
+      <Link to="/" style={{ display: 'inline-block', marginTop: '1rem', color: '#dc2626' }}>
+        गृह पृष्ठमा फर्कनुहोस्
+      </Link>
+    </div>
+  ),
 })
 
 const Home = createRoute({

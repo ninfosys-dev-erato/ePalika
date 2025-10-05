@@ -3,10 +3,13 @@
   "private": true,
   "packageManager": "pnpm@9.0.0",
   "scripts": {
-    "dev": "concurrently --kill-others --names \"SHELL,DARTA,CHALANI\" -c \"bgBlue.bold,bgMagenta.bold,bgCyan.bold\" \"pnpm dev:shell\" \"pnpm dev:darta\" \"pnpm dev:chalani\"",
-    "dev:shell": "pnpm --filter @egov/shell dev",
-    "dev:darta": "pnpm --filter @egov/mfe-darta dev",
-    "dev:chalani": "pnpm --filter @egov/mfe-chalani dev",
+    "dev": "pnpm build:mfes && concurrently --kill-others --names \"SHELL,DARTA,CHALANI\" -c \"bgBlue.bold,bgMagenta.bold,bgCyan.bold\" \"pnpm dev:shell\" \"pnpm preview:darta\" \"pnpm preview:chalani\"",
+    "dev:shell": "pnpm --filter @egov/shell dev --host",
+    "dev:darta": "pnpm --filter @egov/mfe-darta dev --host",
+    "dev:chalani": "pnpm --filter @egov/mfe-chalani dev --host",
+    "preview:darta": "pnpm --filter @egov/mfe-darta preview --host",
+    "preview:chalani": "pnpm --filter @egov/mfe-chalani preview --host",
+    "build:mfes": "pnpm --filter @egov/mfe-darta build && pnpm --filter @egov/mfe-chalani build",
     "dev:all": "pnpm -r --parallel dev",
     "build": "pnpm -r build",
     "typecheck": "pnpm -r typecheck",
@@ -16,6 +19,7 @@
     "guard:css": "grep -R \"@carbon/styles\" apps/mfe-* || true && if grep -R \"@carbon/styles\" apps/mfe-*; then echo '❌ MFEs must not import Carbon CSS'; exit 1; else echo '✅ CSS ownership OK'; fi"
   },
   "devDependencies": {
+    "@module-federation/vite": "^1.8.1",
     "concurrently": "^9.2.1",
     "sass": "^1.93.2",
     "typescript": "^5.6.3",

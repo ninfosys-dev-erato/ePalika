@@ -10,10 +10,10 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@apollo/client": "^4.0.6",
     "@egov/graphql-schema": "workspace:*",
     "@egov/state-core": "workspace:*",
     "@egov/ui-mobile": "workspace:*",
-    "@apollo/client": "^4.0.6",
     "@tanstack/react-query": "^5.90.2",
     "@tanstack/react-router": "^1.132.19",
     "framer-motion": "^12.0.0",
@@ -22,7 +22,6 @@
     "zustand": "^5.0.2"
   },
   "devDependencies": {
-    "@originjs/vite-plugin-federation": "^1.4.1",
     "@types/react": "^18.3.7",
     "@types/react-dom": "^18.3.2",
     "@vitejs/plugin-react": "^5.0.4",

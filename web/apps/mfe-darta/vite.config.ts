@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import federation from '@originjs/vite-plugin-federation'
+import { federation } from '@module-federation/vite'
 import tsconfigPaths from 'vite-tsconfig-paths'
 
 export default defineConfig({
@@ -10,17 +10,32 @@ export default defineConfig({
     federation({
       name: 'mfe_darta',
       filename: 'remoteEntry.js',
+      manifest: false,
       exposes: {
-        './DartaIntake': './src/features/intake/DartaIntake',
-        './DartaList': './src/features/list/DartaList',
-        './TriageInbox': './src/features/triage/TriageInbox',
+        './DartaIntake': './src/features/intake/DartaIntake.tsx',
+        './DartaList': './src/features/list/DartaList.tsx',
+        './TriageInbox': './src/features/triage/TriageInbox.tsx',
       },
       shared: {
-        react: { singleton: true, requiredVersion: '^18.3.1' },
-        'react-dom': { singleton: true, requiredVersion: '^18.3.1' },
-        '@apollo/client': { singleton: true },
-        '@tanstack/react-query': { singleton: true },
-        'zustand': { singleton: true },
+        react: {
+          singleton: true,
+          requiredVersion: '^18.3.1',
+        },
+        'react-dom': {
+          singleton: true,
+          requiredVersion: '^18.3.1',
+        },
+        '@apollo/client': {
+          singleton: true,
+          requiredVersion: '^4.0.6',
+          strictVersion: true,
+        },
+        '@tanstack/react-query': {
+          singleton: true,
+        },
+        'zustand': {
+          singleton: true,
+        },
       },
     }),
   ],

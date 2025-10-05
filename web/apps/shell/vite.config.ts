@@ -1,6 +1,6 @@
 import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
-import federation from '@originjs/vite-plugin-federation'
+import { federation } from '@module-federation/vite'
 import tsconfigPaths from 'vite-tsconfig-paths'
 // import { perfBudgetPlugin } from '@egov/perf-budget/vite-plugin'
 
@@ -13,17 +13,43 @@ export default defineConfig(({ mode }) => {
       federation({
         name: 'shell',
         remotes: {
-          mfe_darta: mode === 'development'
-            ? 'http://localhost:5201/assets/remoteEntry.js'
-            : `${env.VITE_MFE_DARTA_URL || ''}/assets/remoteEntry.js`,
+          mfe_darta: {
+            type: 'module',
+            name: 'mfe_darta',
+            entry: mode === 'development'
+              ? 'http://localhost:5201/remoteEntry.js'
+              : `${env.VITE_MFE_DARTA_URL || ''}/remoteEntry.js`,
+            entryGlobalName: 'mfe_darta',
+            shareScope: 'default',
+          },
         },
         shared: {
-          react: { singleton: true, requiredVersion: '^18.3.1' },
-          'react-dom': { singleton: true, requiredVersion: '^18.3.1' },
-          '@apollo/client': { singleton: true },
-          '@tanstack/react-query': { singleton: true },
-          '@tanstack/react-router': { singleton: true },
-          'zustand': { singleton: true },
+          react: {
+            singleton: true,
+            requiredVersion: '^18.3.1',
+          },
+          'react-dom': {
+            singleton: true,
+            requiredVersion: '^18.3.1',
+          },
+          '@apollo/client': {
+            singleton: true,
+            requiredVersion: '^4.0.6',
+            eager: true,
+          },
+          '@tanstack/react-query': {
+            singleton: true,
+          },
+          '@tanstack/react-router': {
+            singleton: true,
+          },
+          'zustand': {
+            singleton: true,
+          },
+          '@egov/graphql-schema': {
+            singleton: true,
+            eager: true,
+          },
         },
       }),
       // TODO: Re-enable after fixing ESM imports

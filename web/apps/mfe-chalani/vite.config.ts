@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import federation from '@originjs/vite-plugin-federation'
+import { federation } from '@module-federation/vite'
 import tsconfigPaths from 'vite-tsconfig-paths'
 
 export default defineConfig({
@@ -10,15 +10,29 @@ export default defineConfig({
     federation({
       name: 'mfe_chalani',
       filename: 'remoteEntry.js',
+      manifest: true,
       exposes: {
-        './ChalaniCompose': './src/features/compose/ChalaniCompose',
+        './ChalaniCompose': './src/features/compose/ChalaniCompose.tsx',
       },
       shared: {
-        react: { singleton: true, requiredVersion: '^18.3.1' },
-        'react-dom': { singleton: true, requiredVersion: '^18.3.1' },
-        '@apollo/client': { singleton: true },
-        '@tanstack/react-query': { singleton: true },
-        zustand: { singleton: true },
+        react: {
+          singleton: true,
+          requiredVersion: '^18.3.1',
+        },
+        'react-dom': {
+          singleton: true,
+          requiredVersion: '^18.3.1',
+        },
+        '@apollo/client': {
+          singleton: true,
+          requiredVersion: '^4.0.6',
+        },
+        '@tanstack/react-query': {
+          singleton: true,
+        },
+        'zustand': {
+          singleton: true,
+        },
       },
     }),
   ],
