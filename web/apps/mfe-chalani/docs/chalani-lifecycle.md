@@ -153,6 +153,20 @@ Applies to:
 
 ---
 
+## 11. Implementation Planning
+
+```
+/chalani
+  ├── dashboard           # Overview: counts, quick actions
+  ├── create              # New Chalani wizard
+  ├── review              # PENDING_REVIEW queue (Clerk/Reviewer)
+/chalani/approval         # PENDING_APPROVAL queue (Approvers)
+/chalani/registry         # NUMBER_RESERVED, REGISTERED list, void/supersede
+/chalani/dispatch         # DISPATCHED, IN_TRANSIT, ACKNOWLEDGED board
+/chalani/search           # global search/filter/audit
+/chalani/:id              # details + timeline of one chalani
+```
+
 ## 10. Future Considerations
 
 * SLA timers for review & approval
