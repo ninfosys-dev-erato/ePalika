@@ -54,101 +54,6 @@ Out of scope: IDP implementation details inside Keycloak (handled by Keycloak ad
 * **Credential(id, type, status, rotatedAt, expiresAt, factors[])**
 * **Delegation(id, fromGrantId, toUserId, startAt, endAt, status, constraints{})**
 
-
-```mermaid
-classDiagram
-  class Person {
-    id: ID
-    legalName: string
-    dob: date
-    govIdRefs: string[]
-    contacts: Contact[]
-    primaryAddressRef: ID
-  }
-
-  class User {
-    id: ID
-    personId: ID
-    username: string
-    status: enum
-    mfaEnrolled: Factor[]
-    idpLinks: string[]
-    attributes: map
-  }
-
-  class OrgUnit {
-    id: ID
-    type: PALIKA|WARD|SECTION
-    parentId: ID
-    code: string
-    fiscalContext: string
-  }
-
-  class Role {
-    id: ID
-    key: string
-    description: string
-    constraints: {scopeTypes, SoDConflicts[], requiresMFA?}
-  }
-
-  class Grant {
-    id: ID
-    subject: user|group
-    roleId: ID
-    scope: orgUnitId|recordRef
-    startAt: datetime
-    endAt: datetime
-    status: enum
-    conditions: map
-  }
-
-  class Group {
-    id: ID
-    name: string
-    members: User[]
-  }
-
-  class Address {
-    id: ID
-    raw: string
-    normalized: string
-    geo: {lat,lng}
-    status: enum
-    evidence: Evidence[]
-  }
-
-  class Credential {
-    id: ID
-    type: PASSWORD|WEBAUTHN|TOTP|TOKEN
-    status: enum
-    rotatedAt: datetime
-    expiresAt: datetime
-    factors: Factor[]
-  }
-
-  class Delegation {
-    id: ID
-    fromGrantId: ID
-    toUserId: ID
-    startAt: datetime
-    endAt: datetime
-    status: enum
-    constraints: map
-  }
-
-  %% Relationships
-  User --> Person : links
-  OrgUnit "1" --> "0..*" OrgUnit : parent
-  Grant --> User : subject
-  Grant --> Group : subject (alt)
-  Grant --> Role : roleId
-  Grant --> OrgUnit : scope
-  Delegation --> Grant : fromGrantId
-  Address --> Person : belongsTo (primary/secondary)
-  Credential --> User : belongsTo
-  Group "1" --> "0..*" User : members
-```
-
 ---
 
 ## 5. Actors (Identity Domain)
@@ -164,75 +69,13 @@ classDiagram
 | **Service Account Owner**    | प्रणाली सेवा स्वामी               | Manages headless credentials with least privilege & rotation.              |
 | **Staff / Citizen User**     | कर्मचारी/नागरिक                   | Requests access, maintains profile & addresses, performs MFA.              |
 
-
-```mermaid
-sequenceDiagram
-  autonumber
-  participant HR as HR Officer
-  participant ID as identity-svc
-  participant KC as Keycloak (IdP)
-  participant U as User
-
-  HR->>ID: Create Person (KYC docs)
-  ID-->>HR: Person ID
-  HR->>ID: inviteUser(PersonID, email/phone)
-  ID-->>U: Send verification link/OTP
-  U->>ID: Verify (email/phone/KYC)
-  ID->>KC: Provision account (realm=palika)
-  KC-->>ID: User created
-  ID-->>HR: Status = VERIFIED → PENDING_APPROVAL
-  HR->>ID: approveProvisioning
-  ID-->>U: Account ACTIVE (no grants yet)
-```
-
-```mermaid
-sequenceDiagram
-  autonumber
-  participant U as User
-  participant ID as identity-svc
-  participant FGA as OpenFGA
-  participant OA as Org Admin/Approver
-
-  U->>ID: requestGrant(roleKey, scope, reason)
-  ID->>ID: autoChecks(SoD, scope, tenure, MFA)
-  alt checks pass
-    ID-->>OA: PENDING_REVIEW (inbox)
-    OA->>ID: approverOk
-    ID->>FGA: write tuples (role holder in scope)
-    FGA-->>ID: ok
-    ID-->>U: Grant EFFECTIVE
-  else checks fail
-    ID-->>U: REJECTED (reason)
-  end
-```
 ---
-
 
 ## 6. State Models
 
 ### 6.1 **User Account Lifecycle**
 
-```mermaid
-stateDiagram-v2
-  [*] --> PRE_REGISTERED: createPersonRecord
-  PRE_REGISTERED --> PENDING_VERIFICATION: inviteUser
-  PENDING_VERIFICATION --> VERIFIED: verifyEmail | phone | KYC
-  PENDING_VERIFICATION --> EXPIRED: inviteTimeout
 
-  VERIFIED --> PENDING_APPROVAL: submitForProvisioning
-  PENDING_APPROVAL --> ACTIVE: approveProvisioning
-  PENDING_APPROVAL --> REJECTED: rejectProvisioning
-
-  ACTIVE --> SUSPENDED: suspend (HR/SecOps)
-  SUSPENDED --> ACTIVE: reinstate
-  ACTIVE --> LOCKED: tooManyFailures | riskSignal
-  LOCKED --> ACTIVE: adminUnlock | selfRecoverMFA
-
-  ACTIVE --> DISABLED: offboard
-  DISABLED --> DEPROVISIONED: finalizeDeprovision
-  DEPROVISIONED --> ARCHIVED: archivePII
-  ARCHIVED --> ANONYMIZED: retentionElapsed
-```
 
 **Notes**
 
@@ -247,24 +90,7 @@ stateDiagram-v2
 
 ### 6.2 **Role Grant Lifecycle** (dynamic, scope-aware, OpenFGA-backed)
 
-```mermaid
-stateDiagram-v2
-  [*] --> REQUESTED: requestGrant(role, scope, reason)
 
-  REQUESTED --> PENDING_REVIEW: autoChecksPass (SoD, scope, tenure)
-  REQUESTED --> REJECTED: autoChecksFail
-
-  PENDING_REVIEW --> APPROVED: approverOk
-  PENDING_REVIEW --> REJECTED: approverReject
-
-  APPROVED --> EFFECTIVE: writeTuplesOpenFGA
-  EFFECTIVE --> EXPIRED: timeBoundEnd
-  EFFECTIVE --> REVOKED: revoke
-
-  EXPIRED --> RENEW_REQUESTED: userReRequests
-  RENEW_REQUESTED --> APPROVED: approverOk
-  RENEW_REQUESTED --> REJECTED: approverReject
-```
 
 **Controls**
 
@@ -276,18 +102,6 @@ stateDiagram-v2
 
 ### 6.3 **Address Verification Lifecycle**
 
-```mermaid
-stateDiagram-v2
-  [*] --> CAPTURED: addAddress(raw)
-  CAPTURED --> NORMALIZED: normalize
-  NORMALIZED --> GEO_VALIDATED: geocodeValidate
-
-  GEO_VALIDATED --> VERIFIED: evidenceAttached(utility|citizenship|wardLetter)
-  GEO_VALIDATED --> REJECTED: mismatchOrInvalid
-
-  VERIFIED --> HISTORICAL: supersededByNewPrimary
-  REJECTED --> CAPTURED: recapture
-```
 
 ---
 
@@ -486,9 +300,3 @@ service IdentityService {
 3. Audit OpenFGA tuple diffs weekly.
 
 ---
-
-If you want, I can convert this into a **PlantUML package + OpenFGA schema file** and a **.docx/PDF** with your corporate styling, ready to circulate to the team.
-
-
-
-

@@ -1,12 +1,18 @@
 @startuml address-lifecycle
 skinparam shadowing false
 skinparam dpi 150
-skinparam state { BackgroundColor #f4f4f4; BorderColor #0f62fe; ArrowColor #0f62fe; FontSize 12; RoundCorner 8 }
+skinparam state {
+  BackgroundColor #f4f4f4
+  BorderColor #0f62fe
+  ArrowColor #0f62fe
+  FontSize 12
+  RoundCorner 8
+}
 
-[*] --> CAPTURED : addAddress(raw)
+[*] --> CAPTURED : "addAddress(raw)"
 CAPTURED --> NORMALIZED : normalize
 NORMALIZED --> GEO_VALIDATED : geocodeValidate
-GEO_VALIDATED --> VERIFIED : evidenceAttached(utility|citizenship|wardLetter)
+GEO_VALIDATED --> VERIFIED : "evidenceAttached(utility / citizenship / wardLetter)"
 GEO_VALIDATED --> REJECTED : mismatchOrInvalid
 VERIFIED --> HISTORICAL : supersededByNewPrimary
 REJECTED --> CAPTURED : recapture

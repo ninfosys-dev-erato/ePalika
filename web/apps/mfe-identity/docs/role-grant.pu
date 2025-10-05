@@ -1,10 +1,16 @@
 @startuml grant-lifecycle
 skinparam shadowing false
 skinparam dpi 150
-skinparam state { BackgroundColor #f4f4f4; BorderColor #0f62fe; ArrowColor #0f62fe; FontSize 12; RoundCorner 8 }
+skinparam state {
+  BackgroundColor #f4f4f4
+  BorderColor #0f62fe
+  ArrowColor #0f62fe
+  FontSize 12
+  RoundCorner 8
+}
 
-[*] --> REQUESTED : requestGrant(role, scope, reason)
-REQUESTED --> PENDING_REVIEW : autoChecksPass (SoD, scope, tenure)
+[*] --> REQUESTED : "requestGrant(role, scope, reason)"
+REQUESTED --> PENDING_REVIEW : "autoChecksPass (SoD, scope, tenure)"
 REQUESTED --> REJECTED : autoChecksFail
 
 PENDING_REVIEW --> APPROVED : approverOk
