@@ -1,4 +1,5 @@
 // src/auth/adapters/federated.ts
+/// <reference types="../env.d.ts" />
 import type { AuthAdapter, AuthEvent, AuthInitResult, BaseAuthConfig } from '../types'
 
 type KC = any
