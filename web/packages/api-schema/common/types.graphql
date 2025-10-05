@@ -1,0 +1,24 @@
+type Ward {
+  id: ID!
+  number: Int!
+  name: String!
+  localBodyId: ID!
+  localBodyName: String
+  districtId: ID
+  provinceId: ID
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+type User {
+  id: ID!
+  username: String!
+  fullName: String
+  email: String
+  phone: String
+  roles: [String!]
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+

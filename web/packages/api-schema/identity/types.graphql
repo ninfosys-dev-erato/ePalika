@@ -7,6 +7,26 @@ type AddressEvidence { id: ID! kind: String! fileId: ID! uploadedAt: DateTime! }
 
 type OrgUnit { id: ID! name: String! code: String! type: OrgUnitType! parent: OrgUnit children: [OrgUnit!]! wardNumber: Int createdAt: DateTime! updatedAt: DateTime! }
 
+
+
+# ===========================================================================
+# 🧭 Organizational Unit Type
+# ===========================================================================
+enum OrgUnitType {
+  ADMINISTRATION
+  ACCOUNT
+  REVENUE
+  ENGINEERING
+  EDUCATION
+  HEALTH
+  AGRICULTURE
+  PLANNING
+  SOCIAL_DEVELOPMENT
+  INFORMATION_TECHNOLOGY
+  GENERAL_SERVICE
+  OTHER
+}
+
 type Role { id: ID! key: String! name: String! description: String permissions: [Permission!]! constraints: RoleConstraints! createdAt: DateTime! updatedAt: DateTime! }
 type Permission { resource: String! action: String! }
 type RoleConstraints { scopeTypes: [OrgUnitType!]! requiresMFA: Boolean! SoDConflicts: [String!]! }
@@ -17,3 +37,62 @@ type GrantSubject { type: String! user: User group: Group }
 type ScopeRef { orgUnit: OrgUnit! }
 type Delegation { id: ID! fromGrant: Grant! toUser: User! status: DelegationStatus! startAt: DateTime! endAt: DateTime constraints: JSON createdAt: DateTime! endedAt: DateTime reason: String }
 type Credential { id: ID! type: CredentialType! status: CredentialStatus! createdAt: DateTime! lastUsedAt: DateTime rotatedAt: DateTime expiresAt: DateTime }
+enum CredentialType {
+  CITIZENSHIP
+  DISABILITY_CARD
+  WARD_RECOMMENDATION
+  TAX_CLEARANCE
+  BUSINESS_REGISTRATION
+  LAND_OWNERSHIP
+  EDUCATIONAL_CERTIFICATE
+  OTHER
+}
+
+enum CredentialStatus {
+  PENDING
+  ACTIVE
+  EXPIRED
+  REVOKED
+  SUSPENDED
+}
+
+# ===========================================================================
+# 🔄 Delegation Lifecycle Status
+# ===========================================================================
+enum DelegationStatus {
+  PENDING          # Delegation request created but not yet approved
+  ACTIVE           # Delegation is currently effective
+  SUSPENDED        # Temporarily paused (manual or policy-based)
+  REVOKED          # Cancelled before endAt
+  COMPLETED        # Naturally ended (endAt reached)
+  EXPIRED          # Timed out automatically
+}
+
+# ===========================================================================
+# 🪶 Grant Lifecycle Status
+# ===========================================================================
+enum GrantStatus {
+  REQUESTED       # Grant requested, awaiting approval
+  APPROVED        # Approved and active
+  ACTIVE          # Currently effective and usable
+  SUSPENDED       # Temporarily disabled by admin/policy
+  REVOKED         # Permanently revoked
+  EXPIRED         # Automatically expired after end date
+}
+
+# ===========================================================================
+# ✅ Verification Method
+# ---------------------------------------------------------------------------
+# Represents how an entity (User, Address, Credential, etc.) was verified.
+# ===========================================================================
+enum VerificationMethod {
+  MANUAL_REVIEW           # Verified manually by authorized staff
+  DOCUMENT_VERIFICATION   # Verified through submitted document evidence
+  FIELD_INSPECTION        # Physical verification at location
+  DIGITAL_SIGNATURE       # eSignature or certificate-based verification
+  OTP_VERIFICATION        # Via SMS or email OTP
+  BIOMETRIC_VERIFICATION  # Using biometric match
+  SYSTEM_AUTO_VERIFY      # Automatically verified by system rules
+  THIRD_PARTY_API         # Verified via an external service (e.g. NRB, MoHA)
+  OTHER                   # Custom or unspecified verification method
+}

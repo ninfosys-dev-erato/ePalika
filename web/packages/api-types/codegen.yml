@@ -21,7 +21,7 @@
 # =============================================================================
 
 schema:
-  - "./packages/api-schema/**/*.graphql"
+  - "./packages/api-schema/index.graphql"
 documents:
   - "../../apps/**/*.{ts,tsx,graphql}" # All MFE-specific GraphQL operations
   - "./src/fragments/**/*.graphql" # Shared fragments & reusable queries

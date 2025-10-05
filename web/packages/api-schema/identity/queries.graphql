@@ -13,6 +13,22 @@ extend type Query {
 }
 
 input UsersFilter { status: UserStatus orgUnitId: ID search: String }
+# ===========================================================================
+# ✅ User Status
+# ---------------------------------------------------------------------------
+# Represents the lifecycle or active state of a system user account.
+# ===========================================================================
+enum UserStatus {
+  ACTIVE             # User is active and has access
+  INACTIVE           # Temporarily disabled or suspended
+  PENDING_VERIFICATION  # Awaiting email, phone, or KYC verification
+  LOCKED             # Locked due to security reasons (too many failures, etc.)
+  DISABLED           # Offboarded or manually disabled
+  DEPROVISIONED      # Fully removed from active directory
+  ARCHIVED           # Retained for audit, cannot log in
+}
+
+
 input GrantsFilter { userId: ID roleKey: String orgUnitId: ID status: GrantStatus }
 input RolesFilter { key: String search: String }
 
