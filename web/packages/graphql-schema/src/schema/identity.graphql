@@ -1,0 +1,534 @@
+# ============================================================================
+# e-Palika Identity & Access GraphQL Schema (identity-svc)
+# Version: 0.9 (matches Identity Lifecycle spec)
+# ============================================================================
+
+scalar DateTime
+scalar JSON
+
+schema {
+  query: Query
+  mutation: Mutation
+}
+
+# ----------------------------------------------------------------------------
+# Core enums
+# ----------------------------------------------------------------------------
+
+enum UserStatus {
+  PRE_REGISTERED
+  PENDING_VERIFICATION
+  PENDING_APPROVAL
+  ACTIVE
+  LOCKED
+  SUSPENDED
+  DISABLED
+  DEPROVISIONED
+  ARCHIVED
+  ANONYMIZED
+}
+
+enum VerificationMethod {
+  EMAIL
+  SMS
+  KYC
+}
+
+enum CredentialType {
+  PASSWORD
+  WEBAUTHN
+  TOTP
+  OAUTH_LINK
+  API_TOKEN
+}
+
+enum CredentialStatus {
+  ACTIVE
+  ROTATION_DUE
+  COMPROMISED
+  REVOKED
+}
+
+enum AddressStatus {
+  UNVERIFIED
+  PENDING_VERIFICATION
+  VERIFIED
+  REJECTED
+}
+
+enum OrgUnitType {
+  PALIKA
+  WARD
+  SECTION
+}
+
+enum GrantStatus {
+  REQUESTED
+  PENDING_APPROVAL
+  APPROVED
+  EFFECTIVE
+  DENIED
+  REVOKED
+  EXPIRED
+}
+
+enum DelegationStatus {
+  PENDING
+  ACTIVE
+  ENDED
+  REVOKED
+}
+
+# ----------------------------------------------------------------------------
+# Common pagination
+# ----------------------------------------------------------------------------
+
+input PaginationInput {
+  page: Int! = 1
+  limit: Int! = 20
+}
+
+type PageInfo {
+  page: Int!
+  limit: Int!
+  total: Int!
+  totalPages: Int!
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+}
+
+# ----------------------------------------------------------------------------
+# People & Users
+# ----------------------------------------------------------------------------
+
+type Person {
+  id: ID!
+  legalName: String!
+  preferredName: String
+  dateOfBirth: String
+  govIdRefs: [GovIdRef!]!
+  contacts: [Contact!]!
+  primaryAddress: Address
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type GovIdRef {
+  type: String!          # e.g., "Citizenship", "PAN"
+  value: String!
+  issuedBy: String
+  expiresAt: DateTime
+}
+
+type Contact {
+  type: String!          # "EMAIL" | "PHONE"
+  value: String!
+  verified: Boolean!
+  verifiedAt: DateTime
+}
+
+type Address {
+  id: ID!
+  raw: String!
+  normalized: JSON
+  geo: GeoPoint
+  status: AddressStatus!
+  evidence: [AddressEvidence!]!
+  createdAt: DateTime!
+  verifiedAt: DateTime
+}
+
+type GeoPoint {
+  lat: Float!
+  lng: Float!
+}
+
+type AddressEvidence {
+  id: ID!
+  kind: String!          # e.g., "utility_bill", "tax_receipt"
+  fileId: ID!
+  uploadedAt: DateTime!
+}
+
+type User {
+  id: ID!
+  username: String!
+  status: UserStatus!
+  person: Person!
+  orgUnit: OrgUnit
+  email: String
+  phone: String
+  actorType: String
+  mfaMethods: [CredentialType!]!
+  idpLinks: [IdpLink!]!
+  attributes: JSON
+  lastLogin: DateTime
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type IdpLink {
+  provider: String!      # e.g., "keycloak"
+  subjectId: String!
+  linkedAt: DateTime!
+}
+
+# ----------------------------------------------------------------------------
+# Organization
+# ----------------------------------------------------------------------------
+
+type OrgUnit {
+  id: ID!
+  name: String!
+  code: String!
+  type: OrgUnitType!
+  parent: OrgUnit
+  children: [OrgUnit!]!
+  wardNumber: Int
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+input OrgUnitInput {
+  name: String!
+  code: String!
+  type: OrgUnitType!
+  parentId: ID
+  wardNumber: Int
+}
+
+# ----------------------------------------------------------------------------
+# Roles, Grants, Groups, Delegations
+# ----------------------------------------------------------------------------
+
+type Role {
+  id: ID!
+  key: String!                   # e.g., "ward_clerk", "cao"
+  name: String!
+  description: String
+  permissions: [Permission!]!    # declarative actions
+  constraints: RoleConstraints!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type Permission {
+  resource: String!              # e.g., "chalani", "darta"
+  action: String!                # e.g., "approve", "register"
+}
+
+type RoleConstraints {
+  scopeTypes: [OrgUnitType!]!    # where this role can be granted
+  requiresMFA: Boolean!
+  SoDConflicts: [String!]!       # role.keys that conflict
+}
+
+type Group {
+  id: ID!
+  name: String!
+  description: String
+  members: [User!]!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type Grant {
+  id: ID!
+  role: Role!
+  subject: GrantSubject!
+  scope: ScopeRef!
+  status: GrantStatus!
+  requestedBy: User!
+  requestedAt: DateTime!
+  decidedBy: User
+  decidedAt: DateTime
+  startAt: DateTime
+  endAt: DateTime
+  conditions: JSON
+  decisionReason: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type GrantSubject {
+  type: String!                  # "USER" | "GROUP"
+  user: User
+  group: Group
+}
+
+type ScopeRef {
+  orgUnit: OrgUnit!
+}
+
+type Delegation {
+  id: ID!
+  fromGrant: Grant!
+  toUser: User!
+  status: DelegationStatus!
+  startAt: DateTime!
+  endAt: DateTime
+  constraints: JSON
+  createdAt: DateTime!
+  endedAt: DateTime
+  reason: String
+}
+
+type Credential {
+  id: ID!
+  type: CredentialType!
+  status: CredentialStatus!
+  createdAt: DateTime!
+  lastUsedAt: DateTime
+  rotatedAt: DateTime
+  expiresAt: DateTime
+}
+
+# ----------------------------------------------------------------------------
+# Inputs
+# ----------------------------------------------------------------------------
+
+input PersonInput {
+  legalName: String!
+  preferredName: String
+  dateOfBirth: String
+  contacts: [ContactInput!]
+  primaryAddress: AddressInput
+  govIdRefs: [GovIdRefInput!]
+}
+
+input GovIdRefInput {
+  type: String!
+  value: String!
+  issuedBy: String
+  expiresAt: DateTime
+}
+
+input ContactInput {
+  type: String!    # "EMAIL" | "PHONE"
+  value: String!
+}
+
+input AddressInput {
+  raw: String!
+  normalized: JSON
+  lat: Float
+  lng: Float
+}
+
+input EvidenceInput {
+  kind: String!
+  fileId: ID!
+}
+
+input InviteUserInput {
+  person: PersonInput!
+  username: String!
+  email: String
+  phone: String
+  orgUnitId: ID
+  actorType: String
+  attributes: JSON
+}
+
+input RequestGrantInput {
+  userId: ID!
+  roleKey: String!
+  orgUnitId: ID!
+  reason: String
+  startAt: DateTime
+  endAt: DateTime
+}
+
+input ApproveGrantInput {
+  grantId: ID!
+  approve: Boolean!
+  reason: String
+  overrideSoD: Boolean = false
+}
+
+input RevokeGrantInput {
+  grantId: ID!
+  reason: String!
+}
+
+input DelegateGrantInput {
+  grantId: ID!
+  toUserId: ID!
+  startAt: DateTime!
+  endAt: DateTime
+  constraints: JSON
+}
+
+input PermissionCheckInput {
+  userId: ID
+  resourceType: String!
+  resourceId: ID
+  action: String!
+  orgUnitId: ID
+  # If userId omitted, defaults to caller (me)
+}
+
+input UsersFilter {
+  status: UserStatus
+  orgUnitId: ID
+  search: String
+}
+
+input GrantsFilter {
+  userId: ID
+  roleKey: String
+  orgUnitId: ID
+  status: GrantStatus
+}
+
+input RolesFilter {
+  key: String
+  search: String
+}
+
+# ----------------------------------------------------------------------------
+# Results / helpers
+# ----------------------------------------------------------------------------
+
+type PermissionCheckResult {
+  allowed: Boolean!
+  matchedGrantIds: [ID!]!
+  reason: String
+}
+
+type UserConnection {
+  edges: [UserEdge!]!
+  pageInfo: PageInfo!
+}
+
+type UserEdge {
+  cursor: String!
+  node: User!
+}
+
+type GrantConnection {
+  edges: [GrantEdge!]!
+  pageInfo: PageInfo!
+}
+
+type GrantEdge {
+  cursor: String!
+  node: Grant!
+}
+
+type RoleConnection {
+  edges: [RoleEdge!]!
+  pageInfo: PageInfo!
+}
+
+type RoleEdge {
+  cursor: String!
+  node: Role!
+}
+
+# ----------------------------------------------------------------------------
+# Query
+# ----------------------------------------------------------------------------
+
+type Query {
+  # Me
+  me: User!
+
+  # Users & People
+  user(id: ID!): User
+  users(filter: UsersFilter, pagination: PaginationInput): UserConnection!
+  person(id: ID!): Person
+
+  # Org units
+  orgUnit(id: ID!): OrgUnit
+  orgUnits(parentId: ID, type: OrgUnitType, search: String): [OrgUnit!]!
+
+  # Roles & Grants
+  role(key: String!): Role
+  roles(filter: RolesFilter, pagination: PaginationInput): RoleConnection!
+  grant(id: ID!): Grant
+  grants(filter: GrantsFilter, pagination: PaginationInput): GrantConnection!
+  pendingGrantRequests(pagination: PaginationInput): GrantConnection!
+
+  # Groups
+  group(id: ID!): Group
+  groups(search: String): [Group!]!
+
+  # Delegations
+  delegations(userId: ID, status: DelegationStatus): [Delegation!]!
+
+  # Credentials & addresses
+  userCredentials(userId: ID!): [Credential!]!
+  userAddresses(userId: ID!): [Address!]!
+
+  # Authorization (OpenFGA-backed)
+  checkPermission(input: PermissionCheckInput!): PermissionCheckResult!
+  effectiveGrants(userId: ID!, orgUnitId: ID): [Grant!]!
+}
+
+# ----------------------------------------------------------------------------
+# Mutation
+# ----------------------------------------------------------------------------
+
+type Mutation {
+  # Onboarding / account
+  inviteUser(input: InviteUserInput!): User!                       # -> PRE_REGISTERED
+  verifyUser(userId: ID!, method: VerificationMethod!, token: String!): Boolean!
+  approveUserProvisioning(userId: ID!): User!                      # -> ACTIVE
+  suspendUser(userId: ID!, reason: String!): User!                 # -> SUSPENDED
+  unlockUser(userId: ID!): User!                                   # LOCKED -> ACTIVE
+  disableUser(userId: ID!, reason: String!): User!                 # -> DISABLED
+  deprovisionUser(userId: ID!, reason: String!): User!             # -> DEPROVISIONED
+  anonymizeUser(userId: ID!): User!                                # -> ANONYMIZED
+
+  # Addresses
+  addAddress(userId: ID!, address: AddressInput!): Address!
+  verifyAddress(addressId: ID!, evidence: [EvidenceInput!]!): Address!
+  rejectAddress(addressId: ID!, reason: String!): Address!
+  setPrimaryAddress(userId: ID!, addressId: ID!): Person!
+
+  # Roles & Grants
+  requestGrant(input: RequestGrantInput!): Grant!
+  approveGrant(input: ApproveGrantInput!): Grant!
+  revokeGrant(input: RevokeGrantInput!): Grant!
+  renewGrant(grantId: ID!, endAt: DateTime!): Grant!
+
+  # Delegations
+  delegateGrant(input: DelegateGrantInput!): Delegation!
+  endDelegation(delegationId: ID!, reason: String): Delegation!
+
+  # Groups
+  createGroup(name: String!, description: String): Group!
+  addUserToGroup(groupId: ID!, userId: ID!): Group!
+  removeUserFromGroup(groupId: ID!, userId: ID!): Group!
+
+  # Org units
+  createOrgUnit(input: OrgUnitInput!): OrgUnit!
+  updateOrgUnit(id: ID!, input: OrgUnitInput!): OrgUnit!
+  deleteOrgUnit(id: ID!): Boolean!
+
+  # Credentials (admin flows; self-service can be separate)
+  addCredential(userId: ID!, type: CredentialType!): Credential!
+  revokeCredential(credentialId: ID!, reason: String!): Credential!
+  rotateCredential(credentialId: ID!): Credential!
+
+  # Roles catalog (admin)
+  upsertRole(
+    key: String!,
+    name: String!,
+    description: String,
+    permissions: [PermissionInput!]!,
+    constraints: RoleConstraintsInput!
+  ): Role!
+}
+
+input PermissionInput {
+  resource: String!
+  action: String!
+}
+
+input RoleConstraintsInput {
+  scopeTypes: [OrgUnitType!]!
+  requiresMFA: Boolean!
+  SoDConflicts: [String!]!
+}

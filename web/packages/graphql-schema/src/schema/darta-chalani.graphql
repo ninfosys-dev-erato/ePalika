@@ -1,0 +1,759 @@
+# ============================================================================
+# Darta-Chalani System GraphQL Schema
+# Enterprise-grade Registry & Dispatch Management
+# Version: 2.0 (reflects detailed Chalani & Darta lifecycles)
+# ============================================================================
+
+scalar DateTime
+scalar Upload
+scalar JSON
+scalar FiscalYear
+
+schema {
+  query: Query
+  mutation: Mutation
+}
+
+# ============================================================================
+# COMMON TYPES
+# ============================================================================
+
+enum Scope {
+  MUNICIPALITY
+  WARD
+}
+
+enum IntakeChannel {
+  COUNTER
+  POSTAL
+  EMAIL
+  EDARTA_PORTAL
+  COURIER
+}
+
+enum DispatchChannel {
+  POSTAL
+  COURIER
+  EMAIL
+  HAND_DELIVERY
+  EDARTA_PORTAL
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+type Attachment {
+  id: ID!
+  fileName: String!
+  fileSize: Int!
+  mimeType: String!
+  url: String!
+  checksum: String!
+  uploadedAt: DateTime!
+  uploadedBy: User!
+}
+
+type AuditEntry {
+  id: ID!
+  entityType: AuditEntityType!
+  entityId: ID!
+  actor: User!
+  action: String!                 # e.g., "submit", "approve", "register", "dispatch", "void"
+  fromStatus: String
+  toStatus: String
+  timestamp: DateTime!
+  ip: String
+  userAgent: String
+  metadata: JSON
+  reason: String
+}
+
+enum AuditEntityType {
+  DARTA
+  CHALANI
+  COUNTER
+}
+
+type User {
+  id: ID!
+  username: String!
+  fullName: String!
+  email: String!
+  roles: [Role!]!
+  organizationalUnit: OrganizationalUnit
+  ward: Ward
+  actorType: ActorType!
+  isActive: Boolean!
+  lastLogin: DateTime
+  phone: String
+}
+
+enum ActorType {
+  MUNICIPALITY_REGISTRY_ADMIN
+  CENTRAL_REGISTRY_CLERK
+  CAO
+  SECTION_HEAD
+  SECTION_OFFICER
+  MAYOR
+  WARD_SECRETARY
+  WARD_REGISTRY_CLERK
+  WARD_OFFICER
+  WARD_CHAIR
+  CITIZEN
+}
+
+type Role {
+  id: ID!
+  name: String!
+  permissions: [String!]!
+}
+
+type OrganizationalUnit {
+  id: ID!
+  name: String!
+  code: String!
+  type: UnitType!
+  parent: OrganizationalUnit
+  children: [OrganizationalUnit!]!
+}
+
+enum UnitType {
+  DEPARTMENT
+  SECTION
+  UNIT
+}
+
+type Ward {
+  id: ID!
+  number: Int!
+  name: String!
+}
+
+input PaginationInput {
+  page: Int! = 1
+  limit: Int! = 20
+}
+
+type PageInfo {
+  page: Int!
+  limit: Int!
+  total: Int!
+  totalPages: Int!
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+}
+
+# ============================================================================
+# NUMBERING SERVICE
+# ============================================================================
+
+type Counter {
+  id: ID!
+  scope: Scope!
+  type: CounterType!
+  fiscalYear: FiscalYear!
+  currentValue: Int!
+  lastIssuedAt: DateTime
+  isLocked: Boolean!
+  lockedBy: User
+  lockedReason: String
+  ward: Ward
+}
+
+enum CounterType {
+  DARTA
+  CHALANI
+}
+
+input NumberAllocationInput {
+  scope: Scope!
+  type: CounterType!
+  fiscalYear: FiscalYear!
+  wardId: ID
+  idempotencyKey: String!
+  ttlMinutes: Int = 2880        # reservation expiry (e.g., 48h)
+}
+
+type NumberAllocation {
+  id: ID!
+  number: Int!
+  formattedNumber: String!
+  scope: Scope!
+  type: CounterType!
+  fiscalYear: FiscalYear!
+  ward: Ward
+  status: AllocationStatus!
+  expiresAt: DateTime
+  allocatedBy: User!
+  allocatedAt: DateTime!
+  committedAt: DateTime
+  committedEntityType: String
+  committedEntityId: ID
+  voidedAt: DateTime
+  voidReason: String
+}
+
+enum AllocationStatus {
+  PROVISIONAL
+  COMMITTED
+  EXPIRED
+  VOIDED
+}
+
+input CommitNumberInput {
+  allocationId: ID!
+  entityId: ID!
+  entityType: String!            # "CHALANI" | "DARTA"
+}
+
+input VoidNumberInput {
+  allocationId: ID!
+  reason: String!
+}
+
+# ============================================================================
+# DARTA (INBOUND)
+# ============================================================================
+
+# Rich, inbound-specific lifecycle
+enum DartaStatus {
+  DRAFT
+  PENDING_REVIEW
+  CLASSIFICATION
+  NUMBER_RESERVED
+  REGISTERED
+  VOIDED
+  SCANNED
+  METADATA_ENRICHED
+  DIGITALLY_ARCHIVED
+  ASSIGNED
+  IN_REVIEW_BY_SECTION
+  NEEDS_CLARIFICATION
+  ACCEPTED
+  ACTION_TAKEN
+  RESPONSE_ISSUED
+  ACK_REQUESTED
+  ACK_RECEIVED
+  SUPERSEDED
+  CLOSED
+}
+
+type Darta {
+  id: ID!
+  dartaNumber: Int
+  formattedDartaNumber: String
+  fiscalYear: FiscalYear!
+  scope: Scope!
+  ward: Ward
+  subject: String!
+  applicant: Applicant!
+  intakeChannel: IntakeChannel!
+  receivedDate: DateTime!
+  entryDate: DateTime!
+  isBackdated: Boolean!
+  backdateReason: String
+  backdateApprover: User
+  primaryDocument: Attachment!
+  annexes: [Attachment!]!
+  status: DartaStatus!
+  priority: Priority!
+  classificationCode: String
+  assignedTo: OrganizationalUnit
+  currentAssignee: User
+  slaDeadline: DateTime
+  isOverdue: Boolean!
+  createdBy: User!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  auditTrail: [AuditEntry!]!
+  chalaniResponses: [Chalani!]!
+  relatedDarta: [Darta!]!
+}
+
+type Applicant {
+  id: ID!
+  type: ApplicantType!
+  fullName: String!
+  organization: String
+  email: String
+  phone: String
+  address: String
+  identificationNumber: String
+}
+
+enum ApplicantType {
+  CITIZEN
+  ORGANIZATION
+  GOVERNMENT_OFFICE
+  OTHER
+}
+
+type DartaConnection {
+  edges: [DartaEdge!]!
+  pageInfo: PageInfo!
+}
+
+type DartaEdge {
+  cursor: String!
+  node: Darta!
+}
+
+input DartaFilterInput {
+  fiscalYear: FiscalYear
+  scope: Scope
+  wardId: ID
+  status: DartaStatus
+  priority: Priority
+  organizationalUnitId: ID
+  assigneeId: ID
+  intakeChannel: IntakeChannel
+  fromDate: DateTime
+  toDate: DateTime
+  search: String
+  isOverdue: Boolean
+}
+
+input CreateDartaInput {
+  scope: Scope!
+  wardId: ID
+  subject: String!
+  applicant: ApplicantInput!
+  intakeChannel: IntakeChannel!
+  receivedDate: DateTime!
+  primaryDocumentId: ID!
+  annexIds: [ID!]
+  priority: Priority
+  idempotencyKey: String!
+}
+
+input ApplicantInput {
+  type: ApplicantType!
+  fullName: String!
+  organization: String
+  email: String
+  phone: String
+  address: String
+  identificationNumber: String
+}
+
+input RouteDartaInput {
+  dartaId: ID!
+  organizationalUnitId: ID!
+  assigneeId: ID
+  priority: Priority
+  slaHours: Int
+  notes: String
+}
+
+enum DartaReviewDecision {
+  APPROVE_REVIEW
+  EDIT_REQUIRED
+}
+
+input ReviewDartaInput {
+  dartaId: ID!
+  notes: String!
+  decision: DartaReviewDecision!
+  requestedInfo: String
+}
+
+type DartaStats {
+  total: Int!
+  byStatus: [DartaStatusCount!]!
+  byChannel: [ChannelCount!]!
+  overdueCount: Int!
+  avgProcessingTimeHours: Float!
+}
+
+type DartaStatusCount {
+  status: DartaStatus!
+  count: Int!
+}
+
+type ChannelCount {
+  channel: IntakeChannel!
+  count: Int!
+}
+
+# ============================================================================
+# CHALANI (OUTBOUND)
+# ============================================================================
+
+# Rich, outbound-specific lifecycle
+enum ChalaniStatus {
+  DRAFT
+  PENDING_REVIEW
+  PENDING_APPROVAL
+  APPROVED
+  NUMBER_RESERVED
+  REGISTERED
+  SIGNED
+  SEALED
+  DISPATCHED
+  IN_TRANSIT
+  ACKNOWLEDGED
+  RETURNED_UNDELIVERED
+  DELIVERED
+  VOIDED
+  SUPERSEDED
+  CLOSED
+}
+
+type Chalani {
+  id: ID!
+  chalaniNumber: Int
+  formattedChalaniNumber: String
+  fiscalYear: FiscalYear!
+  scope: Scope!
+  ward: Ward
+  subject: String!
+  body: String!
+  templateId: ID
+  attachments: [Attachment!]!
+  linkedDarta: Darta
+  status: ChalaniStatus!
+  requiredSignatories: [Signatory!]!
+  approvals: [Approval!]!
+  isFullyApproved: Boolean!
+  dispatchChannel: DispatchChannel
+  recipient: Recipient!
+  dispatchedAt: DateTime
+  dispatchedBy: User
+  trackingId: String
+  courierName: String
+  isAcknowledged: Boolean!
+  acknowledgedAt: DateTime
+  acknowledgedBy: String
+  acknowledgementProof: Attachment
+  deliveredAt: DateTime
+  deliveredProof: Attachment
+  createdBy: User!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  auditTrail: [AuditEntry!]!
+  supersededById: ID
+  supersedesId: ID
+}
+
+type Signatory {
+  id: ID!
+  user: User!
+  role: Role!
+  order: Int!
+  isRequired: Boolean!
+}
+
+type Approval {
+  id: ID!
+  signatory: Signatory!
+  decision: ApprovalDecision!
+  notes: String
+  approvedAt: DateTime!
+}
+
+enum ApprovalDecision {
+  APPROVED
+  REJECTED
+  DELEGATED
+}
+
+type Recipient {
+  id: ID!
+  type: RecipientType!
+  name: String!
+  organization: String
+  email: String
+  phone: String
+  address: String!
+}
+
+enum RecipientType {
+  CITIZEN
+  ORGANIZATION
+  GOVERNMENT_OFFICE
+  OTHER
+}
+
+type ChalaniConnection {
+  edges: [ChalaniEdge!]!
+  pageInfo: PageInfo!
+}
+
+type ChalaniEdge {
+  cursor: String!
+  node: Chalani!
+}
+
+input ChalaniFilterInput {
+  fiscalYear: FiscalYear
+  scope: Scope
+  wardId: ID
+  status: ChalaniStatus
+  dispatchChannel: DispatchChannel
+  fromDate: DateTime
+  toDate: DateTime
+  search: String
+  isAcknowledged: Boolean
+  createdById: ID
+}
+
+input CreateChalaniInput {
+  scope: Scope!
+  wardId: ID
+  subject: String!
+  body: String!
+  templateId: ID
+  linkedDartaId: ID
+  attachmentIds: [ID!]
+  recipient: RecipientInput!
+  requiredSignatoryIds: [ID!]!
+  idempotencyKey: String!
+}
+
+input RecipientInput {
+  type: RecipientType!
+  name: String!
+  organization: String
+  email: String
+  phone: String
+  address: String!
+}
+
+# Review (clerical) step
+enum ChalaniReviewDecision {
+  APPROVE_REVIEW
+  EDIT_REQUIRED
+}
+
+input ReviewChalaniInput {
+  chalaniId: ID!
+  decision: ChalaniReviewDecision!
+  notes: String
+}
+
+# Approval (authority) step
+enum ChalaniApprovalDecision {
+  APPROVE
+  REJECT
+}
+
+input ApproveChalaniInput {
+  chalaniId: ID!
+  decision: ChalaniApprovalDecision!
+  notes: String
+  delegateToId: ID
+}
+
+input ReserveChalaniNumberInput {
+  chalaniId: ID!
+  allocationId: ID!     # from allocateNumber(type: CHALANI)
+}
+
+input FinalizeChalaniRegistrationInput {
+  chalaniId: ID!
+  allocationId: ID!
+}
+
+input DirectRegisterChalaniInput {
+  chalaniId: ID!
+}
+
+input SignChalaniInput {
+  chalaniId: ID!
+  signatureAttachmentId: ID
+}
+
+input SealChalaniInput {
+  chalaniId: ID!
+  sealAttachmentId: ID
+}
+
+input DispatchChalaniInput {
+  chalaniId: ID!
+  dispatchChannel: DispatchChannel!
+  trackingId: String
+  courierName: String
+  scheduledDispatchAt: DateTime
+}
+
+input MarkInTransitInput {
+  chalaniId: ID!
+  trackingId: String
+  courierName: String
+}
+
+input AcknowledgeChalaniInput {
+  chalaniId: ID!
+  acknowledgedBy: String
+  acknowledgementProofId: ID
+}
+
+input MarkDeliveredInput {
+  chalaniId: ID!
+  deliveredProofId: ID
+}
+
+input MarkReturnedUndeliveredInput {
+  chalaniId: ID!
+  reason: String!
+}
+
+input ResendChalaniInput {
+  chalaniId: ID!
+  dispatchChannel: DispatchChannel!
+  trackingId: String
+  courierName: String
+}
+
+input VoidChalaniInput {
+  chalaniId: ID!
+  reason: String!
+}
+
+input SupersedeChalaniInput {
+  targetChalaniId: ID!
+  newChalani: CreateChalaniInput!
+  reason: String!
+}
+
+type ChalaniStats {
+  total: Int!
+  byStatus: [ChalaniStatusCount!]!
+  byChannel: [DispatchChannelCount!]!
+  acknowledgementRate: Float!
+  avgDispatchTimeHours: Float!
+}
+
+type ChalaniStatusCount {
+  status: ChalaniStatus!
+  count: Int!
+}
+
+type DispatchChannelCount {
+  channel: DispatchChannel!
+  count: Int!
+}
+
+# ============================================================================
+# QUERY
+# ============================================================================
+
+type Query {
+  # Numbering
+  counter(scope: Scope!, type: CounterType!, fiscalYear: FiscalYear!, wardId: ID): Counter
+  numberAllocation(id: ID!): NumberAllocation
+  counters(scope: Scope, fiscalYear: FiscalYear): [Counter!]!
+
+  # Darta
+  darta(id: ID!): Darta
+  dartaByNumber(dartaNumber: Int!, fiscalYear: FiscalYear!, scope: Scope!, wardId: ID): Darta
+  dartas(filter: DartaFilterInput, pagination: PaginationInput): DartaConnection!
+  myDartas(status: DartaStatus, pagination: PaginationInput): DartaConnection!
+  dartaStats(scope: Scope, fiscalYear: FiscalYear, wardId: ID): DartaStats!
+
+  # Chalani
+  chalani(id: ID!): Chalani
+  chalaniByNumber(chalaniNumber: Int!, fiscalYear: FiscalYear!, scope: Scope!, wardId: ID): Chalani
+  chalanis(filter: ChalaniFilterInput, pagination: PaginationInput): ChalaniConnection!
+  myPendingApprovals(pagination: PaginationInput): ChalaniConnection!
+  chalaniTemplates(category: String, search: String): [ChalaniTemplate!]!
+  chalaniStats(scope: Scope, fiscalYear: FiscalYear, wardId: ID): ChalaniStats!
+
+  # Queues to match MFE routes (optional convenience)
+  chalaniReviewQueue(pagination: PaginationInput): ChalaniConnection!
+  chalaniApprovalQueue(pagination: PaginationInput): ChalaniConnection!
+  chalaniRegistryQueue(pagination: PaginationInput): ChalaniConnection!
+  chalaniDispatchBoard(status: [ChalaniStatus!], pagination: PaginationInput): ChalaniConnection!
+
+  dartaReviewQueue(pagination: PaginationInput): DartaConnection!
+  dartaClassificationQueue(pagination: PaginationInput): DartaConnection!
+  dartaArchiveQueue(pagination: PaginationInput): DartaConnection!
+  dartaAssignmentBoard(status: [DartaStatus!], pagination: PaginationInput): DartaConnection!
+
+  # Users
+  me: User!
+  users(isActive: Boolean): [User!]!
+  user(id: ID!): User
+}
+
+# ============================================================================
+# MUTATION
+# ============================================================================
+
+type Mutation {
+  # Numbering
+  allocateNumber(input: NumberAllocationInput!): NumberAllocation!
+  commitNumber(input: CommitNumberInput!): NumberAllocation!
+  voidNumber(input: VoidNumberInput!): NumberAllocation!
+
+  # ---------------------------
+  # Darta Transitions
+  # ---------------------------
+  createDarta(input: CreateDartaInput!): Darta!
+  submitDartaForReview(dartaId: ID!): Darta!                                 # DRAFT -> PENDING_REVIEW
+  reviewDarta(input: ReviewDartaInput!): Darta!                               # PENDING_REVIEW -> (EDIT_REQUIRED->DRAFT | APPROVE_REVIEW->CLASSIFICATION)
+  classifyDarta(dartaId: ID!, classificationCode: String!): Darta!            # set classification in CLASSIFICATION
+  reserveDartaNumber(dartaId: ID!, allocationId: ID!): Darta!                 # CLASSIFICATION -> NUMBER_RESERVED
+  finalizeDartaRegistration(dartaId: ID!, allocationId: ID!): Darta!          # NUMBER_RESERVED -> REGISTERED
+  directRegisterDarta(dartaId: ID!): Darta!                                   # CLASSIFICATION -> REGISTERED
+  voidDarta(dartaId: ID!, reason: String!): Darta!                            # REGISTERED -> VOIDED (or NUMBER_RESERVED -> VOIDED)
+  scanDarta(dartaId: ID!, scanAttachmentId: ID!): Darta!                      # REGISTERED -> SCANNED
+  enrichDartaMetadata(dartaId: ID!, metadata: JSON!): Darta!                  # SCANNED -> METADATA_ENRICHED
+  finalizeDartaArchive(dartaId: ID!): Darta!                                  # *_ -> DIGITALLY_ARCHIVED
+  routeDarta(input: RouteDartaInput!): Darta!                                 # REGISTERED -> ASSIGNED
+  sectionReviewDarta(dartaId: ID!): Darta!                                    # ASSIGNED -> IN_REVIEW_BY_SECTION
+  requestDartaClarification(dartaId: ID!, note: String!): Darta!              # IN_REVIEW_BY_SECTION -> NEEDS_CLARIFICATION
+  provideDartaClarification(dartaId: ID!, note: String!): Darta!              # NEEDS_CLARIFICATION -> ASSIGNED
+  acceptDarta(dartaId: ID!): Darta!                                           # IN_REVIEW_BY_SECTION -> ACCEPTED
+  markDartaAction(dartaId: ID!, actionNote: String!): Darta!                  # ACCEPTED -> ACTION_TAKEN
+  issueDartaResponse(dartaId: ID!, responseChalaniId: ID, docAttachmentId: ID): Darta! # ACTION_TAKEN -> RESPONSE_ISSUED
+  requestDartaAck(dartaId: ID!): Darta!                                       # REGISTERED -> ACK_REQUESTED
+  receiveDartaAck(dartaId: ID!): Darta!                                       # ACK_REQUESTED -> ACK_RECEIVED
+  supersedeDartaRecord(dartaId: ID!, reason: String!, newDartaId: ID): Darta! # REGISTERED -> SUPERSEDED
+  closeDarta(dartaId: ID!): Darta!                                            # any terminalizing path -> CLOSED
+
+  # ---------------------------
+  # Chalani Transitions
+  # ---------------------------
+  createChalani(input: CreateChalaniInput!): Chalani!                         # -> DRAFT
+  submitChalani(chalaniId: ID!): Chalani!                                     # DRAFT -> PENDING_REVIEW
+  reviewChalani(input: ReviewChalaniInput!): Chalani!                         # PENDING_REVIEW -> (EDIT_REQUIRED->DRAFT | APPROVE_REVIEW->PENDING_APPROVAL)
+  approveChalani(input: ApproveChalaniInput!): Chalani!                       # PENDING_APPROVAL -> (APPROVED | DRAFT)
+  reserveChalaniNumber(input: ReserveChalaniNumberInput!): Chalani!           # APPROVED -> NUMBER_RESERVED
+  finalizeChalaniRegistration(input: FinalizeChalaniRegistrationInput!): Chalani! # NUMBER_RESERVED -> REGISTERED
+  directRegisterChalani(input: DirectRegisterChalaniInput!): Chalani!         # APPROVED -> REGISTERED
+  signChalani(input: SignChalaniInput!): Chalani!                             # REGISTERED -> SIGNED
+  sealChalani(input: SealChalaniInput!): Chalani!                             # SIGNED -> SEALED
+  dispatchChalani(input: DispatchChalaniInput!): Chalani!                     # (REGISTERED|SIGNED|SEALED) -> DISPATCHED
+  markChalaniInTransit(input: MarkInTransitInput!): Chalani!                  # DISPATCHED -> IN_TRANSIT
+  acknowledgeChalani(input: AcknowledgeChalaniInput!): Chalani!               # DISPATCHED -> ACKNOWLEDGED
+  markChalaniDelivered(input: MarkDeliveredInput!): Chalani!                  # (IN_TRANSIT|ACKNOWLEDGED|DISPATCHED) -> DELIVERED
+  markChalaniReturnedUndelivered(input: MarkReturnedUndeliveredInput!): Chalani! # DISPATCHED -> RETURNED_UNDELIVERED
+  resendChalani(input: ResendChalaniInput!): Chalani!                         # RETURNED_UNDELIVERED -> DISPATCHED
+  voidChalani(input: VoidChalaniInput!): Chalani!                             # (NUMBER_RESERVED|REGISTERED) -> VOIDED
+  supersedeChalani(input: SupersedeChalaniInput!): SupersedeChalaniResult!    # REGISTERED/DELIVERED -> SUPERSEDED (+ new chalani)
+  closeChalani(chalaniId: ID!): Chalani!                                      # DELIVERED -> CLOSED
+}
+
+type SupersedeChalaniResult {
+  old: Chalani!
+  new: Chalani!
+}
+
+# ============================================================================
+# TEMPLATES (reused by MFE)
+# ============================================================================
+
+type ChalaniTemplate {
+  id: ID!
+  name: String!
+  category: String!
+  subject: String!
+  body: String!
+  requiredSignatories: [Role!]!
+  isActive: Boolean!
+}
