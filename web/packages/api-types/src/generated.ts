@@ -1,5 +1,8 @@
-import { gql, QueryOptions } from "@apollo/client";
-import { useQuery, useLazyQuery, useSuspenseQuery, QueryResult , } from "@apollo/client/react";
+import { gql, type QueryOptions } from "@apollo/client";
+import { useQuery, useLazyQuery, useSuspenseQuery,  type QueryHookOptions,
+  type LazyQueryHookOptions,
+  type SuspenseQueryHookOptions,
+  type QueryResult, } from "@apollo/client/react";
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = {
@@ -1630,37 +1633,36 @@ export const DummyDocument = gql`
  *   },
  * });
  */
-
 export function useDummyQuery(
-  baseOptions?: QueryOptions<DummyQuery, DummyQueryVariables>,
+  baseOptions?: QueryHookOptions<DummyQuery, DummyQueryVariables>
 ) {
-  const options = { ...defaultOptions, ...baseOptions };
-  return useQuery<DummyQuery, DummyQueryVariables>(
-    DummyDocument,
-    options,
-  );
+  const options = { ...defaultOptions, ...baseOptions } as QueryHookOptions<
+    DummyQuery,
+    DummyQueryVariables
+  >;
+  return useQuery<DummyQuery, DummyQueryVariables>(DummyDocument, options);
 }
+
 export function useDummyLazyQuery(
-  baseOptions?: QueryOptions<DummyQuery, DummyQueryVariables>,
+  baseOptions?: LazyQueryHookOptions<DummyQuery, DummyQueryVariables>
 ) {
-  const options = { ...defaultOptions, ...baseOptions };
-  return useLazyQuery<DummyQuery, DummyQueryVariables>(
-    DummyDocument,
-    options,
-  );
+  const options = { ...defaultOptions, ...baseOptions } as LazyQueryHookOptions<
+    DummyQuery,
+    DummyQueryVariables
+  >;
+  return useLazyQuery<DummyQuery, DummyQueryVariables>(DummyDocument, options);
 }
+
 export function useDummySuspenseQuery(
-  baseOptions?: QueryOptions<DummyQuery, DummyQueryVariables>,
+  baseOptions?: SuspenseQueryHookOptions<DummyQuery, DummyQueryVariables>
 ) {
-  const options = { ...defaultOptions, ...baseOptions };
-  return useSuspenseQuery<DummyQuery, DummyQueryVariables>(
-    DummyDocument,
-    options,
-  );
+  const options = { ...defaultOptions, ...baseOptions } as SuspenseQueryHookOptions<
+    DummyQuery,
+    DummyQueryVariables
+  >;
+  return useSuspenseQuery<DummyQuery, DummyQueryVariables>(DummyDocument, options);
 }
+
 export type DummyQueryHookResult = ReturnType<typeof useDummyQuery>;
 export type DummyLazyQueryHookResult = ReturnType<typeof useDummyLazyQuery>;
-export type DummyQueryResult = QueryResult<
-  DummyQuery,
-  DummyQueryVariables
->;
+export type DummyQueryResult = QueryResult<DummyQuery, DummyQueryVariables>;
