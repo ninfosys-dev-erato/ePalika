@@ -27,6 +27,18 @@ importers:
         specifier: 18.3.1
         version: 18.3.1
     devDependencies:
+      '@graphql-codegen/cli':
+        specifier: ^5.0.3
+        version: 5.0.7(@parcel/watcher@2.5.1)(@types/node@24.6.2)(graphql@16.11.0)(typescript@5.9.2)
+      '@graphql-codegen/typescript':
+        specifier: ^4.1.2
+        version: 4.1.6(graphql@16.11.0)
+      '@graphql-codegen/typescript-operations':
+        specifier: ^4.4.2
+        version: 4.6.1(graphql@16.11.0)
+      '@graphql-codegen/typescript-react-apollo':
+        specifier: ^4.3.2
+        version: 4.3.3(graphql@16.11.0)
       '@module-federation/vite':
         specifier: ^1.8.1
         version: 1.8.1(rollup@4.52.3)
@@ -271,6 +283,21 @@ importers:
       graphql:
         specifier: ^16.11.0
         version: 16.11.0
+
+  packages/api-types:
+    devDependencies:
+      '@graphql-codegen/cli':
+        specifier: ^5.0.3
+        version: 5.0.7(@parcel/watcher@2.5.1)(@types/node@24.6.2)(graphql@16.11.0)(typescript@5.9.2)
+      '@graphql-codegen/typescript':
+        specifier: ^4.1.2
+        version: 4.1.6(graphql@16.11.0)
+      '@graphql-codegen/typescript-operations':
+        specifier: ^4.4.2
+        version: 4.6.1(graphql@16.11.0)
+      '@graphql-codegen/typescript-react-apollo':
+        specifier: ^4.3.2
+        version: 4.3.3(graphql@16.11.0)
 
   packages/apollo:
     dependencies:
