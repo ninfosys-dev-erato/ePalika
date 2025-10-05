@@ -1,0 +1,56 @@
+@startuml darta-state
+skinparam shadowing false
+skinparam dpi 150
+skinparam state {
+  BackgroundColor #f4f4f4
+  BorderColor #0f62fe
+  FontColor #161616
+  ArrowColor #0f62fe
+  FontSize 12
+  RoundCorner 8
+}
+
+[*] --> DRAFT            : createDraft
+
+' ---- Clerical Prep ----
+DRAFT --> PENDING_REVIEW : submitForReview
+PENDING_REVIEW --> DRAFT : editRequired
+PENDING_REVIEW --> CLASSIFICATION : approveReview
+
+' ---- Classification & Coding ----
+CLASSIFICATION --> NUMBER_RESERVED : reserveNo
+CLASSIFICATION --> REGISTERED      : directRegister
+
+NUMBER_RESERVED --> REGISTERED     : finalizeRegistration
+REGISTERED --> VOIDED              : voidInvalid
+
+' ---- Physical / Digital Intake ----
+REGISTERED --> SCANNED             : scanDocuments
+SCANNED --> DIGITALLY_ARCHIVED     : storeDigitalCopy
+SCANNED --> METADATA_ENRICHED      : enrichMetadata
+METADATA_ENRICHED --> DIGITALLY_ARCHIVED : finalizeArchive
+
+' ---- Assignment to Responsible Section ----
+REGISTERED --> ASSIGNED            : assignSection
+ASSIGNED --> IN_REVIEW_BY_SECTION  : sectionReview
+IN_REVIEW_BY_SECTION --> NEEDS_CLARIFICATION : clarificationRequested
+NEEDS_CLARIFICATION --> ASSIGNED   : provideClarification
+IN_REVIEW_BY_SECTION --> ACCEPTED  : sectionAccept
+
+' ---- Tracking & Response ----
+ACCEPTED --> ACTION_TAKEN          : markAction
+ACTION_TAKEN --> RESPONSE_ISSUED   : issueResponse
+RESPONSE_ISSUED --> CLOSED         : archive
+
+' ---- Digital Confirmation (if external sender portal exists) ----
+REGISTERED --> ACK_REQUESTED       : requestAck
+ACK_REQUESTED --> ACK_RECEIVED     : ackReceived
+ACK_RECEIVED --> CLOSED            : archive
+
+' ---- Supersede or Amend ----
+REGISTERED --> SUPERSEDED          : supersedeRecord
+
+' ---- Manual Close (edge cases) ----
+REGISTERED --> CLOSED              : manualClose
+
+@enduml
