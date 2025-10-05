@@ -1,110 +1,65 @@
-// Tiny, runtime-loaded Keycloak wrapper (memory-only)
-type KC = any
+// src/auth/index.ts
+import type { AuthAdapter, BaseAuthConfig, AuthInitResult } from "./types";
 
-let kc: KC | null = null
-let bc: BroadcastChannel | null = null
-let initPromise: Promise<{ authenticated: boolean }> | null = null
-let refreshTimer: number | null = null
+let adapterPromise: Promise<AuthAdapter> | null = null;
+let initPromise: Promise<AuthInitResult> | null = null;
 
-export type KeycloakConfig = {
-  url: string
-  realm: string
-  clientId: string
-  silentCheckSsoRedirectUri: string
-  autoLogin?: boolean
+function selectAdapter(): Promise<AuthAdapter> {
+  if (!adapterPromise) {
+    // Vite replaces import.meta.env.* at build time. The unused branch is dead-code-eliminated,
+    // and only the chosen adapter chunk is emitted.
+    if (import.meta.env.VITE_AUTH_ADAPTER === "live") {
+      adapterPromise = import("./adapters/live").then(
+        (m) => new m.LiveKeycloakAdapter()
+      );
+    } else {
+      adapterPromise = import("./adapters/simulated").then(
+        (m) => new m.SimulatedAdapter()
+      );
+    }
+  }
+  return adapterPromise;
 }
 
-const AUTH_CHANNEL = 'egov-auth'
-
-export async function initAuth(cfg: KeycloakConfig): Promise<{ authenticated: boolean }> {
-  // Reuse a single init across StrictMode double-mount / HMR
-  if (initPromise) return initPromise
-
+export async function initAuth(cfg: BaseAuthConfig): Promise<AuthInitResult> {
+  if (initPromise) return initPromise;
   initPromise = (async () => {
-    // Check if Web Crypto API is available (required for PKCE)
-    const isLocalhost = typeof window !== 'undefined' &&
-                        (window.location.hostname === 'localhost' ||
-                         window.location.hostname === '127.0.0.1' ||
-                         window.location.hostname === '[::1]')
-
-    const hasCrypto = typeof window !== 'undefined' &&
-                      typeof window.crypto !== 'undefined' &&
-                      typeof window.crypto.subtle !== 'undefined' &&
-                      (window.isSecureContext || isLocalhost)
-
-    if (!hasCrypto) {
-      console.warn('⚠️ Web Crypto API not available. Authentication disabled.')
-      console.warn('   Current context:', {
-        hostname: window.location.hostname,
-        isSecureContext: window.isSecureContext,
-        hasCrypto: typeof window.crypto !== 'undefined',
-        hasSubtle: typeof window.crypto?.subtle !== 'undefined'
-      })
-      // Return mock unauthenticated state for development
-      return { authenticated: false }
-    }
-
-    // One-time BroadcastChannel (tab-wide logout)
-    if ('BroadcastChannel' in window && !bc) {
-      bc = new BroadcastChannel(AUTH_CHANNEL)
-      bc.onmessage = (e) => {
-        if (e.data?.type === 'logout') kc?.logout()
-      }
-    }
-
-    // Dynamic import keeps initial chunk small
-    const { default: Keycloak } = await import('keycloak-js')
-
-    if (!kc) {
-      kc = new (Keycloak as any)({
-        url: cfg.url,
-        realm: cfg.realm,
-        clientId: cfg.clientId,
-      })
-    }
-
-    try {
-      const authenticated = await kc.init({
-        onLoad: cfg.autoLogin ? 'login-required' : 'check-sso',
-        pkceMethod: 'S256',
-        checkLoginIframe: false,
-      })
-
-      // Background refresh (single interval)
-      if (refreshTimer == null) {
-        refreshTimer = window.setInterval(async () => {
-          try { await kc?.updateToken(60) } catch {}
-        }, 20_000)
-      }
-
-      if (!authenticated && cfg.autoLogin) {
-        await kc.login({ prompt: 'login' })
-      }
-
-      // Clean up any leftover #state&code fragment (belt & suspenders)
-      if (location.hash.includes('state=') && location.hash.includes('code=')) {
-        history.replaceState(null, '', location.pathname + location.search)
-      }
-
-      return { authenticated: !!kc?.authenticated }
-    } catch (error) {
-      console.error('⚠️ Authentication initialization failed:', error)
-      // Allow app to continue without auth in dev mode
-      return { authenticated: false }
-    }
-  })()
-
-  return initPromise
+    const a = await selectAdapter();
+    return a.init(cfg);
+  })();
+  return initPromise;
 }
 
-export function isAuthenticated() { return !!kc?.authenticated }
-export function login() { return kc?.login({ prompt: 'login' }) }
-export function logout() {
-  bc?.postMessage({ type: 'logout' })
-  return kc?.logout({ redirectUri: location.origin })
+export async function isAuthenticated(): Promise<boolean> {
+  const a = await selectAdapter();
+  return a.isAuthenticated();
 }
-export function getToken() { return kc?.token }
-export function getAuthHeader() {
-  const t = getToken()
-  return t ? { Authorization: `Bearer ${t}` } : {}
+
+export async function login(options?: Record<string, unknown>) {
+  const a = await selectAdapter();
+  return a.login(options);
+}
+
+export async function logout(options?: { redirectUri?: string }) {
+  const a = await selectAdapter();
+  return a.logout(options);
+}
+
+export async function getToken(): Promise<string | null> {
+  const a = await selectAdapter();
+  return a.getToken();
+}
+
+export async function getAuthHeader(): Promise<Record<string, string>> {
+  const a = await selectAdapter();
+  return a.getAuthHeader();
+}
+
+/** Optional: subscribe to auth lifecycle events (token refresh, login/logout) */
+export async function onAuthEvent(
+  event: "token" | "login" | "logout" | "error",
+  cb: () => void
+) {
+  const a = await selectAdapter();
+  return a.on(event, cb);
 }

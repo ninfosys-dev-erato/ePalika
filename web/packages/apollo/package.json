@@ -3,11 +3,17 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "main": "src/client.ts",
-  "exports": { ".": "./src/client.ts" },
+  "main": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
   "peerDependencies": {
-    "@apollo/client": ">=3.10.0",
-    "graphql": ">=16.0.0",
-    "js-sha256": ">=0.11.0"
+    "@apollo/client": "^3.10.0",
+    "graphql": "^16.8.0"
+  },
+  "dependencies": {
+    "@graphql-tools/mock": "^9.0.7",
+    "@graphql-tools/schema": "^10.0.0",
+    "js-sha256": "^0.11.0"
   }
 }

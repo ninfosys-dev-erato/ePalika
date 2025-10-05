@@ -10,15 +10,15 @@ import {
 import { useChalaniStore, useUIStore, type ChalaniDraft } from '@egov/state-core'
 
 const CHANNEL_OPTIONS = [
-  { value: 'POSTAL', label: 'हुलाक' },
-  { value: 'EMAIL', label: 'इमेल' },
-  { value: 'SPECIAL_MESSENGER', label: 'दूतमार्फत' },
+  { value: 'POSTAL', text: 'हुलाक' },
+  { value: 'EMAIL', text: 'इमेल' },
+  { value: 'SPECIAL_MESSENGER', text: 'दूतमार्फत' },
 ]
 
 const SIGNATORY_OPTIONS = [
-  { value: 'mayor', label: 'नगर प्रमुख' },
-  { value: 'ceo', label: 'प्रमुख प्रशासकीय अधिकृत' },
-  { value: 'secretary', label: 'नगर सचिव' },
+  { value: 'mayor', text: 'नगर प्रमुख' },
+  { value: 'ceo', text: 'प्रमुख प्रशासकीय अधिकृत' },
+  { value: 'secretary', text: 'नगर सचिव' },
 ]
 
 const DEFAULT_TEMPLATE = `माननीय,
@@ -140,7 +140,8 @@ export function ChalaniCompose() {
     value={chalaniDraft.recipientAddress || ''}
 />
             <Select
-              label="पठाउने माध्यम"
+              id="senders-medium"
+              labelText="पठाउने माध्यम"
               options={CHANNEL_OPTIONS}
               value={chalaniDraft.dispatchChannel || CHANNEL_OPTIONS[0].value}
               onChange={(event: ChangeEvent<HTMLSelectElement>) =>
@@ -150,7 +151,8 @@ export function ChalaniCompose() {
           </div>
 
           <Select
-            label="हस्ताक्षरकर्ता"
+            id="signatory-select"
+            labelText="हस्ताक्षरकर्ता"
             options={SIGNATORY_OPTIONS}
             value={chalaniDraft.signatoryId || SIGNATORY_OPTIONS[0].value}
             onChange={(event: ChangeEvent<HTMLSelectElement>) =>
@@ -201,10 +203,10 @@ export function ChalaniCompose() {
         {isSubmitting && <span>चलानी तयार गर्दै...</span>}
 
         <div>
-          <Button type="button" variant="ghost" onClick={resetDraft} disabled={isSubmitting}>
+          <Button type="button"  onClick={resetDraft} disabled={isSubmitting}>
             रद्द गर्नुहोस्
           </Button>
-          <Button type="submit" variant="primary" disabled={isSubmitting}>
+          <Button type="submit"  disabled={isSubmitting}>
             {isSubmitting ? 'पठाइँदै...' : 'चलानी सुरक्षित गर्नुहोस्'}
           </Button>
         </div>

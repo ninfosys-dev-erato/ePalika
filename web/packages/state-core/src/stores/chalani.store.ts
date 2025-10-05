@@ -1,8 +1,9 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { immer } from 'zustand/middleware/immer'
-import type { Chalani, ChalaniFilterInput } from '@egov/api-schema'
+import type { Chalani, ChalaniFilterInput } from '@egov/api-types'
 import type { DraftDocument } from './darta.store'
+import type DeepWritable from '../utils/types'
 
 export type ChalaniDraft = Partial<Chalani> & {
   recipientName?: string
@@ -40,14 +41,17 @@ export interface ChalaniState {
   reset: () => void
 }
 
+// Only the plain data portion of the store (not actions)
 const initialState = {
-  chalanis: [],
-  selectedChalani: null,
-  pendingApprovals: [],
-  filters: {},
+  chalanis: [] as Chalani[],
+  selectedChalani: null as Chalani | null,
+  pendingApprovals: [] as Chalani[],
+  // GraphQL generated input types have required keys but their values can be null.
+  // An empty object literal is not assignable to that shape, so cast here.
+  filters: {} as unknown as ChalaniFilterInput,
   isLoading: false,
-  error: null,
-  draft: null,
+  error: null as string | null,
+  draft: null as ChalaniDraft | null,
 }
 
 export const useChalaniStore = create<ChalaniState>()(
@@ -56,23 +60,28 @@ export const useChalaniStore = create<ChalaniState>()(
       ...initialState,
 
       setChalanis: (chalanis) => set((state) => {
-        state.chalanis = chalanis
+        // Cast to DeepWritable so immer's draft mutation types align with generated readonly types
+        state.chalanis = chalanis as unknown as DeepWritable<Chalani[]>
       }),
 
       selectChalani: (chalani) => set((state) => {
-        state.selectedChalani = chalani
+        state.selectedChalani = chalani as unknown as DeepWritable<Chalani> | null
       }),
 
       setPendingApprovals: (approvals) => set((state) => {
-        state.pendingApprovals = approvals
+        state.pendingApprovals = approvals as unknown as DeepWritable<Chalani[]>
       }),
 
       setFilters: (filters) => set((state) => {
-        state.filters = { ...state.filters, ...filters }
+        // generated types use readonly properties; merge using casts to avoid excess strictness
+        state.filters = ({
+          ...(state.filters as unknown as Record<string, any>),
+          ...(filters as unknown as Record<string, any>),
+        } as ChalaniFilterInput)
       }),
 
       setDraft: (draft) => set((state) => {
-        state.draft = draft
+        state.draft = draft as unknown as DeepWritable<ChalaniDraft> | null
       }),
 
       clearDraft: () => set((state) => {
@@ -87,7 +96,16 @@ export const useChalaniStore = create<ChalaniState>()(
         state.error = error
       }),
 
-      reset: () => set(initialState),
+      reset: () => set((state) => {
+        // Do not replace the entire state object (would drop actions). Mutate fields instead.
+  state.chalanis = initialState.chalanis as unknown as DeepWritable<Chalani[]>
+  state.selectedChalani = initialState.selectedChalani as unknown as DeepWritable<Chalani> | null
+  state.pendingApprovals = initialState.pendingApprovals as unknown as DeepWritable<Chalani[]>
+  state.filters = initialState.filters as unknown as DeepWritable<ChalaniFilterInput>
+        state.isLoading = initialState.isLoading
+        state.error = initialState.error
+        state.draft = initialState.draft as unknown as DeepWritable<ChalaniDraft> | null
+      }),
     })),
     {
       name: 'chalani-store',

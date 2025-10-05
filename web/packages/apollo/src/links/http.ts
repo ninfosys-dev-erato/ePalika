@@ -1,28 +1,30 @@
-/// <reference types="./env.d.ts" />
 import { ApolloClient, InMemoryCache, from } from "@apollo/client";
 import { RetryLink } from "@apollo/client/link/retry";
 import { BatchHttpLink } from "@apollo/client/link/batch-http";
 import { createPersistedQueryLink } from "@apollo/client/link/persisted-queries";
 import { sha256 } from "js-sha256";
 
-export type MakeApolloClientOpts = {
+export type HttpClientOpts = {
   url: string;
-  getAuthHeader?: () => Record<string, string> | undefined; // Provide later from Keycloak
+  getAuthHeader?: () => Record<string, string> | undefined;
+  devTools?: boolean;
 };
 
-export function makeApolloClient({ url, getAuthHeader }: MakeApolloClientOpts) {
+export function makeHttpApolloClient({
+  url,
+  getAuthHeader,
+  devTools,
+}: HttpClientOpts) {
   const retry = new RetryLink({
     attempts: { max: 2, retryIf: (error) => !!error },
     delay: { initial: 150, max: 600, jitter: true },
   });
 
-  // APQ with tiny hasher (sync)
   const apq = createPersistedQueryLink({
     sha256: (q: string) => sha256(q),
-    useGETForHashedQueries: false, // auth headers kill shared caches; keep POST
+    useGETForHashedQueries: false, // keep POST; auth headers break shared caches
   });
 
-  // Batching: coalesce within 10ms into one HTTP request
   const batch = new BatchHttpLink({
     uri: url,
     batchMax: 12,
@@ -30,21 +32,19 @@ export function makeApolloClient({ url, getAuthHeader }: MakeApolloClientOpts) {
     fetch: (input, init) =>
       fetch(input as any, {
         ...init,
-        // inject Authorization lazily (no global state)
         headers: { ...(init?.headers || {}), ...(getAuthHeader?.() || {}) },
       }),
   });
 
   const cache = new InMemoryCache({
     typePolicies: {
-      Query: { fields: {} }, // we’ll add merge policies per list later
+      Query: { fields: {} },
     },
   });
 
   return new ApolloClient({
     link: from([retry, apq, batch]),
     cache,
-    devtools: { enabled: import.meta?.env?.DEV },
     defaultOptions: {
       query: { fetchPolicy: "cache-first" },
       watchQuery: { fetchPolicy: "cache-first" },

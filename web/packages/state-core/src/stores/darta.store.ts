@@ -1,7 +1,8 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { immer } from 'zustand/middleware/immer'
-import type { Darta, DartaFilterInput } from '@egov/api-schema'
+import type { Darta, DartaFilterInput } from '@egov/api-types'
+import type DeepWritable from '../utils/types'
 
 export interface DraftDocument {
   id: string
@@ -45,12 +46,12 @@ export interface DartaState {
 }
 
 const initialState = {
-  dartas: [],
-  selectedDarta: null,
-  filters: {},
+  dartas: [] as Darta[],
+  selectedDarta: null as Darta | null,
+  filters: {} as unknown as DartaFilterInput,
   isLoading: false,
-  error: null,
-  draft: null,
+  error: null as string | null,
+  draft: null as DartaDraft | null,
 }
 
 export const useDartaStore = create<DartaState>()(
@@ -59,19 +60,22 @@ export const useDartaStore = create<DartaState>()(
       ...initialState,
 
       setDartas: (dartas) => set((state) => {
-        state.dartas = dartas
+        state.dartas = dartas as unknown as DeepWritable<Darta[]>
       }),
 
       selectDarta: (darta) => set((state) => {
-        state.selectedDarta = darta
+        state.selectedDarta = darta as unknown as DeepWritable<Darta> | null
       }),
 
       setFilters: (filters) => set((state) => {
-        state.filters = { ...state.filters, ...filters }
+        state.filters = ({
+          ...(state.filters as unknown as Record<string, any>),
+          ...(filters as unknown as Record<string, any>),
+        } as DartaFilterInput)
       }),
 
       setDraft: (draft) => set((state) => {
-        state.draft = draft
+        state.draft = draft as unknown as DeepWritable<DartaDraft> | null
       }),
 
       clearDraft: () => set((state) => {
@@ -86,7 +90,14 @@ export const useDartaStore = create<DartaState>()(
         state.error = error
       }),
 
-      reset: () => set(initialState),
+      reset: () => set((state) => {
+  state.dartas = initialState.dartas as unknown as DeepWritable<Darta[]>
+  state.selectedDarta = initialState.selectedDarta as unknown as DeepWritable<Darta> | null
+  state.filters = initialState.filters as unknown as DeepWritable<DartaFilterInput>
+        state.isLoading = initialState.isLoading
+        state.error = initialState.error
+        state.draft = initialState.draft as unknown as DeepWritable<DartaDraft> | null
+      }),
     })),
     {
       name: 'darta-store',

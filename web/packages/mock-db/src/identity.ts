@@ -14,4 +14,5 @@ export const identityResolvers = {
     users: () => mockDB.users,
     orgUnits: () => mockDB.orgUnits,
   },
+  Mutation: {},
 };

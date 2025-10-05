@@ -3,5 +3,5 @@
   "compilerOptions": {
     "types": ["vite/client"]
   },
-  "include": ["src"]
+  "include": ["src", "../../packages/ui/src/providers/CarbonProviders.tsx"]
 }
