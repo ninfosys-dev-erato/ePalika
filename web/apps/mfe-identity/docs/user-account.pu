@@ -1,0 +1,24 @@
+@startuml user-lifecycle
+skinparam shadowing false
+skinparam dpi 150
+skinparam state { BackgroundColor #f4f4f4; BorderColor #0f62fe; ArrowColor #0f62fe; FontSize 12; RoundCorner 8 }
+
+[*] --> PRE_REGISTERED : createPersonRecord
+PRE_REGISTERED --> PENDING_VERIFICATION : inviteUser
+PENDING_VERIFICATION --> VERIFIED : verifyEmail|phone|KYC
+PENDING_VERIFICATION --> EXPIRED : inviteTimeout
+
+VERIFIED --> PENDING_APPROVAL : submitForProvisioning
+PENDING_APPROVAL --> ACTIVE : approveProvisioning
+PENDING_APPROVAL --> REJECTED : rejectProvisioning
+
+ACTIVE --> SUSPENDED : suspend (HR/SecOps)
+SUSPENDED --> ACTIVE : reinstate
+ACTIVE --> LOCKED : tooManyFailures | riskSignal
+LOCKED --> ACTIVE : adminUnlock | selfRecoverMFA
+ACTIVE --> DISABLED : offboard
+DISABLED --> DEPROVISIONED : finalizeDeprovision
+DEPROVISIONED --> ARCHIVED : archivePII
+ARCHIVED --> ANONYMIZED : retentionElapsed
+
+@enduml
