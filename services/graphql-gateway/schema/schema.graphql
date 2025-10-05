@@ -1,0 +1,203 @@
+# Import types from api-schema package
+# This will be the main schema file that combines everything
+
+type Query {
+  # Health check
+  health: HealthStatus!
+  
+  # Darta queries
+  darta(id: ID!): Darta
+  dartas(filter: DartaFilterInput, pagination: PaginationInput): DartaConnection!
+  myDartas(status: DartaStatus, pagination: PaginationInput): DartaConnection!
+  dartaStats(scope: Scope, fiscalYearId: String, wardId: String): DartaStats!
+}
+
+type Mutation {
+  # Darta mutations
+  createDarta(input: CreateDartaInput!): Darta!
+  submitDartaForReview(dartaId: ID!): Darta!
+  classifyDarta(dartaId: ID!, classificationCode: String!): Darta!
+  reserveDartaNumber(dartaId: ID!): Darta!
+  finalizeDartaRegistration(dartaId: ID!): Darta!
+  routeDarta(input: RouteDartaInput!): Darta!
+  closeDarta(dartaId: ID!): Darta!
+  voidDarta(dartaId: ID!, reason: String!): Darta!
+}
+
+# Types
+type HealthStatus {
+  status: String!
+  service: String!
+  timestamp: String!
+}
+
+type Darta {
+  id: ID!
+  dartaNumber: Int
+  formattedDartaNumber: String
+  fiscalYearId: String!
+  scope: Scope!
+  wardId: String
+  subject: String!
+  applicant: Applicant!
+  intakeChannel: IntakeChannel!
+  receivedDate: String!
+  entryDate: String!
+  status: DartaStatus!
+  priority: Priority!
+  createdBy: String!
+  createdAt: String!
+  updatedAt: String!
+  tenantId: String!
+}
+
+type Applicant {
+  id: ID!
+  type: ApplicantType!
+  fullName: String!
+  organization: String
+  email: String
+  phone: String
+  address: String
+}
+
+type DartaConnection {
+  edges: [DartaEdge!]!
+  pageInfo: PageInfo!
+}
+
+type DartaEdge {
+  cursor: String!
+  node: Darta!
+}
+
+type PageInfo {
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  totalCount: Int!
+}
+
+type DartaStats {
+  total: Int!
+  byStatus: [DartaStatusCount!]!
+  byChannel: [ChannelCount!]!
+  overdueCount: Int!
+}
+
+type DartaStatusCount {
+  status: DartaStatus!
+  count: Int!
+}
+
+type ChannelCount {
+  channel: IntakeChannel!
+  count: Int!
+}
+
+# Enums
+enum Scope {
+  MUNICIPALITY
+  WARD
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum IntakeChannel {
+  COUNTER
+  POSTAL
+  EMAIL
+  EDARTA_PORTAL
+  COURIER
+}
+
+enum DartaStatus {
+  DRAFT
+  PENDING_REVIEW
+  CLASSIFICATION
+  NUMBER_RESERVED
+  REGISTERED
+  VOIDED
+  SCANNED
+  METADATA_ENRICHED
+  DIGITALLY_ARCHIVED
+  ASSIGNED
+  IN_REVIEW_BY_SECTION
+  NEEDS_CLARIFICATION
+  ACCEPTED
+  ACTION_TAKEN
+  RESPONSE_ISSUED
+  ACK_REQUESTED
+  ACK_RECEIVED
+  SUPERSEDED
+  CLOSED
+}
+
+enum ApplicantType {
+  CITIZEN
+  ORGANIZATION
+  GOVERNMENT_OFFICE
+  OTHER
+}
+
+# Inputs
+input CreateDartaInput {
+  fiscalYearId: String!
+  scope: Scope!
+  wardId: String
+  subject: String!
+  applicant: ApplicantInput!
+  intakeChannel: IntakeChannel!
+  receivedDate: String!
+  primaryDocumentId: ID!
+  annexIds: [ID!]
+  priority: Priority!
+  idempotencyKey: String!
+}
+
+input ApplicantInput {
+  type: ApplicantType!
+  fullName: String!
+  organization: String
+  email: String
+  phone: String
+  address: String
+  identificationNumber: String
+}
+
+input RouteDartaInput {
+  dartaId: ID!
+  organizationalUnitId: String
+  assigneeId: String
+  priority: Priority
+  slaHours: Int
+  notes: String
+}
+
+input DartaFilterInput {
+  fiscalYearId: String
+  scope: Scope
+  wardId: String
+  status: DartaStatus
+  priority: Priority
+  organizationalUnitId: String
+  assigneeId: String
+  intakeChannel: IntakeChannel
+  fromDate: String
+  toDate: String
+  search: String
+  isOverdue: Boolean
+}
+
+input PaginationInput {
+  limit: Int
+  offset: Int
+  after: String
+  before: String
+  sortBy: String
+  sortDesc: Boolean
+}

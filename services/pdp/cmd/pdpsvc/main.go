@@ -1,164 +1,89 @@
 package main
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
-	"fmt"
 	"log"
+	"net"
 	"net/http"
-	"os"
+	"os/signal"
+	"syscall"
 	"time"
+
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
+
+	pdpv1 "git.ninjainfosys.com/ePalika/proto/gen/pdp/v1"
+	"git.ninjainfosys.com/ePalika/services/pdp/internal/config"
+	grpcserver "git.ninjainfosys.com/ePalika/services/pdp/internal/grpc"
+	"git.ninjainfosys.com/ePalika/services/pdp/internal/service"
 )
 
-type authzReq struct {
-	Subject  string         `json:"subject"`
-	Resource string         `json:"resource"`
-	Action   string         `json:"action"`
-	Claims   map[string]any `json:"claims"`
-	Context  map[string]any `json:"context"`
-}
-
-type fgaCheckReq struct {
-	AuthorizationModelID string `json:"authorization_model_id,omitempty"`
-	TupleKey             struct {
-		User     string `json:"user"`
-		Relation string `json:"relation"`
-		Object   string `json:"object"`
-	} `json:"tuple_key"`
-	Context map[string]any `json:"context,omitempty"`
-}
-
-type fgaCheckResp struct {
-	Allowed bool `json:"allowed"`
-}
-
-func mapActionToRelation(action string) string {
-	switch action {
-	case "read", "can_read":
-		return "can_read"
-	case "update", "can_write":
-		return "can_write"
-	case "delete":
-		return "owner"
-	default:
-		return "viewer"
-	}
-}
-
 func main() {
-	fgaURL := mustEnv("FGA_CHECK_URL") // e.g. http://openfga.svc/stores/<id>/check
-	fgaModelID := os.Getenv("FGA_MODEL_ID")
-	fgaToken := os.Getenv("FGA_API_TOKEN")
-	fmt.Println("fgaURL:", fgaURL, "fgaModelID:", fgaModelID, "fgaToken:", fgaToken)
-	opaURL := os.Getenv("OPA_DECIDE_URL") // optional: http://opa.svc/v1/data/api/authz/allow
-
-	client := &http.Client{Timeout: 2 * time.Second}
-
-	http.HandleFunc("/healthz", func(w http.ResponseWriter, _ *http.Request) {
-		w.WriteHeader(http.StatusOK)
-	})
-
-	http.HandleFunc("/authorize", func(w http.ResponseWriter, r *http.Request) {
-		defer r.Body.Close()
-		var in authzReq
-		if err := json.NewDecoder(r.Body).Decode(&in); err != nil {
-			http.Error(w, "bad json", http.StatusBadRequest)
-			return
-		}
-		log.Printf("PDP received request: %+v", in)
-
-		// Optional OPA decision gate (ABAC / SoD / time rules)
-		if opaURL != "" {
-			allow, err := askOPA(client, opaURL, in)
-			if err != nil {
-				log.Printf("opa error: %v", err)
-				http.Error(w, "opa", http.StatusInternalServerError)
-				return
-			}
-			if !allow {
-				http.Error(w, "forbidden", http.StatusForbidden)
-				return
-			}
-		}
-
-		freq := fgaCheckReq{AuthorizationModelID: fgaModelID, Context: in.Context}
-		freq.TupleKey.User = in.Subject
-		freq.TupleKey.Relation = mapActionToRelation(in.Action)
-		freq.TupleKey.Object = in.Resource
-
-		b, _ := json.Marshal(freq)
-		log.Printf("FGA request payload: %s", string(b))
-		req, _ := http.NewRequestWithContext(context.Background(), http.MethodPost, fgaURL, bytes.NewReader(b))
-		req.Header.Set("Content-Type", "application/json")
-		if fgaToken != "" {
-			req.Header.Set("Authorization", "Bearer "+fgaToken)
-		}
-
-		resp, err := client.Do(req)
-		if err != nil {
-			log.Printf("fga error: %v", err)
-			http.Error(w, "fga", http.StatusInternalServerError)
-			return
-		}
-		defer resp.Body.Close()
-
-		if resp.StatusCode != http.StatusOK {
-			log.Printf("fga non-200: %d", resp.StatusCode)
-			http.Error(w, "fga", http.StatusInternalServerError)
-			return
-		}
-
-		var out fgaCheckResp
-		if err := json.NewDecoder(resp.Body).Decode(&out); err != nil {
-			log.Printf("fga json error: %v", err)
-			http.Error(w, "fga json", http.StatusInternalServerError)
-			return
-		}
-
-		if out.Allowed {
-			w.WriteHeader(http.StatusOK)
-			return
-		}
-		http.Error(w, "forbidden", http.StatusForbidden)
-	})
-
-	log.Println("PDP listening on :8080")
-	log.Fatal(http.ListenAndServe(":8080", nil))
-}
-
-func askOPA(c *http.Client, url string, in authzReq) (bool, error) {
-	payload := struct {
-		Input any `json:"input"`
-	}{Input: in}
-	b, _ := json.Marshal(payload)
-	req, _ := http.NewRequest(http.MethodPost, url, bytes.NewReader(b))
-	req.Header.Set("Content-Type", "application/json")
-
-	resp, err := c.Do(req)
+	cfg, err := config.Load()
 	if err != nil {
-		return false, err
+		log.Fatalf("load config: %v", err)
 	}
-	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
-		return false, errors.New("opa non-200")
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
+
+	svc := service.New(cfg, nil)
+
+	grpcSrv := grpc.NewServer()
+	pdpv1.RegisterPolicyDecisionServiceServer(grpcSrv, grpcserver.NewServer(svc))
+	reflection.Register(grpcSrv)
+
+	lis, err := net.Listen("tcp", ":"+cfg.GRPCPort)
+	if err != nil {
+		log.Fatalf("listen: %v", err)
 	}
-	var out struct {
-		Result bool `json:"result"`
+
+	go startHTTPHealth(ctx, cfg, svc)
+
+	go func() {
+		<-ctx.Done()
+		log.Println("shutting down gRPC server...")
+		grpcSrv.GracefulStop()
+	}()
+
+	log.Printf("%s gRPC server listening on :%s", cfg.ServiceName, cfg.GRPCPort)
+	if err := grpcSrv.Serve(lis); err != nil {
+		log.Fatalf("serve: %v", err)
 	}
-	if err := json.NewDecoder(resp.Body).Decode(&out); err != nil {
-		return false, err
-	}
-	fmt.Printf("opa result: %v\n", out.Result)
-	return out.Result, nil
 }
 
-func mustEnv(k string) string {
-	v := os.Getenv(k)
-	if v == "" {
-		log.Fatalf("%s not set", k)
+func startHTTPHealth(ctx context.Context, cfg *config.Config, svc *service.Service) {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		health := svc.Health(r.Context())
+		payload := map[string]any{
+			"status":    health.Status,
+			"service":   health.Service,
+			"timestamp": health.Timestamp.Format(time.RFC3339),
+		}
+		if err := json.NewEncoder(w).Encode(payload); err != nil {
+			log.Printf("encode health payload: %v", err)
+		}
+	})
+
+	srv := &http.Server{
+		Addr:    ":" + cfg.HTTPPort,
+		Handler: mux,
 	}
-	return v
+
+	go func() {
+		<-ctx.Done()
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		if err := srv.Shutdown(shutdownCtx); err != nil && err != http.ErrServerClosed {
+			log.Printf("health server shutdown: %v", err)
+		}
+	}()
+
+	log.Printf("%s HTTP health server listening on :%s", cfg.ServiceName, cfg.HTTPPort)
+	if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		log.Printf("health server error: %v", err)
+	}
 }

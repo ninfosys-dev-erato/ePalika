@@ -5,19 +5,178 @@
 package db
 
 import (
-	"time"
+	"encoding/json"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type Applicant struct {
+	ID                   uuid.UUID          `json:"id"`
+	Type                 string             `json:"type"`
+	FullName             string             `json:"full_name"`
+	Organization         *string            `json:"organization"`
+	Email                *string            `json:"email"`
+	Phone                *string            `json:"phone"`
+	Address              *string            `json:"address"`
+	IdentificationNumber *string            `json:"identification_number"`
+	CreatedAt            pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt            pgtype.Timestamptz `json:"updated_at"`
+}
+
+type Attachment struct {
+	ID               uuid.UUID          `json:"id"`
+	Filename         string             `json:"filename"`
+	OriginalFilename string             `json:"original_filename"`
+	MimeType         string             `json:"mime_type"`
+	SizeBytes        int64              `json:"size_bytes"`
+	StoragePath      string             `json:"storage_path"`
+	Checksum         string             `json:"checksum"`
+	UploadedBy       string             `json:"uploaded_by"`
+	UploadedAt       pgtype.Timestamptz `json:"uploaded_at"`
+	Metadata         json.RawMessage    `json:"metadata"`
+	TenantID         string             `json:"tenant_id"`
+	CreatedAt        pgtype.Timestamptz `json:"created_at"`
+}
+
+type AuditTrail struct {
+	ID          uuid.UUID          `json:"id"`
+	EntityType  string             `json:"entity_type"`
+	EntityID    pgtype.UUID        `json:"entity_id"`
+	Action      string             `json:"action"`
+	PerformedBy string             `json:"performed_by"`
+	PerformedAt pgtype.Timestamptz `json:"performed_at"`
+	Changes     json.RawMessage    `json:"changes"`
+	IpAddress   *string            `json:"ip_address"`
+	UserAgent   *string            `json:"user_agent"`
+	Notes       *string            `json:"notes"`
+	TenantID    string             `json:"tenant_id"`
+}
+
+type Chalani struct {
+	ID                     uuid.UUID          `json:"id"`
+	ChalaniNumber          *int32             `json:"chalani_number"`
+	FormattedChalaniNumber *string            `json:"formatted_chalani_number"`
+	FiscalYearID           string             `json:"fiscal_year_id"`
+	Scope                  string             `json:"scope"`
+	WardID                 *string            `json:"ward_id"`
+	Subject                string             `json:"subject"`
+	Body                   string             `json:"body"`
+	TemplateID             *string            `json:"template_id"`
+	LinkedDartaID          *uuid.UUID         `json:"linked_darta_id"`
+	RecipientID            uuid.UUID          `json:"recipient_id"`
+	Status                 string             `json:"status"`
+	IsFullyApproved        bool               `json:"is_fully_approved"`
+	DispatchChannel        *string            `json:"dispatch_channel"`
+	DispatchedAt           pgtype.Timestamptz `json:"dispatched_at"`
+	DispatchedBy           *string            `json:"dispatched_by"`
+	TrackingID             *string            `json:"tracking_id"`
+	CourierName            *string            `json:"courier_name"`
+	IsAcknowledged         bool               `json:"is_acknowledged"`
+	AcknowledgedAt         pgtype.Timestamptz `json:"acknowledged_at"`
+	AcknowledgedBy         *string            `json:"acknowledged_by"`
+	AcknowledgementProofID pgtype.UUID        `json:"acknowledgement_proof_id"`
+	DeliveredAt            pgtype.Timestamptz `json:"delivered_at"`
+	DeliveredProofID       pgtype.UUID        `json:"delivered_proof_id"`
+	SupersededByID         pgtype.UUID        `json:"superseded_by_id"`
+	SupersedesID           pgtype.UUID        `json:"supersedes_id"`
+	CreatedBy              string             `json:"created_by"`
+	CreatedAt              pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt              pgtype.Timestamptz `json:"updated_at"`
+	TenantID               string             `json:"tenant_id"`
+	IdempotencyKey         *string            `json:"idempotency_key"`
+	Metadata               json.RawMessage    `json:"metadata"`
+}
+
+type ChalaniApproval struct {
+	ID          uuid.UUID          `json:"id"`
+	ChalaniID   pgtype.UUID        `json:"chalani_id"`
+	SignatoryID pgtype.UUID        `json:"signatory_id"`
+	Decision    string             `json:"decision"`
+	Notes       *string            `json:"notes"`
+	ApprovedAt  pgtype.Timestamptz `json:"approved_at"`
+}
+
+type ChalaniAttachment struct {
+	ChalaniID    pgtype.UUID        `json:"chalani_id"`
+	AttachmentID pgtype.UUID        `json:"attachment_id"`
+	AddedAt      pgtype.Timestamptz `json:"added_at"`
+}
+
+type ChalaniSignatory struct {
+	ID         uuid.UUID          `json:"id"`
+	ChalaniID  pgtype.UUID        `json:"chalani_id"`
+	UserID     string             `json:"user_id"`
+	RoleID     string             `json:"role_id"`
+	OrderNum   int32              `json:"order_num"`
+	IsRequired bool               `json:"is_required"`
+	CreatedAt  pgtype.Timestamptz `json:"created_at"`
+}
+
+type ChalaniTemplate struct {
+	ID                       uuid.UUID          `json:"id"`
+	Name                     string             `json:"name"`
+	Category                 string             `json:"category"`
+	Subject                  string             `json:"subject"`
+	Body                     string             `json:"body"`
+	RequiredSignatoryRoleIds []string           `json:"required_signatory_role_ids"`
+	IsActive                 bool               `json:"is_active"`
+	CreatedAt                pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt                pgtype.Timestamptz `json:"updated_at"`
+}
+
 type Darta struct {
-	ID          uuid.UUID  `json:"id"`
-	Title       string     `json:"title"`
-	Description string     `json:"description"`
-	SubmittedBy string     `json:"submitted_by"`
-	Status      string     `json:"status"`
-	Remarks     *string    `json:"remarks"`
-	CreatedAt   time.Time  `json:"created_at"`
-	UpdatedAt   *time.Time `json:"updated_at"`
-	TenantID    string     `json:"tenant_id"`
+	ID                   uuid.UUID          `json:"id"`
+	DartaNumber          *int32             `json:"darta_number"`
+	FormattedDartaNumber *string            `json:"formatted_darta_number"`
+	FiscalYearID         string             `json:"fiscal_year_id"`
+	Scope                string             `json:"scope"`
+	WardID               *string            `json:"ward_id"`
+	Subject              string             `json:"subject"`
+	ApplicantID          uuid.UUID          `json:"applicant_id"`
+	IntakeChannel        string             `json:"intake_channel"`
+	ReceivedDate         pgtype.Timestamptz `json:"received_date"`
+	EntryDate            pgtype.Timestamptz `json:"entry_date"`
+	IsBackdated          bool               `json:"is_backdated"`
+	BackdateReason       *string            `json:"backdate_reason"`
+	BackdateApproverID   *string            `json:"backdate_approver_id"`
+	PrimaryDocumentID    uuid.UUID          `json:"primary_document_id"`
+	Status               string             `json:"status"`
+	Priority             string             `json:"priority"`
+	ClassificationCode   *string            `json:"classification_code"`
+	AssignedToUnitID     *string            `json:"assigned_to_unit_id"`
+	CurrentAssigneeID    *string            `json:"current_assignee_id"`
+	SlaDeadline          pgtype.Timestamptz `json:"sla_deadline"`
+	IsOverdue            *bool              `json:"is_overdue"`
+	CreatedBy            string             `json:"created_by"`
+	CreatedAt            pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt            pgtype.Timestamptz `json:"updated_at"`
+	TenantID             string             `json:"tenant_id"`
+	IdempotencyKey       *string            `json:"idempotency_key"`
+	Metadata             json.RawMessage    `json:"metadata"`
+}
+
+type DartaAnnex struct {
+	DartaID      pgtype.UUID        `json:"darta_id"`
+	AttachmentID pgtype.UUID        `json:"attachment_id"`
+	AddedAt      pgtype.Timestamptz `json:"added_at"`
+}
+
+type DartaRelationship struct {
+	DartaID          pgtype.UUID        `json:"darta_id"`
+	RelatedDartaID   pgtype.UUID        `json:"related_darta_id"`
+	RelationshipType string             `json:"relationship_type"`
+	CreatedAt        pgtype.Timestamptz `json:"created_at"`
+}
+
+type Recipient struct {
+	ID           uuid.UUID          `json:"id"`
+	Type         string             `json:"type"`
+	Name         string             `json:"name"`
+	Organization *string            `json:"organization"`
+	Email        *string            `json:"email"`
+	Phone        *string            `json:"phone"`
+	Address      string             `json:"address"`
+	CreatedAt    pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt    pgtype.Timestamptz `json:"updated_at"`
 }

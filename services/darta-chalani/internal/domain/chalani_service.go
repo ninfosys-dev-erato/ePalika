@@ -1,0 +1,386 @@
+package domain
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"strings"
+	"time"
+
+	"github.com/google/uuid"
+	"git.ninjainfosys.com/ePalika/services/darta-chalani/internal/db"
+)
+
+// ChalaniService handles Chalani business logic
+type ChalaniService struct {
+	queries db.Querier
+}
+
+// NewChalaniService creates a new Chalani service
+func NewChalaniService(queries db.Querier) *ChalaniService {
+	return &ChalaniService{
+		queries: queries,
+	}
+}
+
+// CreateChalaniInput contains input for creating a chalani
+type CreateChalaniInput struct {
+	FiscalYearID   string
+	Scope          string
+	WardID         *string
+	Subject        string
+	Body           string
+	TemplateID     *string
+	LinkedDartaID  *uuid.UUID
+	RecipientID    uuid.UUID
+	AttachmentIDs  []uuid.UUID
+	SignatoryInputs []SignatoryInput
+	IdempotencyKey string
+	Metadata       map[string]interface{}
+}
+
+type SignatoryInput struct {
+	UserID     string
+	RoleID     string
+	Order      int32
+	IsRequired bool
+}
+
+// CreateChalani creates a new chalani record
+func (s *ChalaniService) CreateChalani(ctx context.Context, input CreateChalaniInput) (*db.Chalani, error) {
+	userCtx := GetUserContext(ctx)
+	
+	// Validate input
+	if err := s.validateCreateChalaniInput(input); err != nil {
+		return nil, err
+	}
+	
+	// Check idempotency
+	if input.IdempotencyKey != "" {
+		existing, err := s.queries.GetChalaniByIdempotencyKey(ctx, db.GetChalaniByIdempotencyKeyParams{
+			IdempotencyKey: input.IdempotencyKey,
+			TenantID:       userCtx.TenantID,
+		})
+		if err == nil && existing.ID != uuid.Nil {
+			return &existing, nil
+		}
+	}
+	
+	// Verify recipient exists
+	_, err := s.queries.GetRecipient(ctx, input.RecipientID)
+	if err != nil {
+		return nil, fmt.Errorf("recipient not found: %w", err)
+	}
+	
+	// Prepare metadata
+	var metadataJSON json.RawMessage
+	if input.Metadata != nil {
+		metadataJSON, err = json.Marshal(input.Metadata)
+		if err != nil {
+			return nil, fmt.Errorf("failed to marshal metadata: %w", err)
+		}
+	}
+	
+	// Create chalani
+	chalani, err := s.queries.CreateChalani(ctx, db.CreateChalaniParams{
+		FiscalYearID:  input.FiscalYearID,
+		Scope:         input.Scope,
+		WardID:        input.WardID,
+		Subject:       input.Subject,
+		Body:          input.Body,
+		TemplateID:    input.TemplateID,
+		LinkedDartaID: input.LinkedDartaID,
+		RecipientID:   input.RecipientID,
+		Status:        "DRAFT",
+		CreatedBy:     userCtx.UserID,
+		TenantID:      userCtx.TenantID,
+		IdempotencyKey: input.IdempotencyKey,
+		Metadata:      metadataJSON,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to create chalani: %w", err)
+	}
+	
+	// Add attachments
+	for _, attachmentID := range input.AttachmentIDs {
+		err := s.queries.AddChalaniAttachment(ctx, db.AddChalaniAttachmentParams{
+			ChalaniID:    chalani.ID,
+			AttachmentID: attachmentID,
+		})
+		if err != nil {
+			fmt.Printf("failed to add attachment %s: %v\n", attachmentID, err)
+		}
+	}
+	
+	// Add signatories
+	for _, sigInput := range input.SignatoryInputs {
+		_, err := s.queries.AddChalaniSignatory(ctx, db.AddChalaniSignatoryParams{
+			ChalaniID:  chalani.ID,
+			UserID:     sigInput.UserID,
+			RoleID:     sigInput.RoleID,
+			OrderNum:   sigInput.Order,
+			IsRequired: sigInput.IsRequired,
+		})
+		if err != nil {
+			fmt.Printf("failed to add signatory %s: %v\n", sigInput.UserID, err)
+		}
+	}
+	
+	// Create audit entry
+	_ = s.createAuditEntry(ctx, "CHALANI", chalani.ID, "CREATED", userCtx, nil)
+	
+	return &chalani, nil
+}
+
+// GetChalani retrieves a chalani by ID
+func (s *ChalaniService) GetChalani(ctx context.Context, id uuid.UUID) (*db.GetChalaniRow, error) {
+	chalani, err := s.queries.GetChalani(ctx, id)
+	if err != nil {
+		return nil, ErrChalaniNotFound
+	}
+	return &chalani, nil
+}
+
+// UpdateChalaniStatus updates the status of a chalani
+func (s *ChalaniService) UpdateChalaniStatus(ctx context.Context, id uuid.UUID, newStatus string) (*db.Chalani, error) {
+	userCtx := GetUserContext(ctx)
+	
+	// Get current chalani
+	current, err := s.queries.GetChalaniSimple(ctx, id)
+	if err != nil {
+		return nil, ErrChalaniNotFound
+	}
+	
+	// Validate status transition
+	if !s.isValidStatusTransition(current.Status, newStatus) {
+		return nil, ErrInvalidChalaniStatus
+	}
+	
+	// Update status
+	updated, err := s.queries.UpdateChalaniStatus(ctx, db.UpdateChalaniStatusParams{
+		ID:     id,
+		Status: newStatus,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to update status: %w", err)
+	}
+	
+	// Create audit entry
+	changes := map[string]interface{}{
+		"status": map[string]string{"from": current.Status, "to": newStatus},
+	}
+	_ = s.createAuditEntry(ctx, "CHALANI", id, "STATUS_CHANGED", userCtx, changes)
+	
+	return &updated, nil
+}
+
+// ApproveChalani records an approval decision
+func (s *ChalaniService) ApproveChalani(ctx context.Context, chalaniID, signatoryID uuid.UUID, decision string, notes *string) (*db.ChalaniApproval, error) {
+	userCtx := GetUserContext(ctx)
+	
+	// Create approval
+	notesStr := ""
+	if notes != nil {
+		notesStr = *notes
+	}
+	
+	approval, err := s.queries.CreateChalaniApproval(ctx, db.CreateChalaniApprovalParams{
+		ChalaniID:   chalaniID,
+		SignatoryID: signatoryID,
+		Decision:    decision,
+		Notes:       &notesStr,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to create approval: %w", err)
+	}
+	
+	// Check if all required signatories have approved
+	counts, err := s.queries.CheckAllSignatoriesApproved(ctx, chalaniID)
+	if err == nil && counts.RequiredCount == counts.ApprovedCount {
+		// All approved - update chalani
+		_, _ = s.queries.UpdateChalaniApprovalStatus(ctx, db.UpdateChalaniApprovalStatusParams{
+			ID:              chalaniID,
+			IsFullyApproved: true,
+		})
+		_, _ = s.queries.UpdateChalaniStatus(ctx, db.UpdateChalaniStatusParams{
+			ID:     chalaniID,
+			Status: "APPROVED",
+		})
+	}
+	
+	// Create audit entry
+	changes := map[string]interface{}{
+		"signatory_id": signatoryID,
+		"decision":     decision,
+	}
+	_ = s.createAuditEntry(ctx, "CHALANI", chalaniID, "APPROVAL_RECORDED", userCtx, changes)
+	
+	return &approval, nil
+}
+
+// ReserveChalaniNumber reserves a chalani number
+func (s *ChalaniService) ReserveChalaniNumber(ctx context.Context, id uuid.UUID) (*db.Chalani, error) {
+	userCtx := GetUserContext(ctx)
+	
+	// Get current chalani
+	current, err := s.queries.GetChalaniSimple(ctx, id)
+	if err != nil {
+		return nil, ErrChalaniNotFound
+	}
+	
+	// Check if already has number
+	if current.ChalaniNumber != nil {
+		return &current, nil
+	}
+	
+	// Get next number
+	nextNum, err := s.queries.GetNextChalaniNumber(ctx, db.GetNextChalaniNumberParams{
+		FiscalYearID: current.FiscalYearID,
+		Scope:        current.Scope,
+		WardID:       current.WardID,
+		TenantID:     current.TenantID,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to get next number: %w", err)
+	}
+	
+	// Format number
+	formatted := s.formatChalaniNumber(current.FiscalYearID, current.Scope, current.WardID, int(nextNum))
+	
+	// Update chalani
+	updated, err := s.queries.UpdateChalaniNumber(ctx, db.UpdateChalaniNumberParams{
+		ID:                      id,
+		ChalaniNumber:           &nextNum,
+		FormattedChalaniNumber:  &formatted,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to update number: %w", err)
+	}
+	
+	// Update status
+	_, _ = s.queries.UpdateChalaniStatus(ctx, db.UpdateChalaniStatusParams{
+		ID:     id,
+		Status: "NUMBER_RESERVED",
+	})
+	
+	// Create audit entry
+	changes := map[string]interface{}{
+		"chalani_number": nextNum,
+		"formatted":      formatted,
+	}
+	_ = s.createAuditEntry(ctx, "CHALANI", id, "NUMBER_RESERVED", userCtx, changes)
+	
+	return &updated, nil
+}
+
+// DispatchChalani dispatches a chalani
+func (s *ChalaniService) DispatchChalani(ctx context.Context, id uuid.UUID, channel, trackingID, courierName *string) (*db.Chalani, error) {
+	userCtx := GetUserContext(ctx)
+	
+	channelVal := ""
+	if channel != nil {
+		channelVal = *channel
+	}
+	
+	updated, err := s.queries.UpdateChalaniDispatch(ctx, db.UpdateChalaniDispatchParams{
+		ID:             id,
+		DispatchChannel: channelVal,
+		DispatchedAt:   time.Now(),
+		DispatchedBy:   userCtx.UserID,
+		TrackingID:     trackingID,
+		CourierName:    courierName,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to dispatch chalani: %w", err)
+	}
+	
+	// Create audit entry
+	changes := map[string]interface{}{
+		"dispatch_channel": channel,
+		"tracking_id":      trackingID,
+	}
+	_ = s.createAuditEntry(ctx, "CHALANI", id, "DISPATCHED", userCtx, changes)
+	
+	return &updated, nil
+}
+
+// Helper methods
+
+func (s *ChalaniService) validateCreateChalaniInput(input CreateChalaniInput) error {
+	if strings.TrimSpace(input.Subject) == "" {
+		return NewValidationError("subject", "required")
+	}
+	if strings.TrimSpace(input.Body) == "" {
+		return NewValidationError("body", "required")
+	}
+	if input.RecipientID == uuid.Nil {
+		return NewValidationError("recipient_id", "required")
+	}
+	if input.Scope != "MUNICIPALITY" && input.Scope != "WARD" {
+		return NewValidationError("scope", "must be MUNICIPALITY or WARD")
+	}
+	return nil
+}
+
+func (s *ChalaniService) isValidStatusTransition(from, to string) bool {
+	validTransitions := map[string][]string{
+		"DRAFT":                 {"PENDING_REVIEW", "VOIDED"},
+		"PENDING_REVIEW":        {"PENDING_APPROVAL", "DRAFT", "VOIDED"},
+		"PENDING_APPROVAL":      {"APPROVED", "PENDING_REVIEW", "VOIDED"},
+		"APPROVED":              {"NUMBER_RESERVED", "VOIDED"},
+		"NUMBER_RESERVED":       {"REGISTERED", "VOIDED"},
+		"REGISTERED":            {"SIGNED", "VOIDED"},
+		"SIGNED":                {"SEALED"},
+		"SEALED":                {"DISPATCHED"},
+		"DISPATCHED":            {"IN_TRANSIT", "RETURNED_UNDELIVERED"},
+		"IN_TRANSIT":            {"DELIVERED", "ACKNOWLEDGED", "RETURNED_UNDELIVERED"},
+		"ACKNOWLEDGED":          {"DELIVERED", "CLOSED"},
+		"DELIVERED":             {"CLOSED"},
+		"RETURNED_UNDELIVERED":  {"DRAFT", "CLOSED"},
+	}
+	
+	allowed, exists := validTransitions[from]
+	if !exists {
+		return false
+	}
+	
+	for _, status := range allowed {
+		if status == to {
+			return true
+		}
+	}
+	return false
+}
+
+func (s *ChalaniService) formatChalaniNumber(fiscalYear, scope string, wardID *string, number int) string {
+	var scopePart string
+	if scope == "MUNICIPALITY" {
+		scopePart = "MUN"
+	} else if wardID != nil {
+		scopePart = fmt.Sprintf("W%s", *wardID)
+	}
+	return fmt.Sprintf("%s/%s/C-%05d", fiscalYear, scopePart, number)
+}
+
+func (s *ChalaniService) createAuditEntry(ctx context.Context, entityType string, entityID uuid.UUID, action string, userCtx *UserContext, changes map[string]interface{}) error {
+	var changesJSON json.RawMessage
+	if changes != nil {
+		var err error
+		changesJSON, err = json.Marshal(changes)
+		if err != nil {
+			return err
+		}
+	}
+	
+	_, err := s.queries.CreateAuditEntry(ctx, db.CreateAuditEntryParams{
+		EntityType:  entityType,
+		EntityID:    entityID,
+		Action:      action,
+		PerformedBy: userCtx.UserID,
+		Changes:     changesJSON,
+		IpAddress:   &userCtx.IPAddress,
+		UserAgent:   &userCtx.UserAgent,
+		TenantID:    userCtx.TenantID,
+	})
+	return err
+}

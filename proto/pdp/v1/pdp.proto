@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package pdp.v1;
+
+option go_package = "git.ninjainfosys.com/ePalika/proto/gen/pdp/v1;pdpv1";
+
+import "google/protobuf/timestamp.proto";
+
+service PolicyDecisionService {
+  rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse);
+  rpc CheckAuthorization(CheckAuthorizationRequest) returns (CheckAuthorizationResponse);
+}
+
+message HealthCheckRequest {}
+
+message HealthCheckResponse {
+  string status = 1;
+  string service = 2;
+  google.protobuf.Timestamp timestamp = 3;
+}
+
+message CheckAuthorizationRequest {
+  string user = 1;
+  string relation = 2;
+  string object = 3;
+  map<string, string> context = 4;
+}
+
+message CheckAuthorizationResponse {
+  bool allowed = 1;
+  string message = 2;
+  string reason = 3;
+}
