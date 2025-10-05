@@ -1,19 +1,11 @@
 {
   "name": "@egov/apollo",
-  "version": "0.2.0",
+  "version": "0.1.0",
+  "private": true,
   "type": "module",
-  "main": "dist/index.js",
-  "module": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "sideEffects": false,
+  "main": "src/index.ts",
   "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
-    }
-  },
-  "scripts": {
-    "build": "tsc -p tsconfig.json"
+    ".": "./src/index.ts"
   },
   "peerDependencies": {
     "@apollo/client": "^3.10.0",

@@ -411,6 +411,27 @@ importers:
         specifier: '>=6.2.1'
         version: 6.2.2
 
+  packages/runtime:
+    dependencies:
+      '@egov/apollo':
+        specifier: workspace:*
+        version: link:../apollo
+      '@egov/auth':
+        specifier: workspace:*
+        version: link:../auth
+      '@egov/state-core':
+        specifier: workspace:*
+        version: link:../state-core
+      '@egov/ui':
+        specifier: workspace:*
+        version: link:../ui
+      react:
+        specifier: ^18.3.0
+        version: 18.3.1
+      react-dom:
+        specifier: ^18.3.0
+        version: 18.3.1(react@18.3.1)
+
   packages/state-core:
     dependencies:
       '@egov/api-schema':
