@@ -1,33 +1,35 @@
 # =============================================================================
-# 🧠  ePalika GraphQL Codegen Configuration — Enterprise Edition v2.0
+# 🧠  ePalika GraphQL Codegen Configuration — Enterprise Edition v2.3
 # =============================================================================
 # PURPOSE:
-#   This configuration drives the automated generation of type-safe artifacts
-#   (TypeScript interfaces, operation types, and React Apollo hooks) from the
-#   unified GraphQL schema produced by the Schema Composition Pipeline.
+#   Generates type-safe artifacts (TypeScript interfaces, operation types,
+#   React Apollo hooks) from the unified GraphQL schema produced by the Schema
+#   Composition Pipeline. This configuration mirrors the same path resolution
+#   model used in schema composition — relative to the monorepo root.
 #
 # COVERAGE:
-#   • All Micro-Frontend (MFE) operation documents under /apps
-#   • Shared fragments residing under /packages/api-types/src/fragments
-#   • Unified schema from /packages/api-schema/index.graphql
+#   • Unified schema from packages/api-schema/index.graphql
+#   • All MFE GraphQL operations under apps/*
+#   • Shared fragments under packages/api-types/src/fragments
 #
 # OUTPUT:
-#   • ./src/generated.ts — Single source of truth for all strongly-typed GraphQL
-#     entities across the ePalika front-end ecosystem.
+#   • packages/api-types/src/generated.ts — single canonical type output
 #
-# GOVERNANCE:
-#   • Changes to GraphQL schema must always be followed by `pnpm generate:types`
-#   • This file is CI-enforced and version-controlled for traceability.
+# EXECUTION CONTEXT:
+#   • Invoked from monorepo root (`pnpm codegen`)
+#   • All relative paths are resolved from repository root
 # =============================================================================
 
 schema:
-  - "./packages/api-schema/index.graphql"
+  - "packages/api-schema/index.graphql" # Unified composed schema
+
 documents:
-  - "../../apps/**/*.{ts,tsx,graphql}" # All MFE-specific GraphQL operations
-  - "./src/fragments/**/*.graphql" # Shared fragments & reusable queries
+  - "apps/**/*.{ts,tsx,graphql,gql}" # MFE GraphQL operations
+  - "packages/api-types/src/fragments/**/*.graphql" # Shared fragments
+  - "packages/api-types/src/**/*.graphql" # Local operations (safety net)
 
 generates:
-  ./src/generated.ts:
+  packages/api-types/src/generated.ts:
     plugins:
       - "typescript"
       - "typescript-operations"
