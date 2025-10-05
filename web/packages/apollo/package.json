@@ -1,13 +1,27 @@
 {
   "name": "@egov/apollo",
-  "version": "0.1.0",
-  "private": true,
+  "version": "0.2.0",
   "type": "module",
-  "main": "src/client.ts",
-  "exports": { ".": "./src/client.ts" },
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
   "peerDependencies": {
-    "@apollo/client": ">=3.10.0",
-    "graphql": ">=16.0.0",
-    "js-sha256": ">=0.11.0"
+    "@apollo/client": "^3.10.0",
+    "graphql": "^16.8.0"
+  },
+  "dependencies": {
+    "@graphql-tools/mock": "^9.0.7",
+    "@graphql-tools/schema": "^10.0.0",
+    "js-sha256": "^0.11.0"
   }
 }
