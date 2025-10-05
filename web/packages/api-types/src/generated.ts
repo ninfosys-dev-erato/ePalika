@@ -1,5 +1,5 @@
-import { gql } from "@apollo/client";
-import * as Apollo from "@apollo/client";
+import { gql, QueryOptions } from "@apollo/client";
+import { useQuery, useLazyQuery, useSuspenseQuery, QueryResult , } from "@apollo/client/react";
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = {
@@ -1630,44 +1630,37 @@ export const DummyDocument = gql`
  *   },
  * });
  */
+
 export function useDummyQuery(
-  baseOptions?: Apollo.QueryHookOptions<DummyQuery, DummyQueryVariables>,
+  baseOptions?: QueryOptions<DummyQuery, DummyQueryVariables>,
 ) {
   const options = { ...defaultOptions, ...baseOptions };
-  return Apollo.useQuery<DummyQuery, DummyQueryVariables>(
+  return useQuery<DummyQuery, DummyQueryVariables>(
     DummyDocument,
     options,
   );
 }
 export function useDummyLazyQuery(
-  baseOptions?: Apollo.LazyQueryHookOptions<DummyQuery, DummyQueryVariables>,
+  baseOptions?: QueryOptions<DummyQuery, DummyQueryVariables>,
 ) {
   const options = { ...defaultOptions, ...baseOptions };
-  return Apollo.useLazyQuery<DummyQuery, DummyQueryVariables>(
+  return useLazyQuery<DummyQuery, DummyQueryVariables>(
     DummyDocument,
     options,
   );
 }
 export function useDummySuspenseQuery(
-  baseOptions?:
-    | Apollo.SkipToken
-    | Apollo.SuspenseQueryHookOptions<DummyQuery, DummyQueryVariables>,
+  baseOptions?: QueryOptions<DummyQuery, DummyQueryVariables>,
 ) {
-  const options =
-    baseOptions === Apollo.skipToken
-      ? baseOptions
-      : { ...defaultOptions, ...baseOptions };
-  return Apollo.useSuspenseQuery<DummyQuery, DummyQueryVariables>(
+  const options = { ...defaultOptions, ...baseOptions };
+  return useSuspenseQuery<DummyQuery, DummyQueryVariables>(
     DummyDocument,
     options,
   );
 }
 export type DummyQueryHookResult = ReturnType<typeof useDummyQuery>;
 export type DummyLazyQueryHookResult = ReturnType<typeof useDummyLazyQuery>;
-export type DummySuspenseQueryHookResult = ReturnType<
-  typeof useDummySuspenseQuery
->;
-export type DummyQueryResult = Apollo.QueryResult<
+export type DummyQueryResult = QueryResult<
   DummyQuery,
   DummyQueryVariables
 >;

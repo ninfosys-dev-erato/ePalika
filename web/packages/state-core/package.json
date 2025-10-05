@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@egov/api-schema": "workspace:*",
+    "@egov/api-types": "workspace:*",
     "immer": "^10.1.1",
     "idb-keyval": "^6.2.1"
   },

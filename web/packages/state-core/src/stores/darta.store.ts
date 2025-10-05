@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { immer } from 'zustand/middleware/immer'
-import type { Darta, DartaFilterInput } from '@egov/api-schema'
+import type { Darta, DartaFilterInput } from '@egov/api-types'
 
 export interface DraftDocument {
   id: string

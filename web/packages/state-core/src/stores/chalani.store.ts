@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { immer } from 'zustand/middleware/immer'
-import type { Chalani, ChalaniFilterInput } from '@egov/api-schema'
+import type { Chalani, ChalaniFilterInput } from '@egov/api-types'
 import type { DraftDocument } from './darta.store'
 
 export type ChalaniDraft = Partial<Chalani> & {
