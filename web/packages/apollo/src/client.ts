@@ -1,3 +1,4 @@
+/// <reference types="./env.d.ts" />
 import { ApolloClient, InMemoryCache, from } from "@apollo/client";
 import { RetryLink } from "@apollo/client/link/retry";
 import { BatchHttpLink } from "@apollo/client/link/batch-http";
