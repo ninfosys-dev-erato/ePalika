@@ -1,0 +1,28 @@
+@use "@carbon/react/scss/spacing" as *;
+@use "@carbon/react/scss/theme" as *;
+@use "@carbon/react/scss/breakpoint" as *;
+
+.gate-layout {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: $layer-01;
+  padding-inline: $spacing-07;
+  transition: background-color 0.25s ease;
+
+  @include breakpoint-up(md) {
+    justify-content: flex-start;
+    padding-inline-start: $spacing-09;
+  }
+
+  &__container {
+    width: 100%;
+    max-width: 560px;
+    text-align: center;
+
+    @include breakpoint-up(md) {
+      text-align: left;
+    }
+  }
+}
