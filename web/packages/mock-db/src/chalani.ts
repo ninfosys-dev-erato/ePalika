@@ -96,7 +96,21 @@ const patch = (c: Chalani, changes: Partial<Chalani>) =>
 // 🧾 Query Resolvers
 // =============================================================================
 export const ChalaniQuery: QueryResolvers = {
-  chalanis: async () => simulate(() => mockDB.chalanis),
+  chalanis: async () =>
+    simulate(() => ({
+      edges: mockDB.chalanis.map((c: Chalani) => ({
+        cursor: c.id,
+        node: c,
+      })),
+      pageInfo: {
+        page: 1,
+        limit: 20,
+        total: mockDB.chalanis.length,
+        totalPages: Math.ceil(mockDB.chalanis.length / 20),
+        hasNextPage: false,
+        hasPreviousPage: false,
+      },
+    })),
 
   chalani: async (_parent: unknown, { id }: { id: string }) =>
     simulate(() => mockDB.chalanis.find((c: Chalani) => c.id === id) || null),
@@ -107,7 +121,14 @@ export const ChalaniQuery: QueryResolvers = {
         cursor: c.id,
         node: c,
       })),
-      pageInfo: { hasNextPage: false, endCursor: null },
+      pageInfo: {
+        page: 1,
+        limit: 20,
+        total: mockDB.chalanis.length,
+        totalPages: Math.ceil(mockDB.chalanis.length / 20),
+        hasNextPage: false,
+        hasPreviousPage: false,
+      },
     })),
 };
 
