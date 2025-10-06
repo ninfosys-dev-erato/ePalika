@@ -1,0 +1,22 @@
+[
+  {
+    "id": "health-check",
+    "version": "v0.40.9",
+    "upstream": {
+      "url": "http://pdp:8080"
+    },
+    "match": {
+      "url": "http://<127.0.0.1|localhost>:4455/healthz",
+      "methods": ["GET"]
+    },
+    "authenticators": [
+      { "handler": "noop" }
+    ],
+    "authorizer": {
+      "handler": "allow"
+    },
+    "mutators": [
+      { "handler": "noop" }
+    ]
+  }
+]

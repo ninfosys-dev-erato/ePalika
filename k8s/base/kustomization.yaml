@@ -1,28 +1,19 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-metadata:
-  name: epalika-base
+namespace: epalika
 
 resources:
-- namespace.yaml
-- configmaps.yaml
-- secrets.yaml
-- openfga/deployment.yaml
-- keycloak/deployment.yaml
-- pdp/deployment.yaml
-- darta-chalani/deployment.yaml
-- oathkeeper/deployment.yaml
-- ingress.yaml
-
-commonLabels:
-  app.kubernetes.io/name: epalika
-  app.kubernetes.io/version: v1.0.0
-  app.kubernetes.io/component: microservices
-  app.kubernetes.io/part-of: epalika-platform
-
-images:
-- name: epalika/pdp
-  newTag: latest
-- name: epalika/darta-chalani
-  newTag: latest
+  - namespace.yaml
+  - secrets.yaml
+  - configmaps.yaml
+  - openfga.yaml
+  - pdp.yaml
+  - darta-chalani.yaml
+  - identity.yaml
+  - graphql-gateway.yaml
+  - oathkeeper.yaml
+  - keycloak.yaml
+  - yugabyte.yaml
+  - kafka.yaml
+  - ingress.yaml

@@ -715,3 +715,21 @@ Developed for Nepali municipalities to modernize their correspondence management
 ---
 
 **For detailed implementation status and plan, see [plan.md](./plan.md)**
+
+Policy Updates
+
+Replaced the placeholder OpenFGA schema with explicit tenant-aware types for user, role, and tenant, allowing either direct users or role members to satisfy admin/member relations (policies/openfga/models/model.json:2,31).
+Added graphql_operation resources so PDP/FGA can evaluate coarse- and fine-grained GraphQL permissions via execute/manage relations (policies/openfga/models/model.json:101).
+Modeled darta_record, chalani_record, and numbering_resource relations to capture creator/assignee/reviewer/dispatcher flows and compute derived abilities such as can_route, can_dispatch, and can_allocate (policies/openfga/models/model.json:171,255,339).
+Seeded representative tuples for tenant membership, domain roles, GraphQL operation grants, and sample record ownership to demonstrate how the new model is intended to be used (policies/openfga/seed/tuples.json:4,20,47,59).
+Gateway Rules
+
+Introduced an Oathkeeper rule that fronts /query with Keycloak JWT auth, PDP authorization, and upstream header mutation; the PDP payload accepts an X-Graphql-Permission header when present and otherwise falls back to graphql:query (policies/oathkeeper/rules/darta-chalani.json:3,27,40).
+Allowed unauthenticated access to the playground and health endpoints so local tooling keeps working without extra headers (policies/oathkeeper/rules/darta-chalani.json:54,75).
+Registered the new rule bundle alongside the existing health check in the Oathkeeper config so both JSON files are loaded (policies/oathkeeper/config.yaml:9; policies/oathkeeper/rules/health-check.json:1).
+Mutated downstream headers to carry X-User-ID, X-User-Name, X-Tenant, X-Roles, and the originating address expected by the gRPC interceptors (policies/oathkeeper/rules/darta-chalani.json:40).
+Next Steps
+
+Make sure Keycloak tokens expose tenant_id, preferred_username, and realm_access.roles so the JWT handler can populate the .Extra fields used in the rule.
+Have the GraphQL gateway set X-Graphql-Permission (or call the PDP directly per resolver) so requests hit the intended graphql_operation:* objects instead of the default graphql:query.
+Publish the updated OpenFGA model to your store and load the seed tuples before rolling these rules into an environment.
