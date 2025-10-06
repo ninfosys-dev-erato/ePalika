@@ -2,6 +2,7 @@
 import type { AuthAdapter, AuthEvent, AuthInitResult, BaseAuthConfig } from '../types'
 
 const AUTH_CHANNEL = 'egov-auth'
+const STORAGE_KEY = 'egov-simulated-auth-token'
 
 export class SimulatedAdapter implements AuthAdapter {
   private token: string | null = null
@@ -35,8 +36,17 @@ export class SimulatedAdapter implements AuthAdapter {
       }
     }
 
-    // “logged out” by default; you can auto-login for DX if you want:
-    // await this.login()
+    // Check localStorage for persisted token
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY)
+      if (stored) {
+        this.token = stored
+        return { authenticated: true }
+      }
+    } catch (e) {
+      console.warn('Failed to restore auth from localStorage:', e)
+    }
+
     return { authenticated: false }
   }
 
@@ -54,6 +64,14 @@ export class SimulatedAdapter implements AuthAdapter {
       iat: Date.now(),
     }
     this.token = `dev.${btoa(JSON.stringify(payload))}.local`
+
+    // Persist token to localStorage
+    try {
+      localStorage.setItem(STORAGE_KEY, this.token)
+    } catch (e) {
+      console.warn('Failed to persist auth to localStorage:', e)
+    }
+
     this.emit('login')
     this.emit('token')
   }
@@ -61,6 +79,14 @@ export class SimulatedAdapter implements AuthAdapter {
   async logout() {
     if (this.bc) this.bc.postMessage({ type: 'logout' })
     this.token = null
+
+    // Remove token from localStorage
+    try {
+      localStorage.removeItem(STORAGE_KEY)
+    } catch (e) {
+      console.warn('Failed to remove auth from localStorage:', e)
+    }
+
     this.emit('logout')
   }
 

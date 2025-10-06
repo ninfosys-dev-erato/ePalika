@@ -1,4 +1,5 @@
 @use "@carbon/react/scss/spacing" as *;
+@use "@carbon/react/scss/type" as *;
 @use "@carbon/react/scss/theme" as *;
 @use "@carbon/react/scss/breakpoint" as *;
 
@@ -8,21 +9,50 @@
   align-items: center;
   justify-content: center;
   background-color: $layer-01;
-  padding-inline: $spacing-07;
-  transition: background-color 0.25s ease;
+  transition: background-color 0.25s ease, opacity 0.3s ease;
 
   @include breakpoint-up(md) {
-    justify-content: flex-start;
-    padding-inline-start: $spacing-09;
+    justify-content: left;
   }
 
   &__container {
-    width: 100%;
-    max-width: 560px;
-    text-align: center;
+    text-align: left;
+  }
 
-    @include breakpoint-up(md) {
-      text-align: left;
+  &__title {
+    @include type-style("heading-03");
+    color: $text-primary;
+    margin-bottom: $spacing-02;
+  }
+
+  &__description {
+    @include type-style("body-01");
+    color: $text-secondary;
+    margin-bottom: $spacing-07;
+  }
+
+  &__button {
+    margin-top: $spacing-05;
+    min-width: 256px !important;
+
+    @include breakpoint-up(lg) {
+      min-width: 320px !important;
     }
+  }
+
+  &--fade-enter {
+    opacity: 0;
+  }
+
+  &--fade-enter-active {
+    opacity: 1;
+  }
+
+  &--fade-exit {
+    opacity: 1;
+  }
+
+  &--fade-exit-active {
+    opacity: 0;
   }
 }

@@ -4,11 +4,18 @@ import { useUIStore } from "@egov/state-core";
 import styles from "./GateLayout.module.scss";
 
 interface GateLayoutProps {
-  children: React.ReactNode;
+  title?: string;
+  description?: string;
+  children?: React.ReactNode;
   className?: string;
 }
 
-export function GateLayout({ children, className }: GateLayoutProps) {
+export function GateLayout({
+  title,
+  description,
+  children,
+  className,
+}: GateLayoutProps) {
   const theme = useUIStore((s) => s.theme);
 
   return (
@@ -18,8 +25,18 @@ export function GateLayout({ children, className }: GateLayoutProps) {
         className={`${styles["gate-layout"]} ${className || ""}`}
       >
         <Row>
-          <Column sm={4} md={8} lg={8} xlg={8}>
-            <div className={styles["gate-layout__container"]}>{children}</div>
+          <Column sm={4} md={16} lg={16} xlg={16}>
+            <div className={styles["gate-layout__container"]}>
+              {title && (
+                <h1 className={styles["gate-layout__title"]}>{title}</h1>
+              )}
+              {description && (
+                <p className={styles["gate-layout__description"]}>
+                  {description}
+                </p>
+              )}
+              {children}
+            </div>
           </Column>
         </Row>
       </FlexGrid>

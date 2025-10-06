@@ -1,35 +1,7 @@
 @use "@carbon/react/scss/spacing" as *;
-@use "@carbon/react/scss/type" as *;
-@use "@carbon/react/scss/theme" as *;
 @use "@carbon/react/scss/breakpoint" as *;
 
 .login-gate {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: $layer-01;
-
-  @include breakpoint-up(md) {
-    justify-content: left;
-  }
-
-  &__container {
-    text-align: left;
-  }
-
-  &__title {
-    @include type-style("heading-03");
-    color: $text-primary;
-    margin-bottom: $spacing-01;
-  }
-
-  &__description {
-    @include type-style("body-01");
-    color: $text-secondary;
-    margin-bottom: $spacing-06;
-  }
-
   &__button {
     margin-top: $spacing-05;
     min-width: 256px !important;
