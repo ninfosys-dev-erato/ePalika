@@ -13,7 +13,7 @@ export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & {
 };
 export type MakeEmpty<
   T extends { [key: string]: unknown },
-  K extends keyof T,
+  K extends keyof T
 > = { [_ in K]?: never };
 export type Incremental<T> =
   | T
@@ -696,6 +696,7 @@ export type MarkReturnedUndeliveredInput = {
 
 export type Mutation = {
   readonly __typename: "Mutation";
+  readonly _empty: Maybe<Scalars["String"]["output"]>;
   readonly acceptDarta: Darta;
   readonly acknowledgeChalani: Chalani;
   readonly addAddress: Address;
@@ -1218,6 +1219,7 @@ export type Priority = "HIGH" | "LOW" | "MEDIUM" | "URGENT";
 
 export type Query = {
   readonly __typename: "Query";
+  readonly _empty: Maybe<Scalars["String"]["output"]>;
   readonly chalani: Maybe<Chalani>;
   /** Approval queue visible to approvers. */
   readonly chalaniApprovalQueue: ChalaniConnection;
@@ -1767,27 +1769,27 @@ export const DummyDocument = gql`
  * });
  */
 export function useDummyQuery(
-  baseOptions?: Apollo.QueryHookOptions<DummyQuery, DummyQueryVariables>,
+  baseOptions?: Apollo.QueryHookOptions<DummyQuery, DummyQueryVariables>
 ) {
   const options = { ...defaultOptions, ...baseOptions };
   return Apollo.useQuery<DummyQuery, DummyQueryVariables>(
     DummyDocument,
-    options,
+    options
   );
 }
 export function useDummyLazyQuery(
-  baseOptions?: Apollo.LazyQueryHookOptions<DummyQuery, DummyQueryVariables>,
+  baseOptions?: Apollo.LazyQueryHookOptions<DummyQuery, DummyQueryVariables>
 ) {
   const options = { ...defaultOptions, ...baseOptions };
   return Apollo.useLazyQuery<DummyQuery, DummyQueryVariables>(
     DummyDocument,
-    options,
+    options
   );
 }
 export function useDummySuspenseQuery(
   baseOptions?:
     | Apollo.SkipToken
-    | Apollo.SuspenseQueryHookOptions<DummyQuery, DummyQueryVariables>,
+    | Apollo.SuspenseQueryHookOptions<DummyQuery, DummyQueryVariables>
 ) {
   const options =
     baseOptions === Apollo.skipToken
@@ -1795,7 +1797,7 @@ export function useDummySuspenseQuery(
       : { ...defaultOptions, ...baseOptions };
   return Apollo.useSuspenseQuery<DummyQuery, DummyQueryVariables>(
     DummyDocument,
-    options,
+    options
   );
 }
 export type DummyQueryHookResult = ReturnType<typeof useDummyQuery>;
@@ -1852,24 +1854,24 @@ export function useGetChalanisQuery(
   baseOptions?: Apollo.QueryHookOptions<
     GetChalanisQuery,
     GetChalanisQueryVariables
-  >,
+  >
 ) {
   const options = { ...defaultOptions, ...baseOptions };
   return Apollo.useQuery<GetChalanisQuery, GetChalanisQueryVariables>(
     GetChalanisDocument,
-    options,
+    options
   );
 }
 export function useGetChalanisLazyQuery(
   baseOptions?: Apollo.LazyQueryHookOptions<
     GetChalanisQuery,
     GetChalanisQueryVariables
-  >,
+  >
 ) {
   const options = { ...defaultOptions, ...baseOptions };
   return Apollo.useLazyQuery<GetChalanisQuery, GetChalanisQueryVariables>(
     GetChalanisDocument,
-    options,
+    options
   );
 }
 export function useGetChalanisSuspenseQuery(
@@ -1878,7 +1880,7 @@ export function useGetChalanisSuspenseQuery(
     | Apollo.SuspenseQueryHookOptions<
         GetChalanisQuery,
         GetChalanisQueryVariables
-      >,
+      >
 ) {
   const options =
     baseOptions === Apollo.skipToken
@@ -1886,7 +1888,7 @@ export function useGetChalanisSuspenseQuery(
       : { ...defaultOptions, ...baseOptions };
   return Apollo.useSuspenseQuery<GetChalanisQuery, GetChalanisQueryVariables>(
     GetChalanisDocument,
-    options,
+    options
   );
 }
 export type GetChalanisQueryHookResult = ReturnType<typeof useGetChalanisQuery>;
@@ -1938,24 +1940,24 @@ export function useMyChalaniInboxQuery(
   baseOptions?: Apollo.QueryHookOptions<
     MyChalaniInboxQuery,
     MyChalaniInboxQueryVariables
-  >,
+  >
 ) {
   const options = { ...defaultOptions, ...baseOptions };
   return Apollo.useQuery<MyChalaniInboxQuery, MyChalaniInboxQueryVariables>(
     MyChalaniInboxDocument,
-    options,
+    options
   );
 }
 export function useMyChalaniInboxLazyQuery(
   baseOptions?: Apollo.LazyQueryHookOptions<
     MyChalaniInboxQuery,
     MyChalaniInboxQueryVariables
-  >,
+  >
 ) {
   const options = { ...defaultOptions, ...baseOptions };
   return Apollo.useLazyQuery<MyChalaniInboxQuery, MyChalaniInboxQueryVariables>(
     MyChalaniInboxDocument,
-    options,
+    options
   );
 }
 export function useMyChalaniInboxSuspenseQuery(
@@ -1964,7 +1966,7 @@ export function useMyChalaniInboxSuspenseQuery(
     | Apollo.SuspenseQueryHookOptions<
         MyChalaniInboxQuery,
         MyChalaniInboxQueryVariables
-      >,
+      >
 ) {
   const options =
     baseOptions === Apollo.skipToken

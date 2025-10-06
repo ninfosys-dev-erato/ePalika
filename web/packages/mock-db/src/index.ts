@@ -14,20 +14,20 @@
  * ============================================================================
  */
 
-import { ChalaniMutation } from "./chalani";
+import { ChalaniQuery, ChalaniMutation } from "./chalani";
 import { dartaResolvers } from "./darta";
 import { identityResolvers } from "./identity";
 import { numberingResolvers } from "./numbering";
 
 export const resolvers = {
   Query: {
-    ...ChalaniMutation.Query,
+    ...ChalaniQuery,
     ...dartaResolvers.Query,
     ...identityResolvers.Query,
     ...numberingResolvers.Query,
   },
   Mutation: {
-    ...ChalaniMutation.Mutation,
+    ...ChalaniMutation,
     ...dartaResolvers.Mutation,
     ...identityResolvers.Mutation,
     ...numberingResolvers.Mutation,
