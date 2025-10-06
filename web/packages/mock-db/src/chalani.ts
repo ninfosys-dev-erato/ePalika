@@ -29,6 +29,8 @@ import type {
   ResendChalaniInput,
   VoidChalaniInput,
   SupersedeChalaniInput,
+  User,
+  AuditEntry,
 } from "@egov/api-types";
 
 // GraphQL Resolver Types
@@ -39,7 +41,7 @@ type MutationResolvers = Record<string, any>;
 // 🧠 Helper Utilities
 // =============================================================================
 const findChalani = (id: string): Chalani => {
-  const c = mockDB.chalanis.find((x) => x.id === id);
+  const c = mockDB.chalanis.find((x: Chalani) => x.id === id);
   if (!c) throw new Error(`Chalani ${id} not found`);
   return c;
 };
