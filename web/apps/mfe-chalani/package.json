@@ -4,9 +4,21 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "vite --port 5202",
-    "build": "vite build",
-    "preview": "vite preview",
+    "//": "---- DEV ----",
+    "dev": "pnpm dev:standalone",
+    "dev:standalone": "vite --port 5202 --mode standalone --open /index.html",
+    "dev:federated": "vite --port 5202 --mode federated",
+    "dev:integrated": "vite --port 5202 --mode integrated",
+    "//2": "---- BUILD (CI/Release) ----",
+    "build": "pnpm build:federated",
+    "build:standalone": "vite build --mode standalone",
+    "build:federated": "vite build --mode federated",
+    "build:integrated": "vite build --mode integrated",
+    "//3": "---- PREVIEW (local dist serve) ----",
+    "preview:standalone": "vite preview --mode standalone --port 5222 --strictPort",
+    "preview:federated": "vite preview --mode federated --port 5223 --strictPort",
+    "preview:integrated": "vite preview --mode integrated --port 5224 --strictPort",
+    "//4": "---- QUALITY ----",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -30,6 +42,7 @@
     "@egov/design-system": "workspace:*",
     "@types/react": "^18.3.7",
     "@types/react-dom": "^18.3.2",
+    "sass": "^1.79.0",
     "typescript": "^5.6.3",
     "vite": "^7.1.9"
   }

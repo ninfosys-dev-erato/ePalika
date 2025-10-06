@@ -8,6 +8,8 @@
     ".": "./src/index.ts"
   },
   "peerDependencies": {
+    "@egov/api-schema": "workspace:*",
+    "@egov/mock-db": "workspace:*",
     "@apollo/client": "^3.10.0",
     "graphql": "^16.8.0"
   },
