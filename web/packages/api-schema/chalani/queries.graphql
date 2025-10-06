@@ -6,17 +6,62 @@ extend type Query {
     scope: Scope!
     wardId: ID
   ): Chalani
+
+  """
+  General listing with filters and pagination.
+  """
   chalanis(
     filter: ChalaniFilterInput
     pagination: PaginationInput
   ): ChalaniConnection!
+
+  """
+  Chalanis that currently need an action by the logged-in user.
+  Auto-filters by role and state (Clerk → Draft, Reviewer → PendingReview, etc.)
+  """
+  myChalaniInbox(
+    pagination: PaginationInput
+    status: [ChalaniStatus!]
+  ): ChalaniConnection!
+
+  """
+  Items awaiting this user's approval (Approver role).
+  """
   myPendingApprovals(pagination: PaginationInput): ChalaniConnection!
+
+  """
+  Recently created or updated by the current user.
+  """
+  myChalaniDrafts(pagination: PaginationInput): ChalaniConnection!
+
+  """
+  Templates usable for Chalani creation.
+  """
   chalaniTemplates(category: String, search: String): [ChalaniTemplate!]!
+
+  """
+  Aggregated operational metrics for dashboards.
+  """
   chalaniStats(scope: Scope, fiscalYear: FiscalYear, wardId: ID): ChalaniStats!
 
+  """
+  Review queue visible to reviewers.
+  """
   chalaniReviewQueue(pagination: PaginationInput): ChalaniConnection!
+
+  """
+  Approval queue visible to approvers.
+  """
   chalaniApprovalQueue(pagination: PaginationInput): ChalaniConnection!
+
+  """
+  Registry list for number reservation / registration staff.
+  """
   chalaniRegistryQueue(pagination: PaginationInput): ChalaniConnection!
+
+  """
+  Dispatch and tracking board, filtered by dispatch status.
+  """
   chalaniDispatchBoard(
     status: [ChalaniStatus!]
     pagination: PaginationInput

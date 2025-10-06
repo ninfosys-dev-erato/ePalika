@@ -1,8 +1,5 @@
-import { gql, type QueryOptions } from "@apollo/client";
-import { useQuery, useLazyQuery, useSuspenseQuery,  type QueryHookOptions,
-  type LazyQueryHookOptions,
-  type SuspenseQueryHookOptions,
-  type QueryResult, } from "@apollo/client/react";
+import { gql } from "@apollo/client";
+import * as Apollo from "@apollo/client";
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = {
@@ -41,6 +38,7 @@ export type AcknowledgeChalaniInput = {
   readonly acknowledgedBy: InputMaybe<Scalars["String"]["input"]>;
   readonly acknowledgementProofId: InputMaybe<Scalars["ID"]["input"]>;
   readonly chalaniId: Scalars["ID"]["input"];
+  readonly idempotencyKey: Scalars["String"]["input"];
 };
 
 export type Address = {
@@ -124,11 +122,14 @@ export type Approval = {
 
 export type ApprovalDecision = "APPROVED" | "DELEGATED" | "REJECTED";
 
+/** Used by Approver (CAO/Mayor) to approve, reject or delegate. */
 export type ApproveChalaniInput = {
   readonly chalaniId: Scalars["ID"]["input"];
   readonly decision: ChalaniApprovalDecision;
   readonly delegateToId: InputMaybe<Scalars["ID"]["input"]>;
+  readonly idempotencyKey: Scalars["String"]["input"];
   readonly notes: InputMaybe<Scalars["String"]["input"]>;
+  readonly reason: InputMaybe<Scalars["String"]["input"]>;
 };
 
 export type ApproveGrantInput = {
@@ -173,6 +174,7 @@ export type Chalani = {
   readonly acknowledgedAt: Maybe<Scalars["DateTime"]["output"]>;
   readonly acknowledgedBy: Maybe<Scalars["String"]["output"]>;
   readonly acknowledgementProof: Maybe<Attachment>;
+  readonly allowedActions: ReadonlyArray<ChalaniAction>;
   readonly approvals: ReadonlyArray<Approval>;
   readonly attachments: ReadonlyArray<Attachment>;
   readonly auditTrail: ReadonlyArray<AuditEntry>;
@@ -205,6 +207,28 @@ export type Chalani = {
   readonly ward: Maybe<Ward>;
 };
 
+export type ChalaniAction =
+  | "ACKNOWLEDGE"
+  | "APPROVE"
+  | "APPROVE_REVIEW"
+  | "CLOSE"
+  | "CREATE"
+  | "DELIVER"
+  | "DIRECT_REGISTER"
+  | "DISPATCH"
+  | "EDIT_REQUIRED"
+  | "FINALIZE"
+  | "MARK_IN_TRANSIT"
+  | "REJECT"
+  | "RESEND"
+  | "RESERVE_NO"
+  | "RETURN_UNDELIVERED"
+  | "SEAL"
+  | "SIGN"
+  | "SUBMIT"
+  | "SUPERSEDE"
+  | "VOID";
+
 export type ChalaniApprovalDecision = "APPROVE" | "REJECT";
 
 export type ChalaniConnection = {
@@ -219,20 +243,30 @@ export type ChalaniEdge = {
   readonly node: Chalani;
 };
 
+/**
+ * Filter options for Chalani list and dashboards.
+ * All fields are optional and can be combined.
+ */
 export type ChalaniFilterInput = {
   readonly createdById: InputMaybe<Scalars["ID"]["input"]>;
-  readonly dispatchChannel: InputMaybe<DispatchChannel>;
+  readonly dispatchChannel: InputMaybe<ReadonlyArray<DispatchChannel>>;
   readonly fiscalYear: InputMaybe<Scalars["FiscalYear"]["input"]>;
   readonly fromDate: InputMaybe<Scalars["DateTime"]["input"]>;
+  readonly includeArchived: InputMaybe<Scalars["Boolean"]["input"]>;
   readonly isAcknowledged: InputMaybe<Scalars["Boolean"]["input"]>;
+  readonly recipientName: InputMaybe<Scalars["String"]["input"]>;
   readonly scope: InputMaybe<Scope>;
   readonly search: InputMaybe<Scalars["String"]["input"]>;
-  readonly status: InputMaybe<ChalaniStatus>;
+  readonly sortBy: InputMaybe<ChalaniSortField>;
+  readonly sortOrder: InputMaybe<SortOrder>;
+  readonly status: InputMaybe<ReadonlyArray<ChalaniStatus>>;
   readonly toDate: InputMaybe<Scalars["DateTime"]["input"]>;
   readonly wardId: InputMaybe<Scalars["ID"]["input"]>;
 };
 
 export type ChalaniReviewDecision = "APPROVE_REVIEW" | "EDIT_REQUIRED";
+
+export type ChalaniSortField = "CREATED_AT" | "STATUS" | "UPDATED_AT";
 
 export type ChalaniStats = {
   readonly __typename: "ChalaniStats";
@@ -319,6 +353,7 @@ export type Counter = {
 
 export type CounterType = "CHALANI" | "DARTA";
 
+/** Create a new Chalani draft. */
 export type CreateChalaniInput = {
   readonly attachmentIds: InputMaybe<ReadonlyArray<Scalars["ID"]["input"]>>;
   readonly body: Scalars["String"]["input"];
@@ -503,12 +538,14 @@ export type DelegationStatus =
 
 export type DirectRegisterChalaniInput = {
   readonly chalaniId: Scalars["ID"]["input"];
+  readonly idempotencyKey: Scalars["String"]["input"];
 };
 
 export type DispatchChalaniInput = {
   readonly chalaniId: Scalars["ID"]["input"];
   readonly courierName: InputMaybe<Scalars["String"]["input"]>;
   readonly dispatchChannel: DispatchChannel;
+  readonly idempotencyKey: Scalars["String"]["input"];
   readonly scheduledDispatchAt: InputMaybe<Scalars["DateTime"]["input"]>;
   readonly trackingId: InputMaybe<Scalars["String"]["input"]>;
 };
@@ -534,6 +571,7 @@ export type EvidenceInput = {
 export type FinalizeChalaniRegistrationInput = {
   readonly allocationId: Scalars["ID"]["input"];
   readonly chalaniId: Scalars["ID"]["input"];
+  readonly idempotencyKey: Scalars["String"]["input"];
 };
 
 export type GeoPoint = {
@@ -640,16 +678,19 @@ export type InviteUserInput = {
 export type MarkDeliveredInput = {
   readonly chalaniId: Scalars["ID"]["input"];
   readonly deliveredProofId: InputMaybe<Scalars["ID"]["input"]>;
+  readonly idempotencyKey: Scalars["String"]["input"];
 };
 
 export type MarkInTransitInput = {
   readonly chalaniId: Scalars["ID"]["input"];
   readonly courierName: InputMaybe<Scalars["String"]["input"]>;
+  readonly idempotencyKey: Scalars["String"]["input"];
   readonly trackingId: InputMaybe<Scalars["String"]["input"]>;
 };
 
 export type MarkReturnedUndeliveredInput = {
   readonly chalaniId: Scalars["ID"]["input"];
+  readonly idempotencyKey: Scalars["String"]["input"];
   readonly reason: Scalars["String"]["input"];
 };
 
@@ -1178,13 +1219,20 @@ export type Priority = "HIGH" | "LOW" | "MEDIUM" | "URGENT";
 export type Query = {
   readonly __typename: "Query";
   readonly chalani: Maybe<Chalani>;
+  /** Approval queue visible to approvers. */
   readonly chalaniApprovalQueue: ChalaniConnection;
   readonly chalaniByNumber: Maybe<Chalani>;
+  /** Dispatch and tracking board, filtered by dispatch status. */
   readonly chalaniDispatchBoard: ChalaniConnection;
+  /** Registry list for number reservation / registration staff. */
   readonly chalaniRegistryQueue: ChalaniConnection;
+  /** Review queue visible to reviewers. */
   readonly chalaniReviewQueue: ChalaniConnection;
+  /** Aggregated operational metrics for dashboards. */
   readonly chalaniStats: ChalaniStats;
+  /** Templates usable for Chalani creation. */
   readonly chalaniTemplates: ReadonlyArray<ChalaniTemplate>;
+  /** General listing with filters and pagination. */
   readonly chalanis: ChalaniConnection;
   readonly checkPermission: PermissionCheckResult;
   readonly counter: Maybe<Counter>;
@@ -1200,7 +1248,15 @@ export type Query = {
   readonly group: Maybe<Group>;
   readonly groups: ReadonlyArray<Group>;
   readonly me: User;
+  /** Recently created or updated by the current user. */
+  readonly myChalaniDrafts: ChalaniConnection;
+  /**
+   * Chalanis that currently need an action by the logged-in user.
+   * Auto-filters by role and state (Clerk → Draft, Reviewer → PendingReview, etc.)
+   */
+  readonly myChalaniInbox: ChalaniConnection;
   readonly myDartas: DartaConnection;
+  /** Items awaiting this user's approval (Approver role). */
   readonly myPendingApprovals: ChalaniConnection;
   readonly numberAllocation: Maybe<NumberAllocation>;
   readonly orgUnit: Maybe<OrgUnit>;
@@ -1324,6 +1380,15 @@ export type QueryGroupsArgs = {
   search: InputMaybe<Scalars["String"]["input"]>;
 };
 
+export type QueryMyChalaniDraftsArgs = {
+  pagination: InputMaybe<PaginationInput>;
+};
+
+export type QueryMyChalaniInboxArgs = {
+  pagination: InputMaybe<PaginationInput>;
+  status: InputMaybe<ReadonlyArray<ChalaniStatus>>;
+};
+
 export type QueryMyDartasArgs = {
   pagination: InputMaybe<PaginationInput>;
   status: InputMaybe<DartaStatus>;
@@ -1392,6 +1457,7 @@ export type Recipient = {
   readonly type: RecipientType;
 };
 
+/** Recipient details for Chalani. */
 export type RecipientInput = {
   readonly address: Scalars["String"]["input"];
   readonly email: InputMaybe<Scalars["String"]["input"]>;
@@ -1420,17 +1486,21 @@ export type ResendChalaniInput = {
   readonly chalaniId: Scalars["ID"]["input"];
   readonly courierName: InputMaybe<Scalars["String"]["input"]>;
   readonly dispatchChannel: DispatchChannel;
+  readonly idempotencyKey: Scalars["String"]["input"];
   readonly trackingId: InputMaybe<Scalars["String"]["input"]>;
 };
 
 export type ReserveChalaniNumberInput = {
   readonly allocationId: Scalars["ID"]["input"];
   readonly chalaniId: Scalars["ID"]["input"];
+  readonly idempotencyKey: Scalars["String"]["input"];
 };
 
+/** Used by Reviewer (Ward Secretary) to accept or request edit. */
 export type ReviewChalaniInput = {
   readonly chalaniId: Scalars["ID"]["input"];
   readonly decision: ChalaniReviewDecision;
+  readonly idempotencyKey: Scalars["String"]["input"];
   readonly notes: InputMaybe<Scalars["String"]["input"]>;
 };
 
@@ -1506,11 +1576,13 @@ export type ScopeRef = {
 
 export type SealChalaniInput = {
   readonly chalaniId: Scalars["ID"]["input"];
+  readonly idempotencyKey: Scalars["String"]["input"];
   readonly sealAttachmentId: InputMaybe<Scalars["ID"]["input"]>;
 };
 
 export type SignChalaniInput = {
   readonly chalaniId: Scalars["ID"]["input"];
+  readonly idempotencyKey: Scalars["String"]["input"];
   readonly signatureAttachmentId: InputMaybe<Scalars["ID"]["input"]>;
 };
 
@@ -1523,7 +1595,10 @@ export type Signatory = {
   readonly user: User;
 };
 
+export type SortOrder = "ASC" | "DESC";
+
 export type SupersedeChalaniInput = {
+  readonly idempotencyKey: Scalars["String"]["input"];
   readonly newChalani: CreateChalaniInput;
   readonly reason: Scalars["String"]["input"];
   readonly targetChalaniId: Scalars["ID"]["input"];
@@ -1587,6 +1662,7 @@ export type VerificationMethod =
 
 export type VoidChalaniInput = {
   readonly chalaniId: Scalars["ID"]["input"];
+  readonly idempotencyKey: Scalars["String"]["input"];
   readonly reason: Scalars["String"]["input"];
 };
 
@@ -1634,35 +1710,43 @@ export const DummyDocument = gql`
  * });
  */
 export function useDummyQuery(
-  baseOptions?: QueryHookOptions<DummyQuery, DummyQueryVariables>
+  baseOptions?: Apollo.QueryHookOptions<DummyQuery, DummyQueryVariables>,
 ) {
-  const options = { ...defaultOptions, ...baseOptions } as QueryHookOptions<
-    DummyQuery,
-    DummyQueryVariables
-  >;
-  return useQuery<DummyQuery, DummyQueryVariables>(DummyDocument, options);
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<DummyQuery, DummyQueryVariables>(
+    DummyDocument,
+    options,
+  );
 }
-
 export function useDummyLazyQuery(
-  baseOptions?: LazyQueryHookOptions<DummyQuery, DummyQueryVariables>
+  baseOptions?: Apollo.LazyQueryHookOptions<DummyQuery, DummyQueryVariables>,
 ) {
-  const options = { ...defaultOptions, ...baseOptions } as LazyQueryHookOptions<
-    DummyQuery,
-    DummyQueryVariables
-  >;
-  return useLazyQuery<DummyQuery, DummyQueryVariables>(DummyDocument, options);
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<DummyQuery, DummyQueryVariables>(
+    DummyDocument,
+    options,
+  );
 }
-
 export function useDummySuspenseQuery(
-  baseOptions?: SuspenseQueryHookOptions<DummyQuery, DummyQueryVariables>
+  baseOptions?:
+    | Apollo.SkipToken
+    | Apollo.SuspenseQueryHookOptions<DummyQuery, DummyQueryVariables>,
 ) {
-  const options = { ...defaultOptions, ...baseOptions } as SuspenseQueryHookOptions<
-    DummyQuery,
-    DummyQueryVariables
-  >;
-  return useSuspenseQuery<DummyQuery, DummyQueryVariables>(DummyDocument, options);
+  const options =
+    baseOptions === Apollo.skipToken
+      ? baseOptions
+      : { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<DummyQuery, DummyQueryVariables>(
+    DummyDocument,
+    options,
+  );
 }
-
 export type DummyQueryHookResult = ReturnType<typeof useDummyQuery>;
 export type DummyLazyQueryHookResult = ReturnType<typeof useDummyLazyQuery>;
-export type DummyQueryResult = QueryResult<DummyQuery, DummyQueryVariables>;
+export type DummySuspenseQueryHookResult = ReturnType<
+  typeof useDummySuspenseQuery
+>;
+export type DummyQueryResult = Apollo.QueryResult<
+  DummyQuery,
+  DummyQueryVariables
+>;

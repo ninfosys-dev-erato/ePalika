@@ -122,7 +122,7 @@ export function Receipt({
       {notes && <p className={styles.notes}>{notes}</p>}
 
       <div className={styles.actions}>
-        <Button type="button" variant="primary" onClick={handleDownload} disabled={downloading}>
+        <Button type="button" kind="primary" onClick={handleDownload} disabled={downloading}>
           {downloading ? 'तैयार गर्दै...' : downloadLabel}
         </Button>
       </div>

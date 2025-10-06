@@ -1,0 +1,15 @@
+query MyChalaniInbox($pagination: PaginationInput) {
+  myChalaniInbox(pagination: $pagination) {
+    edges {
+      node {
+        id
+        subject
+        status
+        recipient {
+          name
+        }
+        createdAt
+      }
+    }
+  }
+}
