@@ -1,5 +1,5 @@
 import React from "react";
-import { CarbonProviders } from "@egov/ui";
+import { CarbonProviders, Button } from "@egov/ui";
 import { useUIStore } from "@egov/state-core";
 
 export function LoginGate(props: { onLogin: () => void }) {
@@ -9,7 +9,7 @@ export function LoginGate(props: { onLogin: () => void }) {
       <div style={{ padding: 32, maxWidth: 560 }}>
         <h2>Session Required</h2>
         <p>You need to sign in to continue.</p>
-        <button onClick={props.onLogin}>Sign in</button>
+        <Button onClick={props.onLogin}>Sign in</Button>
       </div>
     </CarbonProviders>
   );

@@ -1,5 +1,3 @@
-import { TextArea as CarbonTextArea, TextAreaProps } from '@carbon/react';
+import { TextArea as CarbonTextArea, TextAreaProps } from "@carbon/react";
 
-export const TextArea = (props: TextAreaProps) => (
-  <CarbonTextArea {...props} />
-);
+export const TextArea = (props: TextAreaProps) => <CarbonTextArea {...props} />;

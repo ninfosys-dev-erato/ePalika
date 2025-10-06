@@ -14,6 +14,7 @@
     "@egov/apollo": "workspace:*",
     "@egov/auth": "workspace:*",
     "@egov/state-core": "workspace:*",
-    "@egov/ui": "workspace:*"
+    "@egov/ui": "workspace:*",
+    "@egov/icons": "workspace:*"
   }
 }
