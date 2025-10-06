@@ -1,42 +1,153 @@
 enum ChalaniStatus {
-  DRAFT PENDING_REVIEW PENDING_APPROVAL APPROVED NUMBER_RESERVED
-  REGISTERED SIGNED SEALED DISPATCHED IN_TRANSIT ACKNOWLEDGED
-  RETURNED_UNDELIVERED DELIVERED VOIDED SUPERSEDED CLOSED
+  DRAFT
+  PENDING_REVIEW
+  PENDING_APPROVAL
+  APPROVED
+  NUMBER_RESERVED
+  REGISTERED
+  SIGNED
+  SEALED
+  DISPATCHED
+  IN_TRANSIT
+  ACKNOWLEDGED
+  RETURNED_UNDELIVERED
+  DELIVERED
+  VOIDED
+  SUPERSEDED
+  CLOSED
+}
+
+enum ChalaniAction {
+  CREATE
+  SUBMIT
+  EDIT_REQUIRED
+  APPROVE_REVIEW
+  APPROVE
+  REJECT
+  RESERVE_NO
+  DIRECT_REGISTER
+  FINALIZE
+  SIGN
+  SEAL
+  DISPATCH
+  MARK_IN_TRANSIT
+  ACKNOWLEDGE
+  DELIVER
+  RETURN_UNDELIVERED
+  RESEND
+  VOID
+  SUPERSEDE
+  CLOSE
 }
 
 type Chalani {
-  id: ID! chalaniNumber: Int formattedChalaniNumber: String
-  fiscalYear: FiscalYear! scope: Scope! ward: Ward subject: String! body: String!
-  templateId: ID attachments: [Attachment!]! linkedDarta: Darta
-  status: ChalaniStatus! requiredSignatories: [Signatory!]! approvals: [Approval!]!
-  isFullyApproved: Boolean! dispatchChannel: DispatchChannel
-  recipient: Recipient! dispatchedAt: DateTime dispatchedBy: User
-  trackingId: String courierName: String isAcknowledged: Boolean!
-  acknowledgedAt: DateTime acknowledgedBy: String acknowledgementProof: Attachment
-  deliveredAt: DateTime deliveredProof: Attachment createdBy: User!
-  createdAt: DateTime! updatedAt: DateTime! auditTrail: [AuditEntry!]!
-  supersededById: ID supersedesId: ID
+  id: ID!
+  chalaniNumber: Int
+  formattedChalaniNumber: String
+  fiscalYear: FiscalYear!
+  scope: Scope!
+  ward: Ward
+  subject: String!
+  body: String!
+  templateId: ID
+  attachments: [Attachment!]!
+  linkedDarta: Darta
+  status: ChalaniStatus!
+  requiredSignatories: [Signatory!]!
+  approvals: [Approval!]!
+  isFullyApproved: Boolean!
+  dispatchChannel: DispatchChannel
+  recipient: Recipient!
+  dispatchedAt: DateTime
+  dispatchedBy: User
+  trackingId: String
+  courierName: String
+  isAcknowledged: Boolean!
+  acknowledgedAt: DateTime
+  acknowledgedBy: String
+  acknowledgementProof: Attachment
+  deliveredAt: DateTime
+  deliveredProof: Attachment
+  createdBy: User!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  auditTrail: [AuditEntry!]!
+  supersededById: ID
+  supersedesId: ID
+  allowedActions: [ChalaniAction!]!
 }
-type Signatory { id: ID! user: User! role: Role! order: Int! isRequired: Boolean! }
-type Approval { id: ID! signatory: Signatory! decision: ApprovalDecision! notes: String approvedAt: DateTime! }
-enum ApprovalDecision { APPROVED REJECTED DELEGATED }
+type Signatory {
+  id: ID!
+  user: User!
+  role: Role!
+  order: Int!
+  isRequired: Boolean!
+}
+type Approval {
+  id: ID!
+  signatory: Signatory!
+  decision: ApprovalDecision!
+  notes: String
+  approvedAt: DateTime!
+}
+enum ApprovalDecision {
+  APPROVED
+  REJECTED
+  DELEGATED
+}
 
-type Recipient { id: ID! type: RecipientType! name: String! organization: String email: String phone: String address: String! }
-enum RecipientType { CITIZEN ORGANIZATION GOVERNMENT_OFFICE OTHER }
+type Recipient {
+  id: ID!
+  type: RecipientType!
+  name: String!
+  organization: String
+  email: String
+  phone: String
+  address: String!
+}
+enum RecipientType {
+  CITIZEN
+  ORGANIZATION
+  GOVERNMENT_OFFICE
+  OTHER
+}
 
-type ChalaniConnection { edges: [ChalaniEdge!]! pageInfo: PageInfo! }
-type ChalaniEdge { cursor: String! node: Chalani! }
+type ChalaniConnection {
+  edges: [ChalaniEdge!]!
+  pageInfo: PageInfo!
+}
+type ChalaniEdge {
+  cursor: String!
+  node: Chalani!
+}
 
 type ChalaniStats {
-  total: Int! byStatus: [ChalaniStatusCount!]! byChannel: [DispatchChannelCount!]!
-  acknowledgementRate: Float! avgDispatchTimeHours: Float!
+  total: Int!
+  byStatus: [ChalaniStatusCount!]!
+  byChannel: [DispatchChannelCount!]!
+  acknowledgementRate: Float!
+  avgDispatchTimeHours: Float!
 }
-type ChalaniStatusCount { status: ChalaniStatus! count: Int! }
-type DispatchChannelCount { channel: DispatchChannel! count: Int! }
+type ChalaniStatusCount {
+  status: ChalaniStatus!
+  count: Int!
+}
+type DispatchChannelCount {
+  channel: DispatchChannel!
+  count: Int!
+}
 
-type SupersedeChalaniResult { old: Chalani! new: Chalani! }
+type SupersedeChalaniResult {
+  old: Chalani!
+  new: Chalani!
+}
 
 type ChalaniTemplate {
-  id: ID! name: String! category: String! subject: String! body: String!
-  requiredSignatories: [Role!]! isActive: Boolean!
+  id: ID!
+  name: String!
+  category: String!
+  subject: String!
+  body: String!
+  requiredSignatories: [Role!]!
+  isActive: Boolean!
 }

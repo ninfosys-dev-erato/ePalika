@@ -1,6 +1,19 @@
-enum AuditEntityType { DARTA CHALANI COUNTER }
+enum AuditEntityType {
+  DARTA
+  CHALANI
+  COUNTER
+}
 type AuditEntry {
-  id: ID! entityType: AuditEntityType! entityId: ID!
-  actor: User! action: String! fromStatus: String toStatus: String
-  timestamp: DateTime! ip: String userAgent: String metadata: JSON reason: String
+  id: ID!
+  entityType: AuditEntityType!
+  entityId: ID!
+  actor: User!
+  action: String!
+  fromStatus: String
+  toStatus: String
+  timestamp: DateTime!
+  ip: String
+  userAgent: String
+  metadata: JSON
+  reason: String
 }

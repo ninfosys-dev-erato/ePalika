@@ -1,7 +1,15 @@
 extend type Query {
   chalani(id: ID!): Chalani
-  chalaniByNumber(chalaniNumber: Int!, fiscalYear: FiscalYear!, scope: Scope!, wardId: ID): Chalani
-  chalanis(filter: ChalaniFilterInput, pagination: PaginationInput): ChalaniConnection!
+  chalaniByNumber(
+    chalaniNumber: Int!
+    fiscalYear: FiscalYear!
+    scope: Scope!
+    wardId: ID
+  ): Chalani
+  chalanis(
+    filter: ChalaniFilterInput
+    pagination: PaginationInput
+  ): ChalaniConnection!
   myPendingApprovals(pagination: PaginationInput): ChalaniConnection!
   chalaniTemplates(category: String, search: String): [ChalaniTemplate!]!
   chalaniStats(scope: Scope, fiscalYear: FiscalYear, wardId: ID): ChalaniStats!
@@ -9,5 +17,8 @@ extend type Query {
   chalaniReviewQueue(pagination: PaginationInput): ChalaniConnection!
   chalaniApprovalQueue(pagination: PaginationInput): ChalaniConnection!
   chalaniRegistryQueue(pagination: PaginationInput): ChalaniConnection!
-  chalaniDispatchBoard(status: [ChalaniStatus!], pagination: PaginationInput): ChalaniConnection!
+  chalaniDispatchBoard(
+    status: [ChalaniStatus!]
+    pagination: PaginationInput
+  ): ChalaniConnection!
 }

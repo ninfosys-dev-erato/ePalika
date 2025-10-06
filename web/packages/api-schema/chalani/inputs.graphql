@@ -1,39 +1,161 @@
+"""
+Filter options for Chalani list and dashboards.
+All fields are optional and can be combined.
+"""
 input ChalaniFilterInput {
-  fiscalYear: FiscalYear scope: Scope wardId: ID status: ChalaniStatus
-  dispatchChannel: DispatchChannel fromDate: DateTime toDate: DateTime
-  search: String isAcknowledged: Boolean createdById: ID
+  fiscalYear: FiscalYear
+  scope: Scope
+  wardId: ID
+  status: [ChalaniStatus!] # ← allow multi-status filters
+  dispatchChannel: [DispatchChannel!] # ← allow multiple channels
+  fromDate: DateTime
+  toDate: DateTime
+  search: String
+  isAcknowledged: Boolean
+  createdById: ID
+  recipientName: String
+  includeArchived: Boolean = false
+  sortBy: ChalaniSortField = CREATED_AT
+  sortOrder: SortOrder = DESC
 }
-input CreateChalaniInput {
-  scope: Scope! wardId: ID subject: String! body: String! templateId: ID
-  linkedDartaId: ID attachmentIds: [ID!] recipient: RecipientInput!
-  requiredSignatoryIds: [ID!]! idempotencyKey: String!
-}
-input RecipientInput {
-  type: RecipientType! name: String! organization: String email: String phone: String address: String!
-}
-input ReviewChalaniInput { chalaniId: ID! decision: ChalaniReviewDecision! notes: String }
-enum ChalaniReviewDecision { APPROVE_REVIEW EDIT_REQUIRED }
-input ApproveChalaniInput {
-  chalaniId: ID! decision: ChalaniApprovalDecision! notes: String delegateToId: ID
-}
-enum ChalaniApprovalDecision { APPROVE REJECT }
 
-input ReserveChalaniNumberInput { chalaniId: ID! allocationId: ID! }
-input FinalizeChalaniRegistrationInput { chalaniId: ID! allocationId: ID! }
-input DirectRegisterChalaniInput { chalaniId: ID! }
-input SignChalaniInput { chalaniId: ID! signatureAttachmentId: ID }
-input SealChalaniInput { chalaniId: ID! sealAttachmentId: ID }
+enum ChalaniSortField {
+  CREATED_AT
+  UPDATED_AT
+  STATUS
+}
+enum SortOrder {
+  ASC
+  DESC
+}
+
+"""
+Create a new Chalani draft.
+"""
+input CreateChalaniInput {
+  scope: Scope!
+  wardId: ID
+  subject: String! @constraint(minLength: 3, maxLength: 256)
+  body: String! @constraint(minLength: 5)
+  templateId: ID
+  linkedDartaId: ID
+  attachmentIds: [ID!]
+  recipient: RecipientInput!
+  requiredSignatoryIds: [ID!]!
+  idempotencyKey: String! @constraint(minLength: 8)
+}
+
+"""
+Recipient details for Chalani.
+"""
+input RecipientInput {
+  type: RecipientType!
+  name: String! @constraint(minLength: 2)
+  organization: String
+  email: String @constraint(format: "email")
+  phone: String
+  address: String! @constraint(minLength: 5)
+}
+
+"""
+Used by Reviewer (Ward Secretary) to accept or request edit.
+"""
+input ReviewChalaniInput {
+  chalaniId: ID!
+  decision: ChalaniReviewDecision!
+  notes: String @constraint(maxLength: 2000)
+  idempotencyKey: String!
+}
+enum ChalaniReviewDecision {
+  APPROVE_REVIEW
+  EDIT_REQUIRED
+}
+
+"""
+Used by Approver (CAO/Mayor) to approve, reject or delegate.
+"""
+input ApproveChalaniInput {
+  chalaniId: ID!
+  decision: ChalaniApprovalDecision!
+  notes: String
+  delegateToId: ID
+  reason: String # required for REJECT
+  idempotencyKey: String!
+}
+enum ChalaniApprovalDecision {
+  APPROVE
+  REJECT
+}
+
+input ReserveChalaniNumberInput {
+  chalaniId: ID!
+  allocationId: ID!
+  idempotencyKey: String!
+}
+input FinalizeChalaniRegistrationInput {
+  chalaniId: ID!
+  allocationId: ID!
+  idempotencyKey: String!
+}
+input DirectRegisterChalaniInput {
+  chalaniId: ID!
+  idempotencyKey: String!
+}
+input SignChalaniInput {
+  chalaniId: ID!
+  signatureAttachmentId: ID
+  idempotencyKey: String!
+}
+input SealChalaniInput {
+  chalaniId: ID!
+  sealAttachmentId: ID
+  idempotencyKey: String!
+}
 input DispatchChalaniInput {
-  chalaniId: ID! dispatchChannel: DispatchChannel! trackingId: String courierName: String scheduledDispatchAt: DateTime
+  chalaniId: ID!
+  dispatchChannel: DispatchChannel!
+  trackingId: String
+  courierName: String
+  scheduledDispatchAt: DateTime
+  idempotencyKey: String!
 }
-input MarkInTransitInput { chalaniId: ID! trackingId: String courierName: String }
-input AcknowledgeChalaniInput { chalaniId: ID! acknowledgedBy: String acknowledgementProofId: ID }
-input MarkDeliveredInput { chalaniId: ID! deliveredProofId: ID }
-input MarkReturnedUndeliveredInput { chalaniId: ID! reason: String! }
+input MarkInTransitInput {
+  chalaniId: ID!
+  trackingId: String
+  courierName: String
+  idempotencyKey: String!
+}
+input AcknowledgeChalaniInput {
+  chalaniId: ID!
+  acknowledgedBy: String
+  acknowledgementProofId: ID
+  idempotencyKey: String!
+}
+input MarkDeliveredInput {
+  chalaniId: ID!
+  deliveredProofId: ID
+  idempotencyKey: String!
+}
+input MarkReturnedUndeliveredInput {
+  chalaniId: ID!
+  reason: String!
+  idempotencyKey: String!
+}
 input ResendChalaniInput {
-  chalaniId: ID! dispatchChannel: DispatchChannel! trackingId: String courierName: String
+  chalaniId: ID!
+  dispatchChannel: DispatchChannel!
+  trackingId: String
+  courierName: String
+  idempotencyKey: String!
 }
-input VoidChalaniInput { chalaniId: ID! reason: String! }
+input VoidChalaniInput {
+  chalaniId: ID!
+  reason: String!
+  idempotencyKey: String!
+}
 input SupersedeChalaniInput {
-  targetChalaniId: ID! newChalani: CreateChalaniInput! reason: String!
+  targetChalaniId: ID!
+  newChalani: CreateChalaniInput!
+  reason: String!
+  idempotencyKey: String!
 }
