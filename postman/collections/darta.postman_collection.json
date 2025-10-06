@@ -1,0 +1,483 @@
+{
+  "info": {
+    "name": "ePalika - Darta Service",
+    "description": "Collection for Darta (Incoming Correspondence) GraphQL API endpoints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{jwt_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Get JWT Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const response = pm.response.json();",
+                  "if (response.access_token) {",
+                  "    pm.environment.set('jwt_token', response.access_token);",
+                  "    console.log('JWT token saved to environment');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "client_id",
+                  "value": "palika-api",
+                  "type": "text"
+                },
+                {
+                  "key": "grant_type",
+                  "value": "password",
+                  "type": "text"
+                },
+                {
+                  "key": "username",
+                  "value": "{{keycloak_username}}",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "{{keycloak_password}}",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{keycloak_url}}/realms/palika/protocol/openid-connect/token",
+              "host": ["{{keycloak_url}}"],
+              "path": ["realms", "palika", "protocol", "openid-connect", "token"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Queries",
+      "item": [
+        {
+          "name": "Get Darta by ID",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query GetDarta($id: ID!) {\n  darta(id: $id) {\n    id\n    dartaNumber\n    fiscalYear\n    subject\n    status\n    createdAt\n    updatedAt\n  }\n}",
+                "variables": "{\n  \"id\": \"{{darta_id}}\"\n}"
+              }
+            },
+            "url": {
+              "raw": "{{graphql_url}}",
+              "host": ["{{graphql_url}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Darta by Number",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query GetDartaByNumber($dartaNumber: Int!, $fiscalYear: FiscalYear!, $scope: Scope!, $wardId: ID) {\n  dartaByNumber(dartaNumber: $dartaNumber, fiscalYear: $fiscalYear, scope: $scope, wardId: $wardId) {\n    id\n    dartaNumber\n    fiscalYear\n    subject\n    status\n    createdAt\n  }\n}",
+                "variables": "{\n  \"dartaNumber\": 1,\n  \"fiscalYear\": \"FY_2081_82\",\n  \"scope\": \"MUNICIPALITY\",\n  \"wardId\": null\n}"
+              }
+            },
+            "url": {
+              "raw": "{{graphql_url}}",
+              "host": ["{{graphql_url}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List Dartas",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query ListDartas($filter: DartaFilterInput, $pagination: PaginationInput) {\n  dartas(filter: $filter, pagination: $pagination) {\n    edges {\n      node {\n        id\n        dartaNumber\n        subject\n        status\n        createdAt\n      }\n    }\n    pageInfo {\n      hasNextPage\n      hasPreviousPage\n      startCursor\n      endCursor\n    }\n    totalCount\n  }\n}",
+                "variables": "{\n  \"filter\": {\n    \"status\": \"DRAFT\"\n  },\n  \"pagination\": {\n    \"first\": 10\n  }\n}"
+              }
+            },
+            "url": {
+              "raw": "{{graphql_url}}",
+              "host": ["{{graphql_url}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "My Dartas",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query MyDartas($status: DartaStatus, $pagination: PaginationInput) {\n  myDartas(status: $status, pagination: $pagination) {\n    edges {\n      node {\n        id\n        dartaNumber\n        subject\n        status\n        createdAt\n      }\n    }\n    totalCount\n  }\n}",
+                "variables": "{\n  \"status\": \"PENDING_REVIEW\",\n  \"pagination\": {\n    \"first\": 20\n  }\n}"
+              }
+            },
+            "url": {
+              "raw": "{{graphql_url}}",
+              "host": ["{{graphql_url}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Darta Stats",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query DartaStats($scope: Scope, $fiscalYear: FiscalYear, $wardId: ID) {\n  dartaStats(scope: $scope, fiscalYear: $fiscalYear, wardId: $wardId) {\n    totalDartas\n    pendingReview\n    inProgress\n    completed\n  }\n}",
+                "variables": "{\n  \"scope\": \"MUNICIPALITY\",\n  \"fiscalYear\": \"FY_2081_82\"\n}"
+              }
+            },
+            "url": {
+              "raw": "{{graphql_url}}",
+              "host": ["{{graphql_url}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Mutations",
+      "item": [
+        {
+          "name": "Create Darta",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const response = pm.response.json();",
+                  "if (response.data && response.data.createDarta) {",
+                  "    pm.environment.set('darta_id', response.data.createDarta.id);",
+                  "    console.log('Darta ID saved:', response.data.createDarta.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "mutation CreateDarta($input: CreateDartaInput!) {\n  createDarta(input: $input) {\n    id\n    dartaNumber\n    subject\n    status\n    createdAt\n  }\n}",
+                "variables": "{\n  \"input\": {\n    \"subject\": \"Sample Darta Subject\",\n    \"senderName\": \"John Doe\",\n    \"senderAddress\": \"Kathmandu, Nepal\",\n    \"receivedDate\": \"2025-10-06\",\n    \"scope\": \"MUNICIPALITY\"\n  }\n}"
+              }
+            },
+            "url": {
+              "raw": "{{graphql_url}}",
+              "host": ["{{graphql_url}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Submit Darta for Review",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "mutation SubmitDartaForReview($dartaId: ID!) {\n  submitDartaForReview(dartaId: $dartaId) {\n    id\n    status\n    updatedAt\n  }\n}",
+                "variables": "{\n  \"dartaId\": \"{{darta_id}}\"\n}"
+              }
+            },
+            "url": {
+              "raw": "{{graphql_url}}",
+              "host": ["{{graphql_url}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Review Darta",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "mutation ReviewDarta($input: ReviewDartaInput!) {\n  reviewDarta(input: $input) {\n    id\n    status\n    updatedAt\n  }\n}",
+                "variables": "{\n  \"input\": {\n    \"dartaId\": \"{{darta_id}}\",\n    \"approved\": true,\n    \"note\": \"Approved for processing\"\n  }\n}"
+              }
+            },
+            "url": {
+              "raw": "{{graphql_url}}",
+              "host": ["{{graphql_url}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Classify Darta",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "mutation ClassifyDarta($dartaId: ID!, $classificationCode: String!) {\n  classifyDarta(dartaId: $dartaId, classificationCode: $classificationCode) {\n    id\n    classificationCode\n    status\n  }\n}",
+                "variables": "{\n  \"dartaId\": \"{{darta_id}}\",\n  \"classificationCode\": \"ADM-001\"\n}"
+              }
+            },
+            "url": {
+              "raw": "{{graphql_url}}",
+              "host": ["{{graphql_url}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Reserve Darta Number",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "mutation ReserveDartaNumber($dartaId: ID!, $allocationId: ID!) {\n  reserveDartaNumber(dartaId: $dartaId, allocationId: $allocationId) {\n    id\n    dartaNumber\n    status\n  }\n}",
+                "variables": "{\n  \"dartaId\": \"{{darta_id}}\",\n  \"allocationId\": \"{{allocation_id}}\"\n}"
+              }
+            },
+            "url": {
+              "raw": "{{graphql_url}}",
+              "host": ["{{graphql_url}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Finalize Darta Registration",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "mutation FinalizeDartaRegistration($dartaId: ID!, $allocationId: ID!) {\n  finalizeDartaRegistration(dartaId: $dartaId, allocationId: $allocationId) {\n    id\n    dartaNumber\n    status\n    registeredAt\n  }\n}",
+                "variables": "{\n  \"dartaId\": \"{{darta_id}}\",\n  \"allocationId\": \"{{allocation_id}}\"\n}"
+              }
+            },
+            "url": {
+              "raw": "{{graphql_url}}",
+              "host": ["{{graphql_url}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Route Darta",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "mutation RouteDarta($input: RouteDartaInput!) {\n  routeDarta(input: $input) {\n    id\n    status\n    currentAssignee\n  }\n}",
+                "variables": "{\n  \"input\": {\n    \"dartaId\": \"{{darta_id}}\",\n    \"targetUserId\": \"user-123\",\n    \"priority\": \"HIGH\",\n    \"SLAHours\": 24,\n    \"note\": \"Please review and take action\"\n  }\n}"
+              }
+            },
+            "url": {
+              "raw": "{{graphql_url}}",
+              "host": ["{{graphql_url}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Close Darta",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "mutation CloseDarta($dartaId: ID!) {\n  closeDarta(dartaId: $dartaId) {\n    id\n    status\n    closedAt\n  }\n}",
+                "variables": "{\n  \"dartaId\": \"{{darta_id}}\"\n}"
+              }
+            },
+            "url": {
+              "raw": "{{graphql_url}}",
+              "host": ["{{graphql_url}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Void Darta",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "mutation VoidDarta($dartaId: ID!, $reason: String!) {\n  voidDarta(dartaId: $dartaId, reason: $reason) {\n    id\n    status\n    voidReason\n  }\n}",
+                "variables": "{\n  \"dartaId\": \"{{darta_id}}\",\n  \"reason\": \"Duplicate entry\"\n}"
+              }
+            },
+            "url": {
+              "raw": "{{graphql_url}}",
+              "host": ["{{graphql_url}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Health Check",
+      "item": [
+        {
+          "name": "GraphQL Health (via Oathkeeper)",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{oathkeeper_proxy_url}}/healthz",
+              "host": ["{{oathkeeper_proxy_url}}"],
+              "path": ["healthz"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Darta Service Health (Direct)",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{darta_service_url}}/health",
+              "host": ["{{darta_service_url}}"],
+              "path": ["health"]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

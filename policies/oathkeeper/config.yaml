@@ -8,22 +8,19 @@ serve:
 
 access_rules:
   repositories:
-    - file:///policies/oathkeeper/base
+    - file:///rules/health-check.json
+    - file:///rules/darta-chalani.json
 
 authenticators:
   jwt:
     enabled: true
     config:
       jwks_urls:
-        - http://keycloak:8083/realms/palika/protocol/openid-connect/certs
-      allowed_issuers:
-        - http://keycloak:8083/realms/palika
-      required_scope: ["openid"]
-      target_audience:
-        - palika-api
-      cache:
-        enabled: true
-        ttl: 60s
+        - http://keycloak:8080/realms/palika/protocol/openid-connect/certs
+      scope_strategy: exact
+      trusted_issuers:
+        - http://keycloak:8080/realms/palika
+        - http://localhost:8083/realms/palika
 
   noop:
     enabled: true
@@ -33,7 +30,13 @@ authorizers:
     enabled: true
     config:
       remote: http://pdp:8080/authorize
-      timeout: 2s
+      payload: |
+        {
+          "subject": "{{ print .Subject }}",
+          "resource": "{{ .MatchContext.URL.Path }}",
+          "action": "{{ .MatchContext.Method }}",
+          "tenant": "{{ .Extra.tenant }}"
+        }
       headers:
         Content-Type: application/json
 
@@ -46,11 +49,7 @@ mutators:
     config:
       headers:
         X-User-ID: "{{ print .Subject }}"
-        X-Roles: '{{ join .Extra.roles "," }}'
         X-Tenant: "{{ .Extra.tenant }}"
-        Accept-Language: "{{ .Extra.locale }}"
-        X-Request-ID: "{{ printUUID }}"
-        Traceparent: "{{ .Extra.traceparent }}"
 
   noop:
     enabled: true
@@ -63,10 +62,6 @@ errors:
       enabled: true
       config:
         verbose: true
-
-upstream:
-  preserve_host: true
-  timeout: 30s
 
 log:
   level: debug

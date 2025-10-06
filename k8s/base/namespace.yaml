@@ -3,5 +3,5 @@ kind: Namespace
 metadata:
   name: epalika
   labels:
-    name: epalika
-    environment: base
+    app.kubernetes.io/name: epalika
+    app.kubernetes.io/part-of: epalika-platform

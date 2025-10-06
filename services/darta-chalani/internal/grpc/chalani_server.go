@@ -6,9 +6,9 @@ import (
 	"encoding/json"
 	"time"
 
+	chalaniv1 "git.ninjainfosys.com/ePalika/proto/gen/darta/v1"
 	"git.ninjainfosys.com/ePalika/services/darta-chalani/internal/db"
 	"git.ninjainfosys.com/ePalika/services/darta-chalani/internal/domain"
-	chalaniv1 "git.ninjainfosys.com/ePalika/proto/gen/darta/v1"
 	"github.com/google/uuid"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -41,19 +41,19 @@ func (s *ChalaniServer) CreateChalani(ctx context.Context, req *chalaniv1.Create
 	// Create chalani
 	chalaniID := uuid.New()
 	chalani, err := s.queries.CreateChalani(ctx, db.CreateChalaniParams{
-		ID:                   chalaniID,
-		FiscalYearID:         req.Input.FiscalYearId,
-		Scope:                req.Input.Scope.String(),
-		WardID:               sqlNullString(req.Input.WardId),
-		Subject:              req.Input.Subject,
-		RecipientID:          recipientID,
-		DispatchChannel:      req.Input.DispatchChannel.String(),
-		Priority:             req.Input.Priority.String(),
-		TemplateID:           sqlNullUUID(req.Input.TemplateId),
-		Status:               "DRAFT",
-		TenantID:             userCtx.TenantID,
-		CreatedBy:            userCtx.UserID,
-		IdempotencyKey:       sqlNullString(req.Input.IdempotencyKey),
+		ID:              chalaniID,
+		FiscalYearID:    req.Input.FiscalYearId,
+		Scope:           req.Input.Scope.String(),
+		WardID:          sqlNullString(req.Input.WardId),
+		Subject:         req.Input.Subject,
+		RecipientID:     recipientID,
+		DispatchChannel: req.Input.DispatchChannel.String(),
+		Priority:        req.Input.Priority.String(),
+		TemplateID:      sqlNullUUID(req.Input.TemplateId),
+		Status:          "DRAFT",
+		TenantID:        userCtx.TenantID,
+		CreatedBy:       userCtx.UserID,
+		IdempotencyKey:  sqlNullString(req.Input.IdempotencyKey),
 	})
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to create chalani: %v", err)
@@ -221,8 +221,8 @@ func (s *ChalaniServer) ApproveChalani(ctx context.Context, req *chalaniv1.Appro
 	}
 
 	changes := map[string]interface{}{
-		"status":       map[string]string{"to": "APPROVED"},
-		"approver":     userCtx.UserID,
+		"status":         map[string]string{"to": "APPROVED"},
+		"approver":       userCtx.UserID,
 		"approval_notes": req.Notes,
 	}
 	changesJSON, _ := json.Marshal(changes)
@@ -276,8 +276,8 @@ func (s *ChalaniServer) RejectChalani(ctx context.Context, req *chalaniv1.Reject
 	}
 
 	changes := map[string]interface{}{
-		"status":         map[string]string{"to": "REJECTED"},
-		"rejector":       userCtx.UserID,
+		"status":           map[string]string{"to": "REJECTED"},
+		"rejector":         userCtx.UserID,
 		"rejection_reason": req.Reason,
 	}
 	changesJSON, _ := json.Marshal(changes)
@@ -587,16 +587,16 @@ func (s *ChalaniServer) VoidChalani(ctx context.Context, req *chalaniv1.VoidChal
 // Conversion function from DB model to Proto
 func toProtoChalani(c *db.Chalani) *chalaniv1.Chalani {
 	chalani := &chalaniv1.Chalani{
-		Id:                     c.ID.String(),
-		FiscalYearId:           c.FiscalYearID,
-		Scope:                  stringToScope(c.Scope),
-		WardId:                 nullStringToPtr(c.WardID),
-		Subject:                c.Subject,
-		Status:                 stringToChalaniStatus(c.Status),
-		Priority:               stringToPriority(c.Priority),
-		DispatchChannel:        stringToDispatchChannel(c.DispatchChannel),
-		CreatedAt:              timestamppb.New(c.CreatedAt),
-		UpdatedAt:              timestamppb.New(c.UpdatedAt),
+		Id:              c.ID.String(),
+		FiscalYearId:    c.FiscalYearID,
+		Scope:           stringToScope(c.Scope),
+		WardId:          nullStringToPtr(c.WardID),
+		Subject:         c.Subject,
+		Status:          stringToChalaniStatus(c.Status),
+		Priority:        stringToPriority(c.Priority),
+		DispatchChannel: stringToDispatchChannel(c.DispatchChannel),
+		CreatedAt:       timestamppb.New(c.CreatedAt),
+		UpdatedAt:       timestamppb.New(c.UpdatedAt),
 	}
 
 	if c.ChalaniNumber.Valid {

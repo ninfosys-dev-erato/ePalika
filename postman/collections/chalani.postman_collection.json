@@ -1,0 +1,635 @@
+{
+  "info": {
+    "name": "ePalika - Chalani Service",
+    "description": "Collection for Chalani (Outgoing Correspondence) GraphQL API endpoints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{jwt_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Get JWT Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const response = pm.response.json();",
+                  "if (response.access_token) {",
+                  "    pm.environment.set('jwt_token', response.access_token);",
+                  "    console.log('JWT token saved to environment');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "client_id",
+                  "value": "palika-api",
+                  "type": "text"
+                },
+                {
+                  "key": "grant_type",
+                  "value": "password",
+                  "type": "text"
+                },
+                {
+                  "key": "username",
+                  "value": "{{keycloak_username}}",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "{{keycloak_password}}",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{keycloak_url}}/realms/palika/protocol/openid-connect/token",
+              "host": ["{{keycloak_url}}"],
+              "path": ["realms", "palika", "protocol", "openid-connect", "token"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Queries",
+      "item": [
+        {
+          "name": "Get Chalani by ID",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query GetChalani($id: ID!) {\n  chalani(id: $id) {\n    id\n    chalaniNumber\n    fiscalYear\n    subject\n    status\n    createdAt\n    updatedAt\n  }\n}",
+                "variables": "{\n  \"id\": \"{{chalani_id}}\"\n}"
+              }
+            },
+            "url": {
+              "raw": "{{graphql_url}}",
+              "host": ["{{graphql_url}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Chalani by Number",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query GetChalaniByNumber($chalaniNumber: Int!, $fiscalYear: FiscalYear!, $scope: Scope!, $wardId: ID) {\n  chalaniByNumber(chalaniNumber: $chalaniNumber, fiscalYear: $fiscalYear, scope: $scope, wardId: $wardId) {\n    id\n    chalaniNumber\n    fiscalYear\n    subject\n    status\n    createdAt\n  }\n}",
+                "variables": "{\n  \"chalaniNumber\": 1,\n  \"fiscalYear\": \"FY_2081_82\",\n  \"scope\": \"MUNICIPALITY\",\n  \"wardId\": null\n}"
+              }
+            },
+            "url": {
+              "raw": "{{graphql_url}}",
+              "host": ["{{graphql_url}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List Chalanis",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query ListChalanis($filter: ChalaniFilterInput, $pagination: PaginationInput) {\n  chalanis(filter: $filter, pagination: $pagination) {\n    edges {\n      node {\n        id\n        chalaniNumber\n        subject\n        status\n        createdAt\n      }\n    }\n    pageInfo {\n      hasNextPage\n      hasPreviousPage\n      startCursor\n      endCursor\n    }\n    totalCount\n  }\n}",
+                "variables": "{\n  \"filter\": {\n    \"status\": \"DRAFT\"\n  },\n  \"pagination\": {\n    \"first\": 10\n  }\n}"
+              }
+            },
+            "url": {
+              "raw": "{{graphql_url}}",
+              "host": ["{{graphql_url}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "My Pending Approvals",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query MyPendingApprovals($pagination: PaginationInput) {\n  myPendingApprovals(pagination: $pagination) {\n    edges {\n      node {\n        id\n        chalaniNumber\n        subject\n        status\n        createdAt\n      }\n    }\n    totalCount\n  }\n}",
+                "variables": "{\n  \"pagination\": {\n    \"first\": 20\n  }\n}"
+              }
+            },
+            "url": {
+              "raw": "{{graphql_url}}",
+              "host": ["{{graphql_url}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Chalani Templates",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query ChalaniTemplates($category: String, $search: String) {\n  chalaniTemplates(category: $category, search: $search) {\n    id\n    name\n    category\n    content\n  }\n}",
+                "variables": "{\n  \"category\": \"official\",\n  \"search\": null\n}"
+              }
+            },
+            "url": {
+              "raw": "{{graphql_url}}",
+              "host": ["{{graphql_url}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Chalani Stats",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query ChalaniStats($scope: Scope, $fiscalYear: FiscalYear, $wardId: ID) {\n  chalaniStats(scope: $scope, fiscalYear: $fiscalYear, wardId: $wardId) {\n    totalChalanis\n    pendingApproval\n    dispatched\n    delivered\n  }\n}",
+                "variables": "{\n  \"scope\": \"MUNICIPALITY\",\n  \"fiscalYear\": \"FY_2081_82\"\n}"
+              }
+            },
+            "url": {
+              "raw": "{{graphql_url}}",
+              "host": ["{{graphql_url}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Chalani Review Queue",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query ChalaniReviewQueue($pagination: PaginationInput) {\n  chalaniReviewQueue(pagination: $pagination) {\n    edges {\n      node {\n        id\n        chalaniNumber\n        subject\n        status\n      }\n    }\n    totalCount\n  }\n}",
+                "variables": "{\n  \"pagination\": {\n    \"first\": 10\n  }\n}"
+              }
+            },
+            "url": {
+              "raw": "{{graphql_url}}",
+              "host": ["{{graphql_url}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Chalani Dispatch Board",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query ChalaniDispatchBoard($status: [ChalaniStatus!], $pagination: PaginationInput) {\n  chalaniDispatchBoard(status: $status, pagination: $pagination) {\n    edges {\n      node {\n        id\n        chalaniNumber\n        subject\n        status\n        dispatchedAt\n      }\n    }\n    totalCount\n  }\n}",
+                "variables": "{\n  \"status\": [\"DISPATCHED\", \"IN_TRANSIT\"],\n  \"pagination\": {\n    \"first\": 10\n  }\n}"
+              }
+            },
+            "url": {
+              "raw": "{{graphql_url}}",
+              "host": ["{{graphql_url}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Mutations",
+      "item": [
+        {
+          "name": "Create Chalani",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const response = pm.response.json();",
+                  "if (response.data && response.data.createChalani) {",
+                  "    pm.environment.set('chalani_id', response.data.createChalani.id);",
+                  "    console.log('Chalani ID saved:', response.data.createChalani.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "mutation CreateChalani($input: CreateChalaniInput!) {\n  createChalani(input: $input) {\n    id\n    chalaniNumber\n    subject\n    status\n    createdAt\n  }\n}",
+                "variables": "{\n  \"input\": {\n    \"subject\": \"Sample Chalani Subject\",\n    \"recipientName\": \"Jane Doe\",\n    \"recipientAddress\": \"Lalitpur, Nepal\",\n    \"content\": \"This is the body of the outgoing correspondence\",\n    \"scope\": \"MUNICIPALITY\"\n  }\n}"
+              }
+            },
+            "url": {
+              "raw": "{{graphql_url}}",
+              "host": ["{{graphql_url}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Submit Chalani",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "mutation SubmitChalani($chalaniId: ID!) {\n  submitChalani(chalaniId: $chalaniId) {\n    id\n    status\n    updatedAt\n  }\n}",
+                "variables": "{\n  \"chalaniId\": \"{{chalani_id}}\"\n}"
+              }
+            },
+            "url": {
+              "raw": "{{graphql_url}}",
+              "host": ["{{graphql_url}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Review Chalani",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "mutation ReviewChalani($input: ReviewChalaniInput!) {\n  reviewChalani(input: $input) {\n    id\n    status\n    updatedAt\n  }\n}",
+                "variables": "{\n  \"input\": {\n    \"chalaniId\": \"{{chalani_id}}\",\n    \"approved\": true,\n    \"note\": \"Approved for dispatch\"\n  }\n}"
+              }
+            },
+            "url": {
+              "raw": "{{graphql_url}}",
+              "host": ["{{graphql_url}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Approve Chalani",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "mutation ApproveChalani($input: ApproveChalaniInput!) {\n  approveChalani(input: $input) {\n    id\n    status\n    approvedAt\n  }\n}",
+                "variables": "{\n  \"input\": {\n    \"chalaniId\": \"{{chalani_id}}\",\n    \"note\": \"Final approval granted\"\n  }\n}"
+              }
+            },
+            "url": {
+              "raw": "{{graphql_url}}",
+              "host": ["{{graphql_url}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Reserve Chalani Number",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "mutation ReserveChalaniNumber($input: ReserveChalaniNumberInput!) {\n  reserveChalaniNumber(input: $input) {\n    id\n    chalaniNumber\n    status\n  }\n}",
+                "variables": "{\n  \"input\": {\n    \"chalaniId\": \"{{chalani_id}}\",\n    \"allocationId\": \"{{allocation_id}}\"\n  }\n}"
+              }
+            },
+            "url": {
+              "raw": "{{graphql_url}}",
+              "host": ["{{graphql_url}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Finalize Chalani Registration",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "mutation FinalizeChalaniRegistration($input: FinalizeChalaniRegistrationInput!) {\n  finalizeChalaniRegistration(input: $input) {\n    id\n    chalaniNumber\n    status\n    registeredAt\n  }\n}",
+                "variables": "{\n  \"input\": {\n    \"chalaniId\": \"{{chalani_id}}\",\n    \"allocationId\": \"{{allocation_id}}\"\n  }\n}"
+              }
+            },
+            "url": {
+              "raw": "{{graphql_url}}",
+              "host": ["{{graphql_url}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Sign Chalani",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "mutation SignChalani($input: SignChalaniInput!) {\n  signChalani(input: $input) {\n    id\n    status\n    signedAt\n  }\n}",
+                "variables": "{\n  \"input\": {\n    \"chalaniId\": \"{{chalani_id}}\",\n    \"signatureType\": \"DIGITAL\",\n    \"signatureData\": \"base64_signature_data\"\n  }\n}"
+              }
+            },
+            "url": {
+              "raw": "{{graphql_url}}",
+              "host": ["{{graphql_url}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Dispatch Chalani",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "mutation DispatchChalani($input: DispatchChalaniInput!) {\n  dispatchChalani(input: $input) {\n    id\n    status\n    dispatchedAt\n    dispatchMethod\n  }\n}",
+                "variables": "{\n  \"input\": {\n    \"chalaniId\": \"{{chalani_id}}\",\n    \"dispatchMethod\": \"COURIER\",\n    \"trackingNumber\": \"TRACK123456\"\n  }\n}"
+              }
+            },
+            "url": {
+              "raw": "{{graphql_url}}",
+              "host": ["{{graphql_url}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Mark Chalani In Transit",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "mutation MarkChalaniInTransit($input: MarkInTransitInput!) {\n  markChalaniInTransit(input: $input) {\n    id\n    status\n    inTransitAt\n  }\n}",
+                "variables": "{\n  \"input\": {\n    \"chalaniId\": \"{{chalani_id}}\",\n    \"location\": \"In transit to destination\"\n  }\n}"
+              }
+            },
+            "url": {
+              "raw": "{{graphql_url}}",
+              "host": ["{{graphql_url}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Acknowledge Chalani",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "mutation AcknowledgeChalani($input: AcknowledgeChalaniInput!) {\n  acknowledgeChalani(input: $input) {\n    id\n    status\n    acknowledgedAt\n  }\n}",
+                "variables": "{\n  \"input\": {\n    \"chalaniId\": \"{{chalani_id}}\",\n    \"acknowledgedBy\": \"Recipient Name\"\n  }\n}"
+              }
+            },
+            "url": {
+              "raw": "{{graphql_url}}",
+              "host": ["{{graphql_url}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Mark Chalani Delivered",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "mutation MarkChalaniDelivered($input: MarkDeliveredInput!) {\n  markChalaniDelivered(input: $input) {\n    id\n    status\n    deliveredAt\n  }\n}",
+                "variables": "{\n  \"input\": {\n    \"chalaniId\": \"{{chalani_id}}\",\n    \"deliveredTo\": \"Recipient Name\",\n    \"proofOfDelivery\": \"POD-12345\"\n  }\n}"
+              }
+            },
+            "url": {
+              "raw": "{{graphql_url}}",
+              "host": ["{{graphql_url}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Void Chalani",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "mutation VoidChalani($input: VoidChalaniInput!) {\n  voidChalani(input: $input) {\n    id\n    status\n    voidReason\n  }\n}",
+                "variables": "{\n  \"input\": {\n    \"chalaniId\": \"{{chalani_id}}\",\n    \"reason\": \"Incorrect information\"\n  }\n}"
+              }
+            },
+            "url": {
+              "raw": "{{graphql_url}}",
+              "host": ["{{graphql_url}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Close Chalani",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "mutation CloseChalani($chalaniId: ID!) {\n  closeChalani(chalaniId: $chalaniId) {\n    id\n    status\n    closedAt\n  }\n}",
+                "variables": "{\n  \"chalaniId\": \"{{chalani_id}}\"\n}"
+              }
+            },
+            "url": {
+              "raw": "{{graphql_url}}",
+              "host": ["{{graphql_url}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Health Check",
+      "item": [
+        {
+          "name": "GraphQL Health (via Oathkeeper)",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{oathkeeper_proxy_url}}/healthz",
+              "host": ["{{oathkeeper_proxy_url}}"],
+              "path": ["healthz"]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

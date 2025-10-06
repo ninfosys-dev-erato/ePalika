@@ -1,0 +1,95 @@
+[
+  {
+    "id": "graphql-query",
+    "version": "v0.40.9",
+    "description": "Protect GraphQL mutations and queries with Keycloak JWT and PDP authorization",
+    "match": {
+      "url": "http://<.*>/query",
+      "methods": ["POST", "OPTIONS"]
+    },
+    "upstream": {
+      "url": "http://graphql-gateway:8000/query",
+      "preserve_host": true
+    },
+    "authenticators": [
+      {
+        "handler": "jwt",
+        "config": {
+          "claims_map": {
+            "tenant": "tenant_id",
+            "roles": "realm_access.roles",
+            "user_name": "preferred_username"
+          }
+        }
+      }
+    ],
+    "authorizer": {
+      "handler": "remote_json",
+      "config": {
+        "remote": "http://pdp:8080/authorize",
+        "payload": "{{- $perm := index .MatchContext.Headers \"X-Graphql-Permission\" -}}{\"subject\":\"user:{{ print .Subject }}\",\"resource\":\"graphql:{{ if $perm }}{{ index $perm 0 }}{{ else }}query{{ end }}\",\"action\":\"{{ .MatchContext.Method }}\",\"context\":{\"tenant\":\"{{ if .Extra.tenant }}{{ index .Extra.tenant 0 }}{{ else }}default{{ end }}\"}}",
+        "retry": {
+          "give_up_after": "1s",
+          "max_delay": "100ms"
+        },
+        "forward_response_headers_to_upstream": ["x-authz-decision", "x-authz-reason"]
+      }
+    },
+    "mutators": [
+      {
+        "handler": "header",
+        "config": {
+          "headers": {
+            "X-User-ID": "{{ print .Subject }}",
+            "X-User-Name": "{{ if .Extra.user_name }}{{ .Extra.user_name }}{{ end }}",
+            "X-Tenant": "{{ if .Extra.tenant }}{{ index .Extra.tenant 0 }}{{ else }}default{{ end }}",
+            "X-Roles": "{{- range $index, $role := .Extra.roles -}}{{- if $index }},{{ end -}}{{ $role }}{{- end -}}",
+            "X-Forwarded-For": "{{ .MatchContext.RemoteAddr }}"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "graphql-playground",
+    "version": "v0.40.9",
+    "description": "Allow unauthenticated access to the GraphQL playground UI",
+    "match": {
+      "url": "http://<.*>/",
+      "methods": ["GET"]
+    },
+    "upstream": {
+      "url": "http://graphql-gateway:8000/"
+    },
+    "authenticators": [
+      { "handler": "noop" }
+    ],
+    "authorizer": {
+      "handler": "allow"
+    },
+    "mutators": [
+      { "handler": "noop" }
+    ]
+  },
+  {
+    "id": "graphql-health",
+    "version": "v0.40.9",
+    "description": "Expose GraphQL health endpoint",
+    "match": {
+      "url": "http://<.*>/health",
+      "methods": ["GET"]
+    },
+    "upstream": {
+      "url": "http://graphql-gateway:8000/health"
+    },
+    "authenticators": [
+      { "handler": "noop" }
+    ],
+    "authorizer": {
+      "handler": "allow"
+    },
+    "mutators": [
+      { "handler": "noop" }
+    ]
+  }
+]
