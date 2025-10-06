@@ -35,14 +35,14 @@ Create a new Chalani draft.
 input CreateChalaniInput {
   scope: Scope!
   wardId: ID
-  subject: String! @constraint(minLength: 3, maxLength: 256)
-  body: String! @constraint(minLength: 5)
+  subject: String!
+  body: String!
   templateId: ID
   linkedDartaId: ID
   attachmentIds: [ID!]
   recipient: RecipientInput!
   requiredSignatoryIds: [ID!]!
-  idempotencyKey: String! @constraint(minLength: 8)
+  idempotencyKey: String!
 }
 
 """
@@ -50,11 +50,11 @@ Recipient details for Chalani.
 """
 input RecipientInput {
   type: RecipientType!
-  name: String! @constraint(minLength: 2)
+  name: String!
   organization: String
-  email: String @constraint(format: "email")
+  email: String
   phone: String
-  address: String! @constraint(minLength: 5)
+  address: String!
 }
 
 """
@@ -63,7 +63,7 @@ Used by Reviewer (Ward Secretary) to accept or request edit.
 input ReviewChalaniInput {
   chalaniId: ID!
   decision: ChalaniReviewDecision!
-  notes: String @constraint(maxLength: 2000)
+  notes: String
   idempotencyKey: String!
 }
 enum ChalaniReviewDecision {
