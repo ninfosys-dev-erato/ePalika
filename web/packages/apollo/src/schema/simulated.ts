@@ -19,7 +19,7 @@ export async function buildSimulatedSchema() {
   try {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore optional
-    const { resolvers } = await import("@egov/mock-resolvers");
+    const { resolvers } = await import("@egov/mock-db");
     return makeExecutableSchema({ typeDefs, resolvers });
   } catch {
     // 3) Auto-mock fallback

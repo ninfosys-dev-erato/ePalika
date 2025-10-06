@@ -4,6 +4,7 @@
 interface ImportMetaEnv {
   readonly MODE: string
   readonly DEV: boolean
+  readonly VITE_BASE_PATH?: string
   // add other environment variables you rely on here, e.g.
   // readonly VITE_API_URL?: string
 }
