@@ -8,8 +8,8 @@ function readEnv(name: string): string | undefined {
     typeof import.meta !== "undefined" && (import.meta as any).env?.[name];
   if (viteVal != null) return String(viteVal);
   // Node/SSR fallback
-  if (typeof process !== "undefined" && (process as any).env) {
-    const v = (process as any).env[name];
+  if (typeof globalThis !== "undefined" && (globalThis as any).process?.env) {
+    const v = (globalThis as any).process.env[name];
     if (v != null) return String(v);
   }
   return undefined;
@@ -44,6 +44,7 @@ export function isDevToolsEnabled(): boolean {
   const viteDev =
     typeof import.meta !== "undefined" && !!(import.meta as any).env?.DEV;
   const nodeDev =
-    typeof process !== "undefined" && process.env?.NODE_ENV !== "production";
+    typeof globalThis !== "undefined" &&
+    (globalThis as any).process?.env?.NODE_ENV !== "production";
   return !!(viteDev || nodeDev);
 }

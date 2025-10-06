@@ -11,7 +11,7 @@
     "lint": "echo 'lint TBD'"
   },
   "dependencies": {
-    "@apollo/client": "^4.0.6",
+    "@apollo/client": "^3.10.0",
     "@egov/apollo": "workspace:*",
     "@egov/auth": "workspace:*",
     "@egov/design-system": "workspace:*",

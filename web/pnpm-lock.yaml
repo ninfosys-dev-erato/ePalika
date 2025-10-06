@@ -207,8 +207,8 @@ importers:
   apps/shell:
     dependencies:
       '@apollo/client':
-        specifier: ^4.0.6
-        version: 4.0.6(graphql-ws@6.0.6(graphql@16.11.0)(ws@8.18.3))(graphql@16.11.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(rxjs@7.8.2)
+        specifier: ^3.10.0
+        version: 3.14.0(@types/react@18.3.24)(graphql-ws@6.0.6(graphql@16.11.0)(ws@8.18.3))(graphql@16.11.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@egov/api-schema':
         specifier: workspace:*
         version: link:../../packages/api-schema
