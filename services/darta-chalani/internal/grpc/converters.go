@@ -348,6 +348,39 @@ func protoToPriority(p dartav1.Priority) *string {
 	return &s
 }
 
+// sqlNullString converts a string pointer to *string for sqlc
+func sqlNullString(s string) *string {
+	if s == "" {
+		return nil
+	}
+	return &s
+}
+
+// sqlNullUUID converts a string to *uuid.UUID for sqlc
+func sqlNullUUID(s string) *uuid.UUID {
+	if s == "" {
+		return nil
+	}
+	id, err := uuid.Parse(s)
+	if err != nil {
+		return nil
+	}
+	return &id
+}
+
+// nullStringToPtr converts *string to string pointer
+func nullStringToPtr(s *string) string {
+	if s == nil {
+		return ""
+	}
+	return *s
+}
+
+// padNumber pads a number with leading zeros
+func padNumber(num int, width int) string {
+	return fmt.Sprintf("%0*d", width, num)
+}
+
 // mapDomainError maps domain errors to gRPC status codes
 func mapDomainError(err error) error {
 	if err == nil {
