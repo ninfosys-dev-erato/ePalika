@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { readRuntimeEnv } from "../config/env";
 import { resolveRuntimeFlags } from "../config/mode";
-import { LoginGate } from "./LoginGate";
+import { LoginGate } from "./pages/LoginGate";
 
 /**
  * We rely on @egov/auth's unified API (adapters: LIVE, SIMULATED).
