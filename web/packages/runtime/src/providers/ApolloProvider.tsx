@@ -1,9 +1,6 @@
 import React, { useEffect, useState } from "react";
-import {
-  ApolloClient,
-  ApolloProvider,
-  NormalizedCacheObject,
-} from "@apollo/client";
+import { ApolloClient, NormalizedCacheObject } from "@apollo/client";
+import { ApolloProvider } from "@apollo/client/react";
 import { createApolloClient } from "@egov/apollo";
 import { resolveRuntimeFlags } from "../config/mode";
 
