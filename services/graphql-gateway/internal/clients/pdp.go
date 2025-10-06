@@ -17,6 +17,9 @@ type PolicyDecisionService interface {
 	CheckAuthorization(ctx context.Context, req *pdpv1.CheckAuthorizationRequest) (*pdpv1.CheckAuthorizationResponse, error)
 }
 
+// PDPService is an alias for PolicyDecisionService for backward compatibility.
+type PDPService = PolicyDecisionService
+
 // PDPClient wraps the gRPC client for the PDP service.
 type PDPClient struct {
 	client pdpv1.PolicyDecisionServiceClient

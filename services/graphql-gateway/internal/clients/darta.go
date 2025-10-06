@@ -13,10 +13,18 @@ import (
 
 // DartaService defines the gRPC operations required by the gateway resolvers.
 type DartaService interface {
-	RegisterDarta(ctx context.Context, req *dartav1.RegisterDartaRequest) (*dartav1.RegisterDartaResponse, error)
+	CreateDarta(ctx context.Context, req *dartav1.CreateDartaRequest) (*dartav1.CreateDartaResponse, error)
 	GetDarta(ctx context.Context, req *dartav1.GetDartaRequest) (*dartav1.GetDartaResponse, error)
 	ListDartas(ctx context.Context, req *dartav1.ListDartasRequest) (*dartav1.ListDartasResponse, error)
-	UpdateDartaStatus(ctx context.Context, req *dartav1.UpdateDartaStatusRequest) (*dartav1.UpdateDartaStatusResponse, error)
+	GetMyDartas(ctx context.Context, req *dartav1.GetMyDartasRequest) (*dartav1.GetMyDartasResponse, error)
+	GetDartaStats(ctx context.Context, req *dartav1.GetDartaStatsRequest) (*dartav1.GetDartaStatsResponse, error)
+	SubmitDartaForReview(ctx context.Context, req *dartav1.SubmitDartaForReviewRequest) (*dartav1.SubmitDartaForReviewResponse, error)
+	ClassifyDarta(ctx context.Context, req *dartav1.ClassifyDartaRequest) (*dartav1.ClassifyDartaResponse, error)
+	ReserveDartaNumber(ctx context.Context, req *dartav1.ReserveDartaNumberRequest) (*dartav1.ReserveDartaNumberResponse, error)
+	FinalizeDartaRegistration(ctx context.Context, req *dartav1.FinalizeDartaRegistrationRequest) (*dartav1.FinalizeDartaRegistrationResponse, error)
+	RouteDarta(ctx context.Context, req *dartav1.RouteDartaRequest) (*dartav1.RouteDartaResponse, error)
+	CloseDarta(ctx context.Context, req *dartav1.CloseDartaRequest) (*dartav1.CloseDartaResponse, error)
+	VoidDarta(ctx context.Context, req *dartav1.VoidDartaRequest) (*dartav1.VoidDartaResponse, error)
 	HealthCheck(ctx context.Context, req *dartav1.HealthCheckRequest) (*dartav1.HealthCheckResponse, error)
 }
 
@@ -62,9 +70,9 @@ func (c *DartaClient) Close() error {
 	return nil
 }
 
-// RegisterDarta registers a new darta.
-func (c *DartaClient) RegisterDarta(ctx context.Context, req *dartav1.RegisterDartaRequest) (*dartav1.RegisterDartaResponse, error) {
-	return c.client.RegisterDarta(ctx, req)
+// CreateDarta creates a new darta.
+func (c *DartaClient) CreateDarta(ctx context.Context, req *dartav1.CreateDartaRequest) (*dartav1.CreateDartaResponse, error) {
+	return c.client.CreateDarta(ctx, req)
 }
 
 // GetDarta retrieves a darta by ID.
@@ -77,9 +85,49 @@ func (c *DartaClient) ListDartas(ctx context.Context, req *dartav1.ListDartasReq
 	return c.client.ListDartas(ctx, req)
 }
 
-// UpdateDartaStatus updates the status of a darta.
-func (c *DartaClient) UpdateDartaStatus(ctx context.Context, req *dartav1.UpdateDartaStatusRequest) (*dartav1.UpdateDartaStatusResponse, error) {
-	return c.client.UpdateDartaStatus(ctx, req)
+// FinalizeDartaRegistration finalizes darta registration.
+func (c *DartaClient) FinalizeDartaRegistration(ctx context.Context, req *dartav1.FinalizeDartaRegistrationRequest) (*dartav1.FinalizeDartaRegistrationResponse, error) {
+	return c.client.FinalizeDartaRegistration(ctx, req)
+}
+
+// GetMyDartas retrieves dartas for the current user.
+func (c *DartaClient) GetMyDartas(ctx context.Context, req *dartav1.GetMyDartasRequest) (*dartav1.GetMyDartasResponse, error) {
+	return c.client.GetMyDartas(ctx, req)
+}
+
+// GetDartaStats retrieves statistics for dartas.
+func (c *DartaClient) GetDartaStats(ctx context.Context, req *dartav1.GetDartaStatsRequest) (*dartav1.GetDartaStatsResponse, error) {
+	return c.client.GetDartaStats(ctx, req)
+}
+
+// SubmitDartaForReview submits a darta for review.
+func (c *DartaClient) SubmitDartaForReview(ctx context.Context, req *dartav1.SubmitDartaForReviewRequest) (*dartav1.SubmitDartaForReviewResponse, error) {
+	return c.client.SubmitDartaForReview(ctx, req)
+}
+
+// ClassifyDarta classifies a darta.
+func (c *DartaClient) ClassifyDarta(ctx context.Context, req *dartav1.ClassifyDartaRequest) (*dartav1.ClassifyDartaResponse, error) {
+	return c.client.ClassifyDarta(ctx, req)
+}
+
+// ReserveDartaNumber reserves a darta number.
+func (c *DartaClient) ReserveDartaNumber(ctx context.Context, req *dartav1.ReserveDartaNumberRequest) (*dartav1.ReserveDartaNumberResponse, error) {
+	return c.client.ReserveDartaNumber(ctx, req)
+}
+
+// RouteDarta routes a darta to an organizational unit or assignee.
+func (c *DartaClient) RouteDarta(ctx context.Context, req *dartav1.RouteDartaRequest) (*dartav1.RouteDartaResponse, error) {
+	return c.client.RouteDarta(ctx, req)
+}
+
+// CloseDarta closes a darta.
+func (c *DartaClient) CloseDarta(ctx context.Context, req *dartav1.CloseDartaRequest) (*dartav1.CloseDartaResponse, error) {
+	return c.client.CloseDarta(ctx, req)
+}
+
+// VoidDarta voids a darta.
+func (c *DartaClient) VoidDarta(ctx context.Context, req *dartav1.VoidDartaRequest) (*dartav1.VoidDartaResponse, error) {
+	return c.client.VoidDarta(ctx, req)
 }
 
 // HealthCheck checks the health of the darta service.

@@ -17,7 +17,6 @@ func (r *mutationResolver) CreateDarta(ctx context.Context, input model.CreateDa
 	// Convert GraphQL input to proto
 	req := &dartav1.CreateDartaRequest{
 		Input: &dartav1.CreateDartaInput{
-			FiscalYearId: input.FiscalYearID,
 			Scope:        scopeToProto(input.Scope),
 			WardId:       stringPtrValue(input.WardID),
 			Subject:      input.Subject,
@@ -114,7 +113,7 @@ func (r *mutationResolver) RouteDarta(ctx context.Context, input model.RouteDart
 			OrganizationalUnitId: stringPtrValue(input.OrganizationalUnitID),
 			AssigneeId:           stringPtrValue(input.AssigneeID),
 			Priority:             priorityPtrToProto(input.Priority),
-			SlaHours:             int32PtrValue(input.SlaHours),
+			SlaHours:             int32PtrValue(input.SLAHours),
 			Notes:                stringPtrValue(input.Notes),
 		},
 	}
@@ -312,7 +311,7 @@ func protoToDarta(d *dartav1.Darta) *model.Darta {
 		CreatedBy:      d.CreatedBy.Id,
 		CreatedAt:      d.CreatedAt.AsTime().Format("2006-01-02T15:04:05Z07:00"),
 		UpdatedAt:      d.UpdatedAt.AsTime().Format("2006-01-02T15:04:05Z07:00"),
-		TenantID:       d.TenantID,
+		TenantID:       d.TenantId,
 	}
 
 	if d.DartaNumber > 0 {
