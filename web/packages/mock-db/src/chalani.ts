@@ -46,23 +46,44 @@ const findChalani = (id: string): Chalani => {
   return c;
 };
 
+const createMockUser = (username: string, fullName: string): User => ({
+  __typename: "User",
+  id: `U-${username.toUpperCase()}`,
+  username,
+  fullName,
+  email: null,
+  phone: null,
+  roles: null,
+  createdAt: null,
+  updatedAt: null,
+});
+
 const recordAudit = (
   c: Chalani,
   action: string,
-  from: ChalaniStatus,
+  from: ChalaniStatus | null,
   to: ChalaniStatus,
-  actor = "MockUser",
-  meta: Record<string, any> = {}
+  actorName: string,
+  reason?: string,
+  metadata?: Record<string, any>
 ) => {
-  c.auditTrail.push({
+  const newEntry: AuditEntry = {
+    __typename: "AuditEntry",
     id: uuid(),
     action,
-    from,
-    to,
-    actor,
-    meta,
-    createdAt: nowISO(),
-  });
+    fromStatus: from,
+    toStatus: to,
+    actor: createMockUser(actorName.toLowerCase().replace(/\s+/g, "_"), actorName),
+    entityType: "CHALANI",
+    entityId: c.id,
+    timestamp: nowISO(),
+    reason: reason ?? null,
+    metadata: metadata ?? null,
+    ip: null,
+    userAgent: null,
+  };
+  // Use type assertion to work around readonly array
+  (c.auditTrail as AuditEntry[]).push(newEntry);
 };
 
 const patch = (c: Chalani, changes: Partial<Chalani>) =>
@@ -75,11 +96,11 @@ export const ChalaniQuery: QueryResolvers = {
   chalanis: async () => simulate(() => mockDB.chalanis),
 
   chalani: async (_parent: unknown, { id }: { id: string }) =>
-    simulate(() => mockDB.chalanis.find((c) => c.id === id) || null),
+    simulate(() => mockDB.chalanis.find((c: Chalani) => c.id === id) || null),
 
   myChalaniInbox: async () =>
     simulate(() => ({
-      edges: mockDB.chalanis.map((c) => ({
+      edges: mockDB.chalanis.map((c: Chalani) => ({
         cursor: c.id,
         node: c,
       })),
@@ -98,6 +119,7 @@ export const ChalaniMutation: MutationResolvers = {
     simulate(() => {
       const now = nowISO();
       const newItem: Chalani = {
+        __typename: "Chalani",
         id: uuid(),
         chalaniNumber: null,
         formattedChalaniNumber: null,
@@ -147,23 +169,15 @@ export const ChalaniMutation: MutationResolvers = {
         acknowledgementProof: null,
         deliveredAt: null,
         deliveredProof: null,
-        createdBy: { id: "U-CLERK", name: "Mock Clerk" },
+        createdBy: createMockUser("clerk", "Mock Clerk"),
         createdAt: now,
         updatedAt: now,
-        auditTrail: [
-          {
-            id: uuid(),
-            action: "CREATE",
-            from: null,
-            to: "DRAFT",
-            actor: "Clerk",
-            createdAt: now,
-          },
-        ],
+        auditTrail: [],
         supersededById: null,
         supersedesId: null,
         allowedActions: ["SUBMIT"],
       };
+      recordAudit(newItem, "CREATE", null, "DRAFT", "Clerk");
       mockDB.chalanis.push(newItem);
       return newItem;
     }),
