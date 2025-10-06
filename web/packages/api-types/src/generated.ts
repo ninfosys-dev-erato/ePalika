@@ -1688,6 +1688,63 @@ export type DummyQueryVariables = Exact<{ [key: string]: never }>;
 
 export type DummyQuery = { readonly __typename: "Query" };
 
+export type GetChalanisQueryVariables = Exact<{
+  pagination: InputMaybe<PaginationInput>;
+}>;
+
+export type GetChalanisQuery = {
+  readonly __typename: "Query";
+  readonly chalanis: {
+    readonly __typename: "ChalaniConnection";
+    readonly edges: ReadonlyArray<{
+      readonly __typename: "ChalaniEdge";
+      readonly cursor: string;
+      readonly node: {
+        readonly __typename: "Chalani";
+        readonly id: string;
+        readonly subject: string;
+        readonly status: ChalaniStatus;
+        readonly createdAt: string;
+        readonly updatedAt: string;
+      };
+    }>;
+    readonly pageInfo: {
+      readonly __typename: "PageInfo";
+      readonly page: number;
+      readonly limit: number;
+      readonly total: number;
+      readonly totalPages: number;
+      readonly hasNextPage: boolean;
+      readonly hasPreviousPage: boolean;
+    };
+  };
+};
+
+export type MyChalaniInboxQueryVariables = Exact<{
+  pagination: InputMaybe<PaginationInput>;
+}>;
+
+export type MyChalaniInboxQuery = {
+  readonly __typename: "Query";
+  readonly myChalaniInbox: {
+    readonly __typename: "ChalaniConnection";
+    readonly edges: ReadonlyArray<{
+      readonly __typename: "ChalaniEdge";
+      readonly node: {
+        readonly __typename: "Chalani";
+        readonly id: string;
+        readonly subject: string;
+        readonly status: ChalaniStatus;
+        readonly createdAt: string;
+        readonly recipient: {
+          readonly __typename: "Recipient";
+          readonly name: string;
+        };
+      };
+    }>;
+  };
+};
+
 export const DummyDocument = gql`
   query Dummy {
     __typename
@@ -1749,4 +1806,185 @@ export type DummySuspenseQueryHookResult = ReturnType<
 export type DummyQueryResult = Apollo.QueryResult<
   DummyQuery,
   DummyQueryVariables
+>;
+export const GetChalanisDocument = gql`
+  query GetChalanis($pagination: PaginationInput) {
+    chalanis(pagination: $pagination) {
+      edges {
+        cursor
+        node {
+          id
+          subject
+          status
+          createdAt
+          updatedAt
+        }
+      }
+      pageInfo {
+        page
+        limit
+        total
+        totalPages
+        hasNextPage
+        hasPreviousPage
+      }
+    }
+  }
+`;
+
+/**
+ * __useGetChalanisQuery__
+ *
+ * To run a query within a React component, call `useGetChalanisQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetChalanisQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetChalanisQuery({
+ *   variables: {
+ *      pagination: // value for 'pagination'
+ *   },
+ * });
+ */
+export function useGetChalanisQuery(
+  baseOptions?: Apollo.QueryHookOptions<
+    GetChalanisQuery,
+    GetChalanisQueryVariables
+  >,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<GetChalanisQuery, GetChalanisQueryVariables>(
+    GetChalanisDocument,
+    options,
+  );
+}
+export function useGetChalanisLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<
+    GetChalanisQuery,
+    GetChalanisQueryVariables
+  >,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<GetChalanisQuery, GetChalanisQueryVariables>(
+    GetChalanisDocument,
+    options,
+  );
+}
+export function useGetChalanisSuspenseQuery(
+  baseOptions?:
+    | Apollo.SkipToken
+    | Apollo.SuspenseQueryHookOptions<
+        GetChalanisQuery,
+        GetChalanisQueryVariables
+      >,
+) {
+  const options =
+    baseOptions === Apollo.skipToken
+      ? baseOptions
+      : { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<GetChalanisQuery, GetChalanisQueryVariables>(
+    GetChalanisDocument,
+    options,
+  );
+}
+export type GetChalanisQueryHookResult = ReturnType<typeof useGetChalanisQuery>;
+export type GetChalanisLazyQueryHookResult = ReturnType<
+  typeof useGetChalanisLazyQuery
+>;
+export type GetChalanisSuspenseQueryHookResult = ReturnType<
+  typeof useGetChalanisSuspenseQuery
+>;
+export type GetChalanisQueryResult = Apollo.QueryResult<
+  GetChalanisQuery,
+  GetChalanisQueryVariables
+>;
+export const MyChalaniInboxDocument = gql`
+  query MyChalaniInbox($pagination: PaginationInput) {
+    myChalaniInbox(pagination: $pagination) {
+      edges {
+        node {
+          id
+          subject
+          status
+          recipient {
+            name
+          }
+          createdAt
+        }
+      }
+    }
+  }
+`;
+
+/**
+ * __useMyChalaniInboxQuery__
+ *
+ * To run a query within a React component, call `useMyChalaniInboxQuery` and pass it any options that fit your needs.
+ * When your component renders, `useMyChalaniInboxQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useMyChalaniInboxQuery({
+ *   variables: {
+ *      pagination: // value for 'pagination'
+ *   },
+ * });
+ */
+export function useMyChalaniInboxQuery(
+  baseOptions?: Apollo.QueryHookOptions<
+    MyChalaniInboxQuery,
+    MyChalaniInboxQueryVariables
+  >,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<MyChalaniInboxQuery, MyChalaniInboxQueryVariables>(
+    MyChalaniInboxDocument,
+    options,
+  );
+}
+export function useMyChalaniInboxLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<
+    MyChalaniInboxQuery,
+    MyChalaniInboxQueryVariables
+  >,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<MyChalaniInboxQuery, MyChalaniInboxQueryVariables>(
+    MyChalaniInboxDocument,
+    options,
+  );
+}
+export function useMyChalaniInboxSuspenseQuery(
+  baseOptions?:
+    | Apollo.SkipToken
+    | Apollo.SuspenseQueryHookOptions<
+        MyChalaniInboxQuery,
+        MyChalaniInboxQueryVariables
+      >,
+) {
+  const options =
+    baseOptions === Apollo.skipToken
+      ? baseOptions
+      : { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<
+    MyChalaniInboxQuery,
+    MyChalaniInboxQueryVariables
+  >(MyChalaniInboxDocument, options);
+}
+export type MyChalaniInboxQueryHookResult = ReturnType<
+  typeof useMyChalaniInboxQuery
+>;
+export type MyChalaniInboxLazyQueryHookResult = ReturnType<
+  typeof useMyChalaniInboxLazyQuery
+>;
+export type MyChalaniInboxSuspenseQueryHookResult = ReturnType<
+  typeof useMyChalaniInboxSuspenseQuery
+>;
+export type MyChalaniInboxQueryResult = Apollo.QueryResult<
+  MyChalaniInboxQuery,
+  MyChalaniInboxQueryVariables
 >;

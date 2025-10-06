@@ -73,7 +73,10 @@ const recordAudit = (
     action,
     fromStatus: from,
     toStatus: to,
-    actor: createMockUser(actorName.toLowerCase().replace(/\s+/g, "_"), actorName),
+    actor: createMockUser(
+      actorName.toLowerCase().replace(/\s+/g, "_"),
+      actorName
+    ),
     entityType: "CHALANI",
     entityId: c.id,
     timestamp: nowISO(),
@@ -115,7 +118,10 @@ export const ChalaniMutation: MutationResolvers = {
   // ---------------------------------------------------------------------------
   // Phase 1 — Drafting + Review
   // ---------------------------------------------------------------------------
-  createChalani: async (_p: unknown, { input }: { input: CreateChalaniInput }) =>
+  createChalani: async (
+    _p: unknown,
+    { input }: { input: CreateChalaniInput }
+  ) =>
     simulate(() => {
       const now = nowISO();
       const newItem: Chalani = {
@@ -190,29 +196,51 @@ export const ChalaniMutation: MutationResolvers = {
       return patch(c, { status: "PENDING_REVIEW" });
     }),
 
-  reviewChalani: async (_p: unknown, { input }: { input: ReviewChalaniInput }) =>
+  reviewChalani: async (
+    _p: unknown,
+    { input }: { input: ReviewChalaniInput }
+  ) =>
     simulate(() => {
       const c = findChalani(input.chalaniId);
       const to =
         input.decision === "APPROVE_REVIEW" ? "PENDING_APPROVAL" : "DRAFT";
       assertTransition("Chalani", c.status, to);
-      recordAudit(c, "REVIEW", c.status, to, "Reviewer", input.notes ?? undefined, {
-        decision: input.decision,
-      });
+      recordAudit(
+        c,
+        "REVIEW",
+        c.status,
+        to,
+        "Reviewer",
+        input.notes ?? undefined,
+        {
+          decision: input.decision,
+        }
+      );
       return patch(c, { status: to });
     }),
 
   // ---------------------------------------------------------------------------
   // Phase 2 — Approval + Registration
   // ---------------------------------------------------------------------------
-  approveChalani: async (_p: unknown, { input }: { input: ApproveChalaniInput }) =>
+  approveChalani: async (
+    _p: unknown,
+    { input }: { input: ApproveChalaniInput }
+  ) =>
     simulate(() => {
       const c = findChalani(input.chalaniId);
       const to = input.decision === "APPROVE" ? "APPROVED" : "DRAFT";
       assertTransition("Chalani", c.status, to);
-      recordAudit(c, "APPROVAL", c.status, to, "CAO", input.notes ?? undefined, {
-        decision: input.decision,
-      });
+      recordAudit(
+        c,
+        "APPROVAL",
+        c.status,
+        to,
+        "CAO",
+        input.notes ?? undefined,
+        {
+          decision: input.decision,
+        }
+      );
       return patch(c, { status: to });
     }),
 
@@ -277,7 +305,10 @@ export const ChalaniMutation: MutationResolvers = {
   // ---------------------------------------------------------------------------
   // Phase 4 — Dispatch & Delivery
   // ---------------------------------------------------------------------------
-  dispatchChalani: async (_p: unknown, { input }: { input: DispatchChalaniInput }) =>
+  dispatchChalani: async (
+    _p: unknown,
+    { input }: { input: DispatchChalaniInput }
+  ) =>
     simulate(() => {
       const c = findChalani(input.chalaniId);
       assertTransition("Chalani", c.status, "DISPATCHED");
@@ -293,7 +324,10 @@ export const ChalaniMutation: MutationResolvers = {
       });
     }),
 
-  markChalaniInTransit: async (_p: unknown, { input }: { input: MarkInTransitInput }) =>
+  markChalaniInTransit: async (
+    _p: unknown,
+    { input }: { input: MarkInTransitInput }
+  ) =>
     simulate(() => {
       const c = findChalani(input.chalaniId);
       assertTransition("Chalani", c.status, "IN_TRANSIT");
@@ -321,7 +355,10 @@ export const ChalaniMutation: MutationResolvers = {
       });
     }),
 
-  markChalaniDelivered: async (_p: unknown, { input }: { input: MarkDeliveredInput }) =>
+  markChalaniDelivered: async (
+    _p: unknown,
+    { input }: { input: MarkDeliveredInput }
+  ) =>
     simulate(() => {
       const c = findChalani(input.chalaniId);
       assertTransition("Chalani", c.status, "DELIVERED");
@@ -347,7 +384,10 @@ export const ChalaniMutation: MutationResolvers = {
       return patch(c, { status: "RETURNED_UNDELIVERED" });
     }),
 
-  resendChalani: async (_p: unknown, { input }: { input: ResendChalaniInput }) =>
+  resendChalani: async (
+    _p: unknown,
+    { input }: { input: ResendChalaniInput }
+  ) =>
     simulate(() => {
       const c = findChalani(input.chalaniId);
       assertTransition("Chalani", c.status, "DISPATCHED");
@@ -370,10 +410,20 @@ export const ChalaniMutation: MutationResolvers = {
       return patch(c, { status: "VOIDED" });
     }),
 
-  supersedeChalani: async (_p: unknown, { input }: { input: SupersedeChalaniInput }) =>
+  supersedeChalani: async (
+    _p: unknown,
+    { input }: { input: SupersedeChalaniInput }
+  ) =>
     simulate(() => {
       const target = findChalani(input.targetChalaniId);
-      recordAudit(target, "SUPERSEDE", target.status, "SUPERSEDED", "CAO", input.reason);
+      recordAudit(
+        target,
+        "SUPERSEDE",
+        target.status,
+        "SUPERSEDED",
+        "CAO",
+        input.reason
+      );
       patch(target, { status: "SUPERSEDED" });
 
       const newItem: Chalani = {
@@ -387,7 +437,14 @@ export const ChalaniMutation: MutationResolvers = {
         updatedAt: nowISO(),
         auditTrail: [],
       };
-      recordAudit(newItem, "CREATE_SUPERSEDE", null, "DRAFT", "CAO", input.reason);
+      recordAudit(
+        newItem,
+        "CREATE_SUPERSEDE",
+        null,
+        "DRAFT",
+        "CAO",
+        input.reason
+      );
       mockDB.chalanis.push(newItem);
       return { old: target, new: newItem };
     }),

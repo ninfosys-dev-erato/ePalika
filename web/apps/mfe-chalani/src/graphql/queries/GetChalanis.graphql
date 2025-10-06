@@ -1,0 +1,22 @@
+query GetChalanis($pagination: PaginationInput) {
+  chalanis(pagination: $pagination) {
+    edges {
+      cursor
+      node {
+        id
+        subject
+        status
+        createdAt
+        updatedAt
+      }
+    }
+    pageInfo {
+      page
+      limit
+      total
+      totalPages
+      hasNextPage
+      hasPreviousPage
+    }
+  }
+}

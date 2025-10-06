@@ -1,5 +1,12 @@
-input PaginationInput { page: Int! = 1 limit: Int! = 20 }
+input PaginationInput {
+  page: Int! = 1
+  limit: Int! = 20
+}
 type PageInfo {
-  page: Int! limit: Int! total: Int! totalPages: Int!
-  hasNextPage: Boolean! hasPreviousPage: Boolean!
+  page: Int!
+  limit: Int!
+  total: Int!
+  totalPages: Int!
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
 }

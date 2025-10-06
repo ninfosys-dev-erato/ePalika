@@ -8,8 +8,8 @@ import {
 } from "@tanstack/react-router";
 
 // Screens (implementations can be simple stubs to start)
-// import { DispatchQueue } from "../features/dispatch/DispatchQueue";
 import { ChalaniCompose } from "../features/compose/ChalaniCompose";
+import { ChalaniListView } from "../layout/ChalaniListView/ChalaniListView";
 // import { Drafts } from "../features/drafts/Drafts";
 // import { Sent } from "../features/sent/Sent";
 // import { ChalaniDetail } from "../features/detail/ChalaniDetail";
@@ -32,8 +32,8 @@ const rootRoute = createRootRoute({
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/",
-  //component: DispatchQueue,
-  component: () => <div>Welcome to ePalika Chalani Module</div>,
+
+  component: () => <ChalaniListView />,
 });
 
 const composeRoute = createRoute({
