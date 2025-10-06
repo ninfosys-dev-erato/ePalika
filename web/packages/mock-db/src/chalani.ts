@@ -196,9 +196,8 @@ export const ChalaniMutation: MutationResolvers = {
       const to =
         input.decision === "APPROVE_REVIEW" ? "PENDING_APPROVAL" : "DRAFT";
       assertTransition("Chalani", c.status, to);
-      recordAudit(c, "REVIEW", c.status, to, "Reviewer", {
+      recordAudit(c, "REVIEW", c.status, to, "Reviewer", input.notes ?? undefined, {
         decision: input.decision,
-        notes: input.notes,
       });
       return patch(c, { status: to });
     }),
@@ -211,9 +210,8 @@ export const ChalaniMutation: MutationResolvers = {
       const c = findChalani(input.chalaniId);
       const to = input.decision === "APPROVE" ? "APPROVED" : "DRAFT";
       assertTransition("Chalani", c.status, to);
-      recordAudit(c, "APPROVAL", c.status, to, "CAO", {
+      recordAudit(c, "APPROVAL", c.status, to, "CAO", input.notes ?? undefined, {
         decision: input.decision,
-        notes: input.notes,
       });
       return patch(c, { status: to });
     }),
@@ -288,7 +286,7 @@ export const ChalaniMutation: MutationResolvers = {
         status: "DISPATCHED",
         dispatchChannel: input.dispatchChannel,
         dispatchedAt: nowISO(),
-        dispatchedBy: { id: "U-DISPATCH", name: "Dispatch Officer" },
+        dispatchedBy: createMockUser("dispatch_officer", "Dispatch Officer"),
         trackingId:
           input.trackingId ?? `TRACK-${Math.random().toString(36).slice(2, 8)}`,
         courierName: input.courierName ?? "Nepal Post",
@@ -344,9 +342,7 @@ export const ChalaniMutation: MutationResolvers = {
         c.status,
         "RETURNED_UNDELIVERED",
         "Courier",
-        {
-          reason: input.reason,
-        }
+        input.reason
       );
       return patch(c, { status: "RETURNED_UNDELIVERED" });
     }),
@@ -370,18 +366,14 @@ export const ChalaniMutation: MutationResolvers = {
   voidChalani: async (_p: unknown, { input }: { input: VoidChalaniInput }) =>
     simulate(() => {
       const c = findChalani(input.chalaniId);
-      recordAudit(c, "VOID", c.status, "VOIDED", "CAO", {
-        reason: input.reason,
-      });
+      recordAudit(c, "VOID", c.status, "VOIDED", "CAO", input.reason);
       return patch(c, { status: "VOIDED" });
     }),
 
   supersedeChalani: async (_p: unknown, { input }: { input: SupersedeChalaniInput }) =>
     simulate(() => {
       const target = findChalani(input.targetChalaniId);
-      recordAudit(target, "SUPERSEDE", target.status, "SUPERSEDED", "CAO", {
-        reason: input.reason,
-      });
+      recordAudit(target, "SUPERSEDE", target.status, "SUPERSEDED", "CAO", input.reason);
       patch(target, { status: "SUPERSEDED" });
 
       const newItem: Chalani = {
@@ -393,17 +385,9 @@ export const ChalaniMutation: MutationResolvers = {
         supersedesId: target.id,
         createdAt: nowISO(),
         updatedAt: nowISO(),
-        auditTrail: [
-          {
-            id: uuid(),
-            action: "CREATE_SUPERSEDE",
-            from: null,
-            to: "DRAFT",
-            actor: "CAO",
-            createdAt: nowISO(),
-          },
-        ],
+        auditTrail: [],
       };
+      recordAudit(newItem, "CREATE_SUPERSEDE", null, "DRAFT", "CAO", input.reason);
       mockDB.chalanis.push(newItem);
       return { old: target, new: newItem };
     }),
