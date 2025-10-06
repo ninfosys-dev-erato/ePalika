@@ -6,7 +6,7 @@
   "scripts": {
     "//": "---- DEV ----",
     "dev": "pnpm dev:standalone",
-    "dev:standalone": "vite --port 5202 --mode standalone --open /index.html",
+    "dev:standalone": "vite --port 5202 --mode standalone --open /",
     "dev:federated": "vite --port 5202 --mode federated",
     "dev:integrated": "vite --port 5202 --mode integrated",
     "//2": "---- BUILD (CI/Release) ----",

@@ -1,1 +1,1 @@
-export { Add } from "@carbon/icons-react";
+export { ArrowRight } from "@carbon/icons-react";
