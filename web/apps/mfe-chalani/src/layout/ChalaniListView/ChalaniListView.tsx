@@ -1,5 +1,5 @@
 import React from "react";
-import { Chalani, useGetChalanisQuery } from "@egov/api-types";
+import { useGetChalanisQuery } from "@egov/api-types";
 import {
   DataTable,
   Table,
@@ -40,9 +40,9 @@ export function ChalaniListView() {
     );
   }
 
-  const rows = data?.chalanis ?? [];
+  const edges = data?.chalanis?.edges ?? [];
 
-  if (rows.length === 0) {
+  if (edges.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen text-center">
         <h3>No Chalani records yet</h3>
@@ -65,7 +65,7 @@ export function ChalaniListView() {
           </TableRow>
         </TableHead>
         <TableBody>
-          {rows.map((c: Chalani) => {
+          {edges.map(({ node: c }) => {
             const tagProps = statusToTag(c.status);
             return (
               <TableRow key={c.id}>
