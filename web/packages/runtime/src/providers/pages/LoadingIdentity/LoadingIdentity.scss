@@ -1,0 +1,43 @@
+@use "@carbon/react/scss/spacing" as *;
+@use "@carbon/react/scss/type" as *;
+@use "@carbon/react/scss/theme" as *;
+@use "@carbon/react/scss/breakpoint" as *;
+
+.loading-gate {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: $layer-01;
+  transition: background-color 0.25s ease;
+
+  @include breakpoint-up(md) {
+    justify-content: flex-start;
+    padding-inline-start: $spacing-09;
+  }
+
+  &__container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: $spacing-05;
+    text-align: center;
+    max-width: 480px;
+
+    @include breakpoint-up(md) {
+      align-items: flex-start;
+      text-align: left;
+    }
+  }
+
+  &__title {
+    @include type-style("heading-03");
+    color: $text-primary;
+  }
+
+  &__description {
+    @include type-style("body-01");
+    color: $text-secondary;
+    margin-bottom: $spacing-06;
+  }
+}

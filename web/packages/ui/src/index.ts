@@ -33,4 +33,5 @@ export { generateReceiptPdf } from "./patterns/Receipt";
 export { CarbonProviders } from "./providers/CarbonProviders";
 
 // Layout Primitives
-export { FlexGrid, Row, Column } from "@carbon/react";
+export { FlexGrid, Row, Column, InlineLoading } from "@carbon/react";
+export { GateLayout } from "./patterns";
