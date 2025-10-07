@@ -4,7 +4,7 @@
     "version": "v0.40.9",
     "description": "Protect GraphQL mutations and queries with Keycloak JWT and PDP authorization",
     "match": {
-      "url": "http://<.*>/query",
+      "url": "http://<.*>/graphql",
       "methods": ["POST", "OPTIONS"]
     },
     "upstream": {
