@@ -8,8 +8,8 @@ serve:
 
 access_rules:
   repositories:
-    - file:///rules/health-check.json
-    - file:///rules/darta-chalani.json
+    - file:///oathkeeper/base/health-check.json
+    - file:///oathkeeper/rules/darta-chalani.json
 
 authenticators:
   jwt:

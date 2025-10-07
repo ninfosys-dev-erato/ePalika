@@ -146,13 +146,12 @@ services:
 
   oathkeeper:
     image: oryd/oathkeeper:latest
-    command: ["serve", "--config", "/etc/config/oathkeeper.yaml"]
+    command: ["serve", "--config", "/oathkeeper/config.yaml"]
     ports:
       - "4455:4455"
       - "4456:4456"
     volumes:
-      - ./policies/oathkeeper/config.yaml:/etc/config/oathkeeper.yaml:ro
-      - ./policies/oathkeeper/base:/rules:ro
+      - ./policies/oathkeeper:/oathkeeper
     healthcheck:
       test:
         ["CMD", "wget", "-q", "--spider", "http://localhost:4456/health/alive"]
