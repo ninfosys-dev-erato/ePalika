@@ -7,7 +7,7 @@ import {
   useDirectRegisterChalaniMutation,
   useSignChalaniMutation,
   useSealChalaniMutation,
-  useDispatchChalaniMutation,
+  useDispatchChalaniActionMutation,
   useMarkChalaniInTransitMutation,
   useAcknowledgeChalaniMutation,
   useMarkChalaniDeliveredMutation,
@@ -32,7 +32,7 @@ export function useChalaniActions() {
   const [directRegister] = useDirectRegisterChalaniMutation();
   const [sign] = useSignChalaniMutation();
   const [seal] = useSealChalaniMutation();
-  const [dispatchM] = useDispatchChalaniMutation();
+  const [dispatchM] = useDispatchChalaniActionMutation();
   const [markTransit] = useMarkChalaniInTransitMutation();
   const [ack] = useAcknowledgeChalaniMutation();
   const [deliver] = useMarkChalaniDeliveredMutation();
@@ -49,29 +49,46 @@ export function useChalaniActions() {
         return submit({ variables: { chalaniId } });
 
       case "EDIT_REQUIRED": {
-        const notes = window.prompt("Reviewer notes (optional):") || undefined;
+        const notes = window.prompt("Reviewer notes (optional):") || null;
         return review({
           variables: {
-            input: { chalaniId, decision: "EDIT_REQUIRED", notes },
+            input: {
+              chalaniId,
+              decision: "EDIT_REQUIRED",
+              notes,
+              idempotencyKey: `review-${chalaniId}-${Date.now()}`
+            },
           },
         });
       }
 
       case "APPROVE_REVIEW": {
-        const notes = window.prompt("Review notes (optional):") || undefined;
+        const notes = window.prompt("Review notes (optional):") || null;
         return review({
           variables: {
-            input: { chalaniId, decision: "APPROVE_REVIEW", notes },
+            input: {
+              chalaniId,
+              decision: "APPROVE_REVIEW",
+              notes,
+              idempotencyKey: `review-${chalaniId}-${Date.now()}`
+            },
           },
         });
       }
 
       // ----- Approval + Registration
       case "APPROVE": {
-        const notes = window.prompt("Approval notes (optional):") || undefined;
+        const notes = window.prompt("Approval notes (optional):") || null;
         return approve({
           variables: {
-            input: { chalaniId, decision: "APPROVE", notes },
+            input: {
+              chalaniId,
+              decision: "APPROVE",
+              notes,
+              reason: null,
+              delegateToId: null,
+              idempotencyKey: `approve-${chalaniId}-${Date.now()}`
+            },
           },
         });
       }
@@ -81,7 +98,14 @@ export function useChalaniActions() {
         if (!reason?.trim()) throw new Error("Rejection reason is required");
         return approve({
           variables: {
-            input: { chalaniId, decision: "REJECT", reason },
+            input: {
+              chalaniId,
+              decision: "REJECT",
+              reason,
+              notes: null,
+              delegateToId: null,
+              idempotencyKey: `reject-${chalaniId}-${Date.now()}`
+            },
           },
         });
       }
@@ -90,7 +114,13 @@ export function useChalaniActions() {
         const allocationId =
           window.prompt("Allocation ID (e.g., ALLOC-001):") || "ALLOC-001";
         return reserveNo({
-          variables: { input: { chalaniId, allocationId } },
+          variables: {
+            input: {
+              chalaniId,
+              allocationId,
+              idempotencyKey: `reserve-${chalaniId}-${Date.now()}`
+            }
+          },
         });
       }
 
@@ -98,54 +128,97 @@ export function useChalaniActions() {
         const allocationId =
           window.prompt("Allocation ID used to reserve:") || "ALLOC-001";
         return finalize({
-          variables: { input: { chalaniId, allocationId } },
+          variables: {
+            input: {
+              chalaniId,
+              allocationId,
+              idempotencyKey: `finalize-${chalaniId}-${Date.now()}`
+            }
+          },
         });
       }
 
       case "DIRECT_REGISTER":
-        return directRegister({ variables: { input: { chalaniId } } });
+        return directRegister({
+          variables: {
+            input: {
+              chalaniId,
+              idempotencyKey: `direct-register-${chalaniId}-${Date.now()}`
+            }
+          }
+        });
 
       // ----- Signing & Sealing
       case "SIGN": {
         const signatureAttachmentId =
-          window.prompt("Signature attachment ID (optional):") || undefined;
-        return sign({ variables: { input: { chalaniId, signatureAttachmentId } } });
+          window.prompt("Signature attachment ID (optional):") || null;
+        return sign({
+          variables: {
+            input: {
+              chalaniId,
+              signatureAttachmentId,
+              idempotencyKey: `sign-${chalaniId}-${Date.now()}`
+            }
+          }
+        });
       }
 
       case "SEAL": {
         const sealAttachmentId =
-          window.prompt("Seal attachment ID (optional):") || undefined;
-        return seal({ variables: { input: { chalaniId, sealAttachmentId } } });
+          window.prompt("Seal attachment ID (optional):") || null;
+        return seal({
+          variables: {
+            input: {
+              chalaniId,
+              sealAttachmentId,
+              idempotencyKey: `seal-${chalaniId}-${Date.now()}`
+            }
+          }
+        });
       }
 
       // ----- Dispatch & Delivery
       case "DISPATCH": {
         const channel = (window.prompt(
-          "Dispatch channel [POST|DIGITAL]:",
-          "POST"
-        ) || "POST") as DispatchChannel;
+          "Dispatch channel [POSTAL|COURIER|EMAIL|HAND_DELIVERY|EDARTA_PORTAL]:",
+          "POSTAL"
+        ) || "POSTAL") as DispatchChannel;
         const trackingId =
-          channel === "POST"
-            ? window.prompt("Tracking ID (optional):") || undefined
-            : undefined;
+          channel === "POSTAL" || channel === "COURIER"
+            ? window.prompt("Tracking ID (optional):") || null
+            : null;
         const courierName =
-          channel === "POST"
-            ? window.prompt("Courier name (optional):", "Nepal Post") || undefined
-            : undefined;
+          channel === "POSTAL" || channel === "COURIER"
+            ? window.prompt("Courier name (optional):", "Nepal Post") || null
+            : null;
 
         return dispatchM({
           variables: {
-            input: { chalaniId, dispatchChannel: channel, trackingId, courierName },
+            input: {
+              chalaniId,
+              dispatchChannel: channel,
+              trackingId: trackingId ?? null,
+              courierName: courierName ?? null,
+              idempotencyKey: `dispatch-${chalaniId}-${Date.now()}`,
+              scheduledDispatchAt: null
+            },
           },
         });
       }
 
       case "MARK_IN_TRANSIT": {
-        const trackingId = window.prompt("Tracking ID (optional):") || undefined;
+        const trackingId = window.prompt("Tracking ID (optional):") || null;
         const courierName =
-          window.prompt("Courier Name (optional):", "Nepal Post") || undefined;
+          window.prompt("Courier Name (optional):", "Nepal Post") || null;
         return markTransit({
-          variables: { input: { chalaniId, trackingId, courierName } },
+          variables: {
+            input: {
+              chalaniId,
+              trackingId,
+              courierName,
+              idempotencyKey: `transit-${chalaniId}-${Date.now()}`
+            }
+          },
         });
       }
 
@@ -153,12 +226,27 @@ export function useChalaniActions() {
         const acknowledgedBy =
           window.prompt("Acknowledged by (name/email):") || "recipient";
         return ack({
-          variables: { input: { chalaniId, acknowledgedBy } },
+          variables: {
+            input: {
+              chalaniId,
+              acknowledgedBy,
+              acknowledgementProofId: null,
+              idempotencyKey: `ack-${chalaniId}-${Date.now()}`
+            }
+          },
         });
       }
 
       case "DELIVER":
-        return deliver({ variables: { input: { chalaniId } } });
+        return deliver({
+          variables: {
+            input: {
+              chalaniId,
+              deliveredProofId: null,
+              idempotencyKey: `deliver-${chalaniId}-${Date.now()}`
+            }
+          }
+        });
 
       case "RETURN_UNDELIVERED": {
         const reason =
@@ -166,27 +254,39 @@ export function useChalaniActions() {
         if (!reason.trim())
           throw new Error("Return/Undelivered reason is required");
         return returned({
-          variables: { input: { chalaniId, reason } },
+          variables: {
+            input: {
+              chalaniId,
+              reason,
+              idempotencyKey: `return-${chalaniId}-${Date.now()}`
+            }
+          },
         });
       }
 
       case "RESEND": {
         const channel = (window.prompt(
-          "Resend channel [POST|DIGITAL]:",
-          "POST"
-        ) || "POST") as DispatchChannel;
+          "Resend channel [POSTAL|COURIER|EMAIL|HAND_DELIVERY|EDARTA_PORTAL]:",
+          "POSTAL"
+        ) || "POSTAL") as DispatchChannel;
         const trackingId =
-          channel === "POST"
-            ? window.prompt("New tracking ID (optional):") || undefined
-            : undefined;
+          channel === "POSTAL" || channel === "COURIER"
+            ? window.prompt("New tracking ID (optional):") || null
+            : null;
         const courierName =
-          channel === "POST"
-            ? window.prompt("Courier (optional):", "Nepal Post") || undefined
-            : undefined;
+          channel === "POSTAL" || channel === "COURIER"
+            ? window.prompt("Courier (optional):", "Nepal Post") || null
+            : null;
 
         return resend({
           variables: {
-            input: { chalaniId, dispatchChannel: channel, trackingId, courierName },
+            input: {
+              chalaniId,
+              dispatchChannel: channel,
+              trackingId,
+              courierName,
+              idempotencyKey: `resend-${chalaniId}-${Date.now()}`
+            },
           },
         });
       }
@@ -195,7 +295,15 @@ export function useChalaniActions() {
       case "VOID": {
         const reason = window.prompt("Void reason (required):") || "";
         if (!reason.trim()) throw new Error("Void reason is required");
-        return voidM({ variables: { input: { chalaniId, reason } } });
+        return voidM({
+          variables: {
+            input: {
+              chalaniId,
+              reason,
+              idempotencyKey: `void-${chalaniId}-${Date.now()}`
+            }
+          }
+        });
       }
 
       case "SUPERSEDE": {
@@ -214,8 +322,9 @@ export function useChalaniActions() {
             input: {
               targetChalaniId: chalaniId,
               reason,
+              idempotencyKey: `supersede-${chalaniId}-${Date.now()}`,
               newChalani: {
-                scope: "MUNICIPALITY", # adjust if needed
+                scope: "MUNICIPALITY", // adjust if needed
                 wardId: null,
                 subject,
                 body,
