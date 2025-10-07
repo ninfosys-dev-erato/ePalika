@@ -16,14 +16,10 @@ authenticators:
     enabled: true
     config:
       jwks_urls:
-        - http://keycloak:8080/realms/palika/protocol/openid-connect/certs
         - http://keycloak:8080/realms/palika_sallaghari/protocol/openid-connect/certs
       scope_strategy: exact
       trusted_issuers:
-        - http://keycloak:8080/realms/palika
         - http://keycloak:8080/realms/palika_sallaghari
-        - http://localhost:8083/realms/palika
-        - http://localhost:8083/realms/palika_sallaghari
       required_scope: []
 
   noop:
