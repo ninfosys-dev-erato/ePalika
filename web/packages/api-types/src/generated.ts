@@ -1848,6 +1848,329 @@ export type DispatchChalaniMutation = {
   };
 };
 
+export type SubmitChalaniActionMutationVariables = Exact<{
+  chalaniId: Scalars["ID"]["input"];
+}>;
+
+export type SubmitChalaniActionMutation = {
+  readonly __typename: "Mutation";
+  readonly submitChalani: {
+    readonly __typename: "Chalani";
+    readonly id: string;
+    readonly status: ChalaniStatus;
+    readonly updatedAt: string;
+    readonly allowedActions: ReadonlyArray<ChalaniAction>;
+    readonly auditTrail: ReadonlyArray<{
+      readonly __typename: "AuditEntry";
+      readonly id: string;
+      readonly action: string;
+      readonly fromStatus: string | null;
+      readonly toStatus: string | null;
+      readonly timestamp: string;
+      readonly actor: {
+        readonly __typename: "User";
+        readonly fullName: string | null;
+      };
+    }>;
+  };
+};
+
+export type ReviewChalaniMutationVariables = Exact<{
+  input: ReviewChalaniInput;
+}>;
+
+export type ReviewChalaniMutation = {
+  readonly __typename: "Mutation";
+  readonly reviewChalani: {
+    readonly __typename: "Chalani";
+    readonly id: string;
+    readonly status: ChalaniStatus;
+    readonly updatedAt: string;
+    readonly allowedActions: ReadonlyArray<ChalaniAction>;
+    readonly auditTrail: ReadonlyArray<{
+      readonly __typename: "AuditEntry";
+      readonly id: string;
+      readonly action: string;
+      readonly fromStatus: string | null;
+      readonly toStatus: string | null;
+      readonly timestamp: string;
+      readonly reason: string | null;
+      readonly actor: {
+        readonly __typename: "User";
+        readonly fullName: string | null;
+      };
+    }>;
+  };
+};
+
+export type ReserveChalaniNumberMutationVariables = Exact<{
+  input: ReserveChalaniNumberInput;
+}>;
+
+export type ReserveChalaniNumberMutation = {
+  readonly __typename: "Mutation";
+  readonly reserveChalaniNumber: {
+    readonly __typename: "Chalani";
+    readonly id: string;
+    readonly status: ChalaniStatus;
+    readonly chalaniNumber: number | null;
+    readonly formattedChalaniNumber: string | null;
+    readonly updatedAt: string;
+    readonly allowedActions: ReadonlyArray<ChalaniAction>;
+    readonly auditTrail: ReadonlyArray<{
+      readonly __typename: "AuditEntry";
+      readonly id: string;
+      readonly action: string;
+      readonly toStatus: string | null;
+      readonly timestamp: string;
+    }>;
+  };
+};
+
+export type FinalizeChalaniRegistrationMutationVariables = Exact<{
+  input: FinalizeChalaniRegistrationInput;
+}>;
+
+export type FinalizeChalaniRegistrationMutation = {
+  readonly __typename: "Mutation";
+  readonly finalizeChalaniRegistration: {
+    readonly __typename: "Chalani";
+    readonly id: string;
+    readonly status: ChalaniStatus;
+    readonly updatedAt: string;
+    readonly allowedActions: ReadonlyArray<ChalaniAction>;
+    readonly auditTrail: ReadonlyArray<{
+      readonly __typename: "AuditEntry";
+      readonly id: string;
+      readonly action: string;
+      readonly toStatus: string | null;
+      readonly timestamp: string;
+    }>;
+  };
+};
+
+export type DirectRegisterChalaniMutationVariables = Exact<{
+  input: DirectRegisterChalaniInput;
+}>;
+
+export type DirectRegisterChalaniMutation = {
+  readonly __typename: "Mutation";
+  readonly directRegisterChalani: {
+    readonly __typename: "Chalani";
+    readonly id: string;
+    readonly status: ChalaniStatus;
+    readonly chalaniNumber: number | null;
+    readonly formattedChalaniNumber: string | null;
+    readonly updatedAt: string;
+    readonly allowedActions: ReadonlyArray<ChalaniAction>;
+    readonly auditTrail: ReadonlyArray<{
+      readonly __typename: "AuditEntry";
+      readonly id: string;
+      readonly action: string;
+      readonly toStatus: string | null;
+      readonly timestamp: string;
+    }>;
+  };
+};
+
+export type SignChalaniMutationVariables = Exact<{
+  input: SignChalaniInput;
+}>;
+
+export type SignChalaniMutation = {
+  readonly __typename: "Mutation";
+  readonly signChalani: {
+    readonly __typename: "Chalani";
+    readonly id: string;
+    readonly status: ChalaniStatus;
+    readonly updatedAt: string;
+    readonly allowedActions: ReadonlyArray<ChalaniAction>;
+    readonly auditTrail: ReadonlyArray<{
+      readonly __typename: "AuditEntry";
+      readonly id: string;
+      readonly action: string;
+      readonly toStatus: string | null;
+      readonly timestamp: string;
+    }>;
+  };
+};
+
+export type SealChalaniMutationVariables = Exact<{
+  input: SealChalaniInput;
+}>;
+
+export type SealChalaniMutation = {
+  readonly __typename: "Mutation";
+  readonly sealChalani: {
+    readonly __typename: "Chalani";
+    readonly id: string;
+    readonly status: ChalaniStatus;
+    readonly updatedAt: string;
+    readonly allowedActions: ReadonlyArray<ChalaniAction>;
+    readonly auditTrail: ReadonlyArray<{
+      readonly __typename: "AuditEntry";
+      readonly id: string;
+      readonly action: string;
+      readonly toStatus: string | null;
+      readonly timestamp: string;
+    }>;
+  };
+};
+
+export type DispatchChalaniActionMutationVariables = Exact<{
+  input: DispatchChalaniInput;
+}>;
+
+export type DispatchChalaniActionMutation = {
+  readonly __typename: "Mutation";
+  readonly dispatchChalani: {
+    readonly __typename: "Chalani";
+    readonly id: string;
+    readonly status: ChalaniStatus;
+    readonly dispatchChannel: DispatchChannel | null;
+    readonly trackingId: string | null;
+    readonly courierName: string | null;
+    readonly updatedAt: string;
+    readonly allowedActions: ReadonlyArray<ChalaniAction>;
+  };
+};
+
+export type MarkChalaniInTransitMutationVariables = Exact<{
+  input: MarkInTransitInput;
+}>;
+
+export type MarkChalaniInTransitMutation = {
+  readonly __typename: "Mutation";
+  readonly markChalaniInTransit: {
+    readonly __typename: "Chalani";
+    readonly id: string;
+    readonly status: ChalaniStatus;
+    readonly trackingId: string | null;
+    readonly courierName: string | null;
+    readonly updatedAt: string;
+    readonly allowedActions: ReadonlyArray<ChalaniAction>;
+  };
+};
+
+export type AcknowledgeChalaniMutationVariables = Exact<{
+  input: AcknowledgeChalaniInput;
+}>;
+
+export type AcknowledgeChalaniMutation = {
+  readonly __typename: "Mutation";
+  readonly acknowledgeChalani: {
+    readonly __typename: "Chalani";
+    readonly id: string;
+    readonly status: ChalaniStatus;
+    readonly isAcknowledged: boolean;
+    readonly acknowledgedAt: string | null;
+    readonly acknowledgedBy: string | null;
+    readonly updatedAt: string;
+    readonly allowedActions: ReadonlyArray<ChalaniAction>;
+  };
+};
+
+export type MarkChalaniDeliveredMutationVariables = Exact<{
+  input: MarkDeliveredInput;
+}>;
+
+export type MarkChalaniDeliveredMutation = {
+  readonly __typename: "Mutation";
+  readonly markChalaniDelivered: {
+    readonly __typename: "Chalani";
+    readonly id: string;
+    readonly status: ChalaniStatus;
+    readonly deliveredAt: string | null;
+    readonly updatedAt: string;
+    readonly allowedActions: ReadonlyArray<ChalaniAction>;
+  };
+};
+
+export type MarkChalaniReturnedUndeliveredMutationVariables = Exact<{
+  input: MarkReturnedUndeliveredInput;
+}>;
+
+export type MarkChalaniReturnedUndeliveredMutation = {
+  readonly __typename: "Mutation";
+  readonly markChalaniReturnedUndelivered: {
+    readonly __typename: "Chalani";
+    readonly id: string;
+    readonly status: ChalaniStatus;
+    readonly updatedAt: string;
+    readonly allowedActions: ReadonlyArray<ChalaniAction>;
+  };
+};
+
+export type ResendChalaniMutationVariables = Exact<{
+  input: ResendChalaniInput;
+}>;
+
+export type ResendChalaniMutation = {
+  readonly __typename: "Mutation";
+  readonly resendChalani: {
+    readonly __typename: "Chalani";
+    readonly id: string;
+    readonly status: ChalaniStatus;
+    readonly trackingId: string | null;
+    readonly courierName: string | null;
+    readonly updatedAt: string;
+    readonly allowedActions: ReadonlyArray<ChalaniAction>;
+  };
+};
+
+export type VoidChalaniMutationVariables = Exact<{
+  input: VoidChalaniInput;
+}>;
+
+export type VoidChalaniMutation = {
+  readonly __typename: "Mutation";
+  readonly voidChalani: {
+    readonly __typename: "Chalani";
+    readonly id: string;
+    readonly status: ChalaniStatus;
+    readonly updatedAt: string;
+    readonly allowedActions: ReadonlyArray<ChalaniAction>;
+  };
+};
+
+export type SupersedeChalaniMutationVariables = Exact<{
+  input: SupersedeChalaniInput;
+}>;
+
+export type SupersedeChalaniMutation = {
+  readonly __typename: "Mutation";
+  readonly supersedeChalani: {
+    readonly __typename: "SupersedeChalaniResult";
+    readonly old: {
+      readonly __typename: "Chalani";
+      readonly id: string;
+      readonly status: ChalaniStatus;
+    };
+    readonly new: {
+      readonly __typename: "Chalani";
+      readonly id: string;
+      readonly status: ChalaniStatus;
+      readonly subject: string;
+      readonly createdAt: string;
+    };
+  };
+};
+
+export type CloseChalaniMutationVariables = Exact<{
+  chalaniId: Scalars["ID"]["input"];
+}>;
+
+export type CloseChalaniMutation = {
+  readonly __typename: "Mutation";
+  readonly closeChalani: {
+    readonly __typename: "Chalani";
+    readonly id: string;
+    readonly status: ChalaniStatus;
+    readonly updatedAt: string;
+    readonly allowedActions: ReadonlyArray<ChalaniAction>;
+  };
+};
+
 export const DummyDocument = gql`
   query Dummy {
     __typename
@@ -2369,4 +2692,930 @@ export type DispatchChalaniMutationResult =
 export type DispatchChalaniMutationOptions = Apollo.BaseMutationOptions<
   DispatchChalaniMutation,
   DispatchChalaniMutationVariables
+>;
+export const SubmitChalaniActionDocument = gql`
+  mutation SubmitChalaniAction($chalaniId: ID!) {
+    submitChalani(chalaniId: $chalaniId) {
+      id
+      status
+      updatedAt
+      allowedActions
+      auditTrail {
+        id
+        action
+        fromStatus
+        toStatus
+        actor {
+          fullName
+        }
+        timestamp
+      }
+    }
+  }
+`;
+export type SubmitChalaniActionMutationFn = Apollo.MutationFunction<
+  SubmitChalaniActionMutation,
+  SubmitChalaniActionMutationVariables
+>;
+
+/**
+ * __useSubmitChalaniActionMutation__
+ *
+ * To run a mutation, you first call `useSubmitChalaniActionMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSubmitChalaniActionMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [submitChalaniActionMutation, { data, loading, error }] = useSubmitChalaniActionMutation({
+ *   variables: {
+ *      chalaniId: // value for 'chalaniId'
+ *   },
+ * });
+ */
+export function useSubmitChalaniActionMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    SubmitChalaniActionMutation,
+    SubmitChalaniActionMutationVariables
+  >,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<
+    SubmitChalaniActionMutation,
+    SubmitChalaniActionMutationVariables
+  >(SubmitChalaniActionDocument, options);
+}
+export type SubmitChalaniActionMutationHookResult = ReturnType<
+  typeof useSubmitChalaniActionMutation
+>;
+export type SubmitChalaniActionMutationResult =
+  Apollo.MutationResult<SubmitChalaniActionMutation>;
+export type SubmitChalaniActionMutationOptions = Apollo.BaseMutationOptions<
+  SubmitChalaniActionMutation,
+  SubmitChalaniActionMutationVariables
+>;
+export const ReviewChalaniDocument = gql`
+  mutation ReviewChalani($input: ReviewChalaniInput!) {
+    reviewChalani(input: $input) {
+      id
+      status
+      updatedAt
+      allowedActions
+      auditTrail {
+        id
+        action
+        fromStatus
+        toStatus
+        actor {
+          fullName
+        }
+        timestamp
+        reason
+      }
+    }
+  }
+`;
+export type ReviewChalaniMutationFn = Apollo.MutationFunction<
+  ReviewChalaniMutation,
+  ReviewChalaniMutationVariables
+>;
+
+/**
+ * __useReviewChalaniMutation__
+ *
+ * To run a mutation, you first call `useReviewChalaniMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useReviewChalaniMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [reviewChalaniMutation, { data, loading, error }] = useReviewChalaniMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useReviewChalaniMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    ReviewChalaniMutation,
+    ReviewChalaniMutationVariables
+  >,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<
+    ReviewChalaniMutation,
+    ReviewChalaniMutationVariables
+  >(ReviewChalaniDocument, options);
+}
+export type ReviewChalaniMutationHookResult = ReturnType<
+  typeof useReviewChalaniMutation
+>;
+export type ReviewChalaniMutationResult =
+  Apollo.MutationResult<ReviewChalaniMutation>;
+export type ReviewChalaniMutationOptions = Apollo.BaseMutationOptions<
+  ReviewChalaniMutation,
+  ReviewChalaniMutationVariables
+>;
+export const ReserveChalaniNumberDocument = gql`
+  mutation ReserveChalaniNumber($input: ReserveChalaniNumberInput!) {
+    reserveChalaniNumber(input: $input) {
+      id
+      status
+      chalaniNumber
+      formattedChalaniNumber
+      updatedAt
+      allowedActions
+      auditTrail {
+        id
+        action
+        toStatus
+        timestamp
+      }
+    }
+  }
+`;
+export type ReserveChalaniNumberMutationFn = Apollo.MutationFunction<
+  ReserveChalaniNumberMutation,
+  ReserveChalaniNumberMutationVariables
+>;
+
+/**
+ * __useReserveChalaniNumberMutation__
+ *
+ * To run a mutation, you first call `useReserveChalaniNumberMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useReserveChalaniNumberMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [reserveChalaniNumberMutation, { data, loading, error }] = useReserveChalaniNumberMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useReserveChalaniNumberMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    ReserveChalaniNumberMutation,
+    ReserveChalaniNumberMutationVariables
+  >,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<
+    ReserveChalaniNumberMutation,
+    ReserveChalaniNumberMutationVariables
+  >(ReserveChalaniNumberDocument, options);
+}
+export type ReserveChalaniNumberMutationHookResult = ReturnType<
+  typeof useReserveChalaniNumberMutation
+>;
+export type ReserveChalaniNumberMutationResult =
+  Apollo.MutationResult<ReserveChalaniNumberMutation>;
+export type ReserveChalaniNumberMutationOptions = Apollo.BaseMutationOptions<
+  ReserveChalaniNumberMutation,
+  ReserveChalaniNumberMutationVariables
+>;
+export const FinalizeChalaniRegistrationDocument = gql`
+  mutation FinalizeChalaniRegistration(
+    $input: FinalizeChalaniRegistrationInput!
+  ) {
+    finalizeChalaniRegistration(input: $input) {
+      id
+      status
+      updatedAt
+      allowedActions
+      auditTrail {
+        id
+        action
+        toStatus
+        timestamp
+      }
+    }
+  }
+`;
+export type FinalizeChalaniRegistrationMutationFn = Apollo.MutationFunction<
+  FinalizeChalaniRegistrationMutation,
+  FinalizeChalaniRegistrationMutationVariables
+>;
+
+/**
+ * __useFinalizeChalaniRegistrationMutation__
+ *
+ * To run a mutation, you first call `useFinalizeChalaniRegistrationMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useFinalizeChalaniRegistrationMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [finalizeChalaniRegistrationMutation, { data, loading, error }] = useFinalizeChalaniRegistrationMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useFinalizeChalaniRegistrationMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    FinalizeChalaniRegistrationMutation,
+    FinalizeChalaniRegistrationMutationVariables
+  >,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<
+    FinalizeChalaniRegistrationMutation,
+    FinalizeChalaniRegistrationMutationVariables
+  >(FinalizeChalaniRegistrationDocument, options);
+}
+export type FinalizeChalaniRegistrationMutationHookResult = ReturnType<
+  typeof useFinalizeChalaniRegistrationMutation
+>;
+export type FinalizeChalaniRegistrationMutationResult =
+  Apollo.MutationResult<FinalizeChalaniRegistrationMutation>;
+export type FinalizeChalaniRegistrationMutationOptions =
+  Apollo.BaseMutationOptions<
+    FinalizeChalaniRegistrationMutation,
+    FinalizeChalaniRegistrationMutationVariables
+  >;
+export const DirectRegisterChalaniDocument = gql`
+  mutation DirectRegisterChalani($input: DirectRegisterChalaniInput!) {
+    directRegisterChalani(input: $input) {
+      id
+      status
+      chalaniNumber
+      formattedChalaniNumber
+      updatedAt
+      allowedActions
+      auditTrail {
+        id
+        action
+        toStatus
+        timestamp
+      }
+    }
+  }
+`;
+export type DirectRegisterChalaniMutationFn = Apollo.MutationFunction<
+  DirectRegisterChalaniMutation,
+  DirectRegisterChalaniMutationVariables
+>;
+
+/**
+ * __useDirectRegisterChalaniMutation__
+ *
+ * To run a mutation, you first call `useDirectRegisterChalaniMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDirectRegisterChalaniMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [directRegisterChalaniMutation, { data, loading, error }] = useDirectRegisterChalaniMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useDirectRegisterChalaniMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    DirectRegisterChalaniMutation,
+    DirectRegisterChalaniMutationVariables
+  >,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<
+    DirectRegisterChalaniMutation,
+    DirectRegisterChalaniMutationVariables
+  >(DirectRegisterChalaniDocument, options);
+}
+export type DirectRegisterChalaniMutationHookResult = ReturnType<
+  typeof useDirectRegisterChalaniMutation
+>;
+export type DirectRegisterChalaniMutationResult =
+  Apollo.MutationResult<DirectRegisterChalaniMutation>;
+export type DirectRegisterChalaniMutationOptions = Apollo.BaseMutationOptions<
+  DirectRegisterChalaniMutation,
+  DirectRegisterChalaniMutationVariables
+>;
+export const SignChalaniDocument = gql`
+  mutation SignChalani($input: SignChalaniInput!) {
+    signChalani(input: $input) {
+      id
+      status
+      updatedAt
+      allowedActions
+      auditTrail {
+        id
+        action
+        toStatus
+        timestamp
+      }
+    }
+  }
+`;
+export type SignChalaniMutationFn = Apollo.MutationFunction<
+  SignChalaniMutation,
+  SignChalaniMutationVariables
+>;
+
+/**
+ * __useSignChalaniMutation__
+ *
+ * To run a mutation, you first call `useSignChalaniMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSignChalaniMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [signChalaniMutation, { data, loading, error }] = useSignChalaniMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useSignChalaniMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    SignChalaniMutation,
+    SignChalaniMutationVariables
+  >,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<SignChalaniMutation, SignChalaniMutationVariables>(
+    SignChalaniDocument,
+    options,
+  );
+}
+export type SignChalaniMutationHookResult = ReturnType<
+  typeof useSignChalaniMutation
+>;
+export type SignChalaniMutationResult =
+  Apollo.MutationResult<SignChalaniMutation>;
+export type SignChalaniMutationOptions = Apollo.BaseMutationOptions<
+  SignChalaniMutation,
+  SignChalaniMutationVariables
+>;
+export const SealChalaniDocument = gql`
+  mutation SealChalani($input: SealChalaniInput!) {
+    sealChalani(input: $input) {
+      id
+      status
+      updatedAt
+      allowedActions
+      auditTrail {
+        id
+        action
+        toStatus
+        timestamp
+      }
+    }
+  }
+`;
+export type SealChalaniMutationFn = Apollo.MutationFunction<
+  SealChalaniMutation,
+  SealChalaniMutationVariables
+>;
+
+/**
+ * __useSealChalaniMutation__
+ *
+ * To run a mutation, you first call `useSealChalaniMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSealChalaniMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [sealChalaniMutation, { data, loading, error }] = useSealChalaniMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useSealChalaniMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    SealChalaniMutation,
+    SealChalaniMutationVariables
+  >,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<SealChalaniMutation, SealChalaniMutationVariables>(
+    SealChalaniDocument,
+    options,
+  );
+}
+export type SealChalaniMutationHookResult = ReturnType<
+  typeof useSealChalaniMutation
+>;
+export type SealChalaniMutationResult =
+  Apollo.MutationResult<SealChalaniMutation>;
+export type SealChalaniMutationOptions = Apollo.BaseMutationOptions<
+  SealChalaniMutation,
+  SealChalaniMutationVariables
+>;
+export const DispatchChalaniActionDocument = gql`
+  mutation DispatchChalaniAction($input: DispatchChalaniInput!) {
+    dispatchChalani(input: $input) {
+      id
+      status
+      dispatchChannel
+      trackingId
+      courierName
+      updatedAt
+      allowedActions
+    }
+  }
+`;
+export type DispatchChalaniActionMutationFn = Apollo.MutationFunction<
+  DispatchChalaniActionMutation,
+  DispatchChalaniActionMutationVariables
+>;
+
+/**
+ * __useDispatchChalaniActionMutation__
+ *
+ * To run a mutation, you first call `useDispatchChalaniActionMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDispatchChalaniActionMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [dispatchChalaniActionMutation, { data, loading, error }] = useDispatchChalaniActionMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useDispatchChalaniActionMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    DispatchChalaniActionMutation,
+    DispatchChalaniActionMutationVariables
+  >,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<
+    DispatchChalaniActionMutation,
+    DispatchChalaniActionMutationVariables
+  >(DispatchChalaniActionDocument, options);
+}
+export type DispatchChalaniActionMutationHookResult = ReturnType<
+  typeof useDispatchChalaniActionMutation
+>;
+export type DispatchChalaniActionMutationResult =
+  Apollo.MutationResult<DispatchChalaniActionMutation>;
+export type DispatchChalaniActionMutationOptions = Apollo.BaseMutationOptions<
+  DispatchChalaniActionMutation,
+  DispatchChalaniActionMutationVariables
+>;
+export const MarkChalaniInTransitDocument = gql`
+  mutation MarkChalaniInTransit($input: MarkInTransitInput!) {
+    markChalaniInTransit(input: $input) {
+      id
+      status
+      trackingId
+      courierName
+      updatedAt
+      allowedActions
+    }
+  }
+`;
+export type MarkChalaniInTransitMutationFn = Apollo.MutationFunction<
+  MarkChalaniInTransitMutation,
+  MarkChalaniInTransitMutationVariables
+>;
+
+/**
+ * __useMarkChalaniInTransitMutation__
+ *
+ * To run a mutation, you first call `useMarkChalaniInTransitMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useMarkChalaniInTransitMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [markChalaniInTransitMutation, { data, loading, error }] = useMarkChalaniInTransitMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useMarkChalaniInTransitMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    MarkChalaniInTransitMutation,
+    MarkChalaniInTransitMutationVariables
+  >,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<
+    MarkChalaniInTransitMutation,
+    MarkChalaniInTransitMutationVariables
+  >(MarkChalaniInTransitDocument, options);
+}
+export type MarkChalaniInTransitMutationHookResult = ReturnType<
+  typeof useMarkChalaniInTransitMutation
+>;
+export type MarkChalaniInTransitMutationResult =
+  Apollo.MutationResult<MarkChalaniInTransitMutation>;
+export type MarkChalaniInTransitMutationOptions = Apollo.BaseMutationOptions<
+  MarkChalaniInTransitMutation,
+  MarkChalaniInTransitMutationVariables
+>;
+export const AcknowledgeChalaniDocument = gql`
+  mutation AcknowledgeChalani($input: AcknowledgeChalaniInput!) {
+    acknowledgeChalani(input: $input) {
+      id
+      status
+      isAcknowledged
+      acknowledgedAt
+      acknowledgedBy
+      updatedAt
+      allowedActions
+    }
+  }
+`;
+export type AcknowledgeChalaniMutationFn = Apollo.MutationFunction<
+  AcknowledgeChalaniMutation,
+  AcknowledgeChalaniMutationVariables
+>;
+
+/**
+ * __useAcknowledgeChalaniMutation__
+ *
+ * To run a mutation, you first call `useAcknowledgeChalaniMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useAcknowledgeChalaniMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [acknowledgeChalaniMutation, { data, loading, error }] = useAcknowledgeChalaniMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useAcknowledgeChalaniMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    AcknowledgeChalaniMutation,
+    AcknowledgeChalaniMutationVariables
+  >,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<
+    AcknowledgeChalaniMutation,
+    AcknowledgeChalaniMutationVariables
+  >(AcknowledgeChalaniDocument, options);
+}
+export type AcknowledgeChalaniMutationHookResult = ReturnType<
+  typeof useAcknowledgeChalaniMutation
+>;
+export type AcknowledgeChalaniMutationResult =
+  Apollo.MutationResult<AcknowledgeChalaniMutation>;
+export type AcknowledgeChalaniMutationOptions = Apollo.BaseMutationOptions<
+  AcknowledgeChalaniMutation,
+  AcknowledgeChalaniMutationVariables
+>;
+export const MarkChalaniDeliveredDocument = gql`
+  mutation MarkChalaniDelivered($input: MarkDeliveredInput!) {
+    markChalaniDelivered(input: $input) {
+      id
+      status
+      deliveredAt
+      updatedAt
+      allowedActions
+    }
+  }
+`;
+export type MarkChalaniDeliveredMutationFn = Apollo.MutationFunction<
+  MarkChalaniDeliveredMutation,
+  MarkChalaniDeliveredMutationVariables
+>;
+
+/**
+ * __useMarkChalaniDeliveredMutation__
+ *
+ * To run a mutation, you first call `useMarkChalaniDeliveredMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useMarkChalaniDeliveredMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [markChalaniDeliveredMutation, { data, loading, error }] = useMarkChalaniDeliveredMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useMarkChalaniDeliveredMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    MarkChalaniDeliveredMutation,
+    MarkChalaniDeliveredMutationVariables
+  >,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<
+    MarkChalaniDeliveredMutation,
+    MarkChalaniDeliveredMutationVariables
+  >(MarkChalaniDeliveredDocument, options);
+}
+export type MarkChalaniDeliveredMutationHookResult = ReturnType<
+  typeof useMarkChalaniDeliveredMutation
+>;
+export type MarkChalaniDeliveredMutationResult =
+  Apollo.MutationResult<MarkChalaniDeliveredMutation>;
+export type MarkChalaniDeliveredMutationOptions = Apollo.BaseMutationOptions<
+  MarkChalaniDeliveredMutation,
+  MarkChalaniDeliveredMutationVariables
+>;
+export const MarkChalaniReturnedUndeliveredDocument = gql`
+  mutation MarkChalaniReturnedUndelivered(
+    $input: MarkReturnedUndeliveredInput!
+  ) {
+    markChalaniReturnedUndelivered(input: $input) {
+      id
+      status
+      updatedAt
+      allowedActions
+    }
+  }
+`;
+export type MarkChalaniReturnedUndeliveredMutationFn = Apollo.MutationFunction<
+  MarkChalaniReturnedUndeliveredMutation,
+  MarkChalaniReturnedUndeliveredMutationVariables
+>;
+
+/**
+ * __useMarkChalaniReturnedUndeliveredMutation__
+ *
+ * To run a mutation, you first call `useMarkChalaniReturnedUndeliveredMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useMarkChalaniReturnedUndeliveredMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [markChalaniReturnedUndeliveredMutation, { data, loading, error }] = useMarkChalaniReturnedUndeliveredMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useMarkChalaniReturnedUndeliveredMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    MarkChalaniReturnedUndeliveredMutation,
+    MarkChalaniReturnedUndeliveredMutationVariables
+  >,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<
+    MarkChalaniReturnedUndeliveredMutation,
+    MarkChalaniReturnedUndeliveredMutationVariables
+  >(MarkChalaniReturnedUndeliveredDocument, options);
+}
+export type MarkChalaniReturnedUndeliveredMutationHookResult = ReturnType<
+  typeof useMarkChalaniReturnedUndeliveredMutation
+>;
+export type MarkChalaniReturnedUndeliveredMutationResult =
+  Apollo.MutationResult<MarkChalaniReturnedUndeliveredMutation>;
+export type MarkChalaniReturnedUndeliveredMutationOptions =
+  Apollo.BaseMutationOptions<
+    MarkChalaniReturnedUndeliveredMutation,
+    MarkChalaniReturnedUndeliveredMutationVariables
+  >;
+export const ResendChalaniDocument = gql`
+  mutation ResendChalani($input: ResendChalaniInput!) {
+    resendChalani(input: $input) {
+      id
+      status
+      trackingId
+      courierName
+      updatedAt
+      allowedActions
+    }
+  }
+`;
+export type ResendChalaniMutationFn = Apollo.MutationFunction<
+  ResendChalaniMutation,
+  ResendChalaniMutationVariables
+>;
+
+/**
+ * __useResendChalaniMutation__
+ *
+ * To run a mutation, you first call `useResendChalaniMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useResendChalaniMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [resendChalaniMutation, { data, loading, error }] = useResendChalaniMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useResendChalaniMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    ResendChalaniMutation,
+    ResendChalaniMutationVariables
+  >,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<
+    ResendChalaniMutation,
+    ResendChalaniMutationVariables
+  >(ResendChalaniDocument, options);
+}
+export type ResendChalaniMutationHookResult = ReturnType<
+  typeof useResendChalaniMutation
+>;
+export type ResendChalaniMutationResult =
+  Apollo.MutationResult<ResendChalaniMutation>;
+export type ResendChalaniMutationOptions = Apollo.BaseMutationOptions<
+  ResendChalaniMutation,
+  ResendChalaniMutationVariables
+>;
+export const VoidChalaniDocument = gql`
+  mutation VoidChalani($input: VoidChalaniInput!) {
+    voidChalani(input: $input) {
+      id
+      status
+      updatedAt
+      allowedActions
+    }
+  }
+`;
+export type VoidChalaniMutationFn = Apollo.MutationFunction<
+  VoidChalaniMutation,
+  VoidChalaniMutationVariables
+>;
+
+/**
+ * __useVoidChalaniMutation__
+ *
+ * To run a mutation, you first call `useVoidChalaniMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useVoidChalaniMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [voidChalaniMutation, { data, loading, error }] = useVoidChalaniMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useVoidChalaniMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    VoidChalaniMutation,
+    VoidChalaniMutationVariables
+  >,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<VoidChalaniMutation, VoidChalaniMutationVariables>(
+    VoidChalaniDocument,
+    options,
+  );
+}
+export type VoidChalaniMutationHookResult = ReturnType<
+  typeof useVoidChalaniMutation
+>;
+export type VoidChalaniMutationResult =
+  Apollo.MutationResult<VoidChalaniMutation>;
+export type VoidChalaniMutationOptions = Apollo.BaseMutationOptions<
+  VoidChalaniMutation,
+  VoidChalaniMutationVariables
+>;
+export const SupersedeChalaniDocument = gql`
+  mutation SupersedeChalani($input: SupersedeChalaniInput!) {
+    supersedeChalani(input: $input) {
+      old {
+        id
+        status
+      }
+      new {
+        id
+        status
+        subject
+        createdAt
+      }
+    }
+  }
+`;
+export type SupersedeChalaniMutationFn = Apollo.MutationFunction<
+  SupersedeChalaniMutation,
+  SupersedeChalaniMutationVariables
+>;
+
+/**
+ * __useSupersedeChalaniMutation__
+ *
+ * To run a mutation, you first call `useSupersedeChalaniMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSupersedeChalaniMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [supersedeChalaniMutation, { data, loading, error }] = useSupersedeChalaniMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useSupersedeChalaniMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    SupersedeChalaniMutation,
+    SupersedeChalaniMutationVariables
+  >,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<
+    SupersedeChalaniMutation,
+    SupersedeChalaniMutationVariables
+  >(SupersedeChalaniDocument, options);
+}
+export type SupersedeChalaniMutationHookResult = ReturnType<
+  typeof useSupersedeChalaniMutation
+>;
+export type SupersedeChalaniMutationResult =
+  Apollo.MutationResult<SupersedeChalaniMutation>;
+export type SupersedeChalaniMutationOptions = Apollo.BaseMutationOptions<
+  SupersedeChalaniMutation,
+  SupersedeChalaniMutationVariables
+>;
+export const CloseChalaniDocument = gql`
+  mutation CloseChalani($chalaniId: ID!) {
+    closeChalani(chalaniId: $chalaniId) {
+      id
+      status
+      updatedAt
+      allowedActions
+    }
+  }
+`;
+export type CloseChalaniMutationFn = Apollo.MutationFunction<
+  CloseChalaniMutation,
+  CloseChalaniMutationVariables
+>;
+
+/**
+ * __useCloseChalaniMutation__
+ *
+ * To run a mutation, you first call `useCloseChalaniMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCloseChalaniMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [closeChalaniMutation, { data, loading, error }] = useCloseChalaniMutation({
+ *   variables: {
+ *      chalaniId: // value for 'chalaniId'
+ *   },
+ * });
+ */
+export function useCloseChalaniMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    CloseChalaniMutation,
+    CloseChalaniMutationVariables
+  >,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<
+    CloseChalaniMutation,
+    CloseChalaniMutationVariables
+  >(CloseChalaniDocument, options);
+}
+export type CloseChalaniMutationHookResult = ReturnType<
+  typeof useCloseChalaniMutation
+>;
+export type CloseChalaniMutationResult =
+  Apollo.MutationResult<CloseChalaniMutation>;
+export type CloseChalaniMutationOptions = Apollo.BaseMutationOptions<
+  CloseChalaniMutation,
+  CloseChalaniMutationVariables
 >;

@@ -1,5 +1,5 @@
 import {
-  useSubmitChalaniMutation,
+  useSubmitChalaniActionMutation,
   useReviewChalaniMutation,
   useApproveChalaniMutation,
   useReserveChalaniNumberMutation,
@@ -24,7 +24,7 @@ import {
  * Uses tiny prompts for demo; swap with proper modals later.
  */
 export function useChalaniActions() {
-  const [submit] = useSubmitChalaniMutation();
+  const [submit] = useSubmitChalaniActionMutation();
   const [review] = useReviewChalaniMutation();
   const [approve] = useApproveChalaniMutation();
   const [reserveNo] = useReserveChalaniNumberMutation();
