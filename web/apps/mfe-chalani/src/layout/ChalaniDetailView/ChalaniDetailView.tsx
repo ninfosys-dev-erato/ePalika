@@ -9,67 +9,34 @@ import {
   BreadcrumbItem,
   ToastNotification,
 } from "@carbon/react";
-import {
-  useChalaniDetailQuery,
-  useSubmitChalaniMutation,
-  useApproveChalaniMutation,
-  useDispatchChalaniMutation,
-} from "@egov/api-types";
+import { useChalaniDetailQuery } from "@egov/api-types";
 import { statusToTag } from "../../features/dashboard/helpers";
 import dayjs from "dayjs";
+import { useChalaniActions } from "../../features/actions/useChalaniActions";
 
 /**
- * ChalaniDetailView — Enterprise interactive detail screen
- * --------------------------------------------------------
- * ✅ Fetches detail via GraphQL
- * ✅ Executes lifecycle actions (SUBMIT, APPROVE, DISPATCH)
- * ✅ Shows audit trail with actor + transitions
- * ✅ Inline feedback + toast notifications
+ * ChalaniDetailView — lifecycle-complete interactive screen
  */
 export function ChalaniDetailView() {
   const { id } = useParams({ from: "/chalani/$id" }) as { id: string };
 
-  // 🧠 Queries
   const { data, loading, error, refetch } = useChalaniDetailQuery({
     variables: { id },
     fetchPolicy: "cache-and-network",
   });
 
-  // ⚙️ Mutations (expandable)
-  const [submitChalani] = useSubmitChalaniMutation();
-  const [approveChalani] = useApproveChalaniMutation();
-  const [dispatchChalani] = useDispatchChalaniMutation();
+  const { run } = useChalaniActions();
 
-  // 🌐 UI state
   const [activeAction, setActiveAction] = React.useState<string | null>(null);
   const [feedback, setFeedback] = React.useState<{
     kind: "success" | "error";
     msg: string;
   } | null>(null);
 
-  // 🚀 Action runner
   async function handleAction(a: string) {
     try {
       setActiveAction(a);
-      switch (a) {
-        case "SUBMIT":
-          await submitChalani({ variables: { chalaniId: id } });
-          break;
-        case "APPROVE":
-          await approveChalani({
-            variables: { input: { chalaniId: id, decision: "APPROVE" } },
-          });
-          break;
-        case "DISPATCH":
-          await dispatchChalani({
-            variables: {
-              input: { chalaniId: id, dispatchChannel: "POST" },
-            },
-          });
-          break;
-        default:
-          throw new Error(`Unhandled Chalani action: ${a}`);
-      }
+      await run(a, id);
       setFeedback({ kind: "success", msg: `${a} successful` });
       await refetch();
     } catch (err: any) {
@@ -79,7 +46,6 @@ export function ChalaniDetailView() {
     }
   }
 
-  // 🌀 Loading
   if (loading)
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -90,7 +56,6 @@ export function ChalaniDetailView() {
       </div>
     );
 
-  // ❌ Error
   if (error)
     return (
       <div style={{ padding: 16, color: "red" }}>
@@ -108,18 +73,15 @@ export function ChalaniDetailView() {
 
   const tagProps = statusToTag(c.status);
 
-  // =====================================================================
-  // 🧩 UI Render
-  // =====================================================================
   return (
     <div className="space-y-6 p-6">
-      {/* ▒▒ Breadcrumbs ▒▒ */}
+      {/* Breadcrumbs */}
       <Breadcrumb noTrailingSlash>
         <BreadcrumbItem href="/chalani">Chalani</BreadcrumbItem>
         <BreadcrumbItem isCurrentPage>{c.subject}</BreadcrumbItem>
       </Breadcrumb>
 
-      {/* ▒▒ Header ▒▒ */}
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-semibold">{c.subject}</h2>
@@ -130,19 +92,19 @@ export function ChalaniDetailView() {
         <Tag type={tagProps.type}>{tagProps.children}</Tag>
       </div>
 
-      {/* ▒▒ Body ▒▒ */}
+      {/* Body */}
       <Tile className="p-4 bg-layer-01">
         <p className="whitespace-pre-wrap">{c.body}</p>
       </Tile>
 
-      {/* ▒▒ Meta ▒▒ */}
+      {/* Meta */}
       <div className="grid grid-cols-2 gap-4 text-sm text-gray-700">
         <div>Created At : {dayjs(c.createdAt).format("YYYY-MM-DD HH:mm")}</div>
         <div>Updated At : {dayjs(c.updatedAt).format("YYYY-MM-DD HH:mm")}</div>
         <div>Recipient Address : {c.recipient?.address}</div>
       </div>
 
-      {/* ▒▒ Allowed Actions ▒▒ */}
+      {/* Allowed Actions */}
       {c.allowedActions?.length > 0 && (
         <div className="flex flex-wrap gap-3 pt-4">
           {c.allowedActions.map((a) => (
@@ -166,7 +128,7 @@ export function ChalaniDetailView() {
         </div>
       )}
 
-      {/* ▒▒ Feedback ▒▒ */}
+      {/* Feedback */}
       {feedback && (
         <ToastNotification
           kind={feedback.kind}
@@ -177,7 +139,7 @@ export function ChalaniDetailView() {
         />
       )}
 
-      {/* ▒▒ Audit Trail ▒▒ */}
+      {/* Audit Trail */}
       {c.auditTrail && c.auditTrail.length > 0 && (
         <div className="pt-8">
           <h4 className="text-lg font-medium mb-3">Audit Trail</h4>
@@ -202,7 +164,7 @@ export function ChalaniDetailView() {
         </div>
       )}
 
-      {/* ▒▒ Footer refresh ▒▒ */}
+      {/* Footer refresh */}
       <div className="pt-8">
         <Button kind="ghost" size="sm" onClick={() => refetch()}>
           Refresh
