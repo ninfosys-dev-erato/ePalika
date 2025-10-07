@@ -26,10 +26,10 @@ data:
         enabled: true
         config:
           jwks_urls:
-            - http://keycloak:8080/realms/palika/protocol/openid-connect/certs
+            - http://keycloak:8083/realms/palika/protocol/openid-connect/certs
           scope_strategy: exact
           trusted_issuers:
-            - http://keycloak:8080/realms/palika
+            - http://keycloak:8083/realms/palika
       noop:
         enabled: true
 
@@ -208,7 +208,7 @@ metadata:
   labels:
     app.kubernetes.io/component: identity
 data:
-  KEYCLOAK_URL: http://keycloak:8080
+  KEYCLOAK_URL: http://keycloak:8083
   KEYCLOAK_REALM: palika
   KEYCLOAK_CLIENT_ID: admin-cli
   PORT: "9001"

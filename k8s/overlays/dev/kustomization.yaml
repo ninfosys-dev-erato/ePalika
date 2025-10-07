@@ -24,7 +24,7 @@ configMapGenerator:
 - name: epalika-config-dev
   literals:
   - fga-check-url=http://openfga:8080/stores/$(FGA_STORE)/check
-  - keycloak-url=http://keycloak:8080
+  - keycloak-url=http://keycloak:8083
   - keycloak-realm=epalika-dev
   - environment=development
   - log-level=debug

@@ -24,7 +24,7 @@ func Load() (*Config, error) {
 	cfg := &Config{
 		Port: getEnv("PORT", "9001"),
 		Keycloak: KeycloakConfig{
-			URL:          getEnv("KEYCLOAK_URL", "http://keycloak:8080"),
+			URL:          getEnv("KEYCLOAK_URL", "http://keycloak:8083"),
 			Realm:        getEnv("KEYCLOAK_REALM", "epalika"),
 			ClientID:     getEnv("KEYCLOAK_CLIENT_ID", "identity-service"),
 			ClientSecret: getEnv("KEYCLOAK_CLIENT_SECRET", ""),
