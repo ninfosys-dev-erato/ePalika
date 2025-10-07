@@ -13,7 +13,7 @@ export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & {
 };
 export type MakeEmpty<
   T extends { [key: string]: unknown },
-  K extends keyof T
+  K extends keyof T,
 > = { [_ in K]?: never };
 export type Incremental<T> =
   | T
@@ -1747,6 +1747,43 @@ export type MyChalaniInboxQuery = {
   };
 };
 
+export type ChalaniDetailQueryVariables = Exact<{
+  id: Scalars["ID"]["input"];
+}>;
+
+export type ChalaniDetailQuery = {
+  readonly __typename: "Query";
+  readonly chalani: {
+    readonly __typename: "Chalani";
+    readonly id: string;
+    readonly subject: string;
+    readonly body: string;
+    readonly status: ChalaniStatus;
+    readonly fiscalYear: string;
+    readonly createdAt: string;
+    readonly updatedAt: string;
+    readonly allowedActions: ReadonlyArray<ChalaniAction>;
+    readonly recipient: {
+      readonly __typename: "Recipient";
+      readonly name: string;
+      readonly address: string;
+    };
+    readonly auditTrail: ReadonlyArray<{
+      readonly __typename: "AuditEntry";
+      readonly id: string;
+      readonly action: string;
+      readonly fromStatus: string | null;
+      readonly toStatus: string | null;
+      readonly timestamp: string;
+      readonly reason: string | null;
+      readonly actor: {
+        readonly __typename: "User";
+        readonly fullName: string | null;
+      };
+    }>;
+  } | null;
+};
+
 export const DummyDocument = gql`
   query Dummy {
     __typename
@@ -1769,27 +1806,27 @@ export const DummyDocument = gql`
  * });
  */
 export function useDummyQuery(
-  baseOptions?: Apollo.QueryHookOptions<DummyQuery, DummyQueryVariables>
+  baseOptions?: Apollo.QueryHookOptions<DummyQuery, DummyQueryVariables>,
 ) {
   const options = { ...defaultOptions, ...baseOptions };
   return Apollo.useQuery<DummyQuery, DummyQueryVariables>(
     DummyDocument,
-    options
+    options,
   );
 }
 export function useDummyLazyQuery(
-  baseOptions?: Apollo.LazyQueryHookOptions<DummyQuery, DummyQueryVariables>
+  baseOptions?: Apollo.LazyQueryHookOptions<DummyQuery, DummyQueryVariables>,
 ) {
   const options = { ...defaultOptions, ...baseOptions };
   return Apollo.useLazyQuery<DummyQuery, DummyQueryVariables>(
     DummyDocument,
-    options
+    options,
   );
 }
 export function useDummySuspenseQuery(
   baseOptions?:
     | Apollo.SkipToken
-    | Apollo.SuspenseQueryHookOptions<DummyQuery, DummyQueryVariables>
+    | Apollo.SuspenseQueryHookOptions<DummyQuery, DummyQueryVariables>,
 ) {
   const options =
     baseOptions === Apollo.skipToken
@@ -1797,7 +1834,7 @@ export function useDummySuspenseQuery(
       : { ...defaultOptions, ...baseOptions };
   return Apollo.useSuspenseQuery<DummyQuery, DummyQueryVariables>(
     DummyDocument,
-    options
+    options,
   );
 }
 export type DummyQueryHookResult = ReturnType<typeof useDummyQuery>;
@@ -1854,24 +1891,24 @@ export function useGetChalanisQuery(
   baseOptions?: Apollo.QueryHookOptions<
     GetChalanisQuery,
     GetChalanisQueryVariables
-  >
+  >,
 ) {
   const options = { ...defaultOptions, ...baseOptions };
   return Apollo.useQuery<GetChalanisQuery, GetChalanisQueryVariables>(
     GetChalanisDocument,
-    options
+    options,
   );
 }
 export function useGetChalanisLazyQuery(
   baseOptions?: Apollo.LazyQueryHookOptions<
     GetChalanisQuery,
     GetChalanisQueryVariables
-  >
+  >,
 ) {
   const options = { ...defaultOptions, ...baseOptions };
   return Apollo.useLazyQuery<GetChalanisQuery, GetChalanisQueryVariables>(
     GetChalanisDocument,
-    options
+    options,
   );
 }
 export function useGetChalanisSuspenseQuery(
@@ -1880,7 +1917,7 @@ export function useGetChalanisSuspenseQuery(
     | Apollo.SuspenseQueryHookOptions<
         GetChalanisQuery,
         GetChalanisQueryVariables
-      >
+      >,
 ) {
   const options =
     baseOptions === Apollo.skipToken
@@ -1888,7 +1925,7 @@ export function useGetChalanisSuspenseQuery(
       : { ...defaultOptions, ...baseOptions };
   return Apollo.useSuspenseQuery<GetChalanisQuery, GetChalanisQueryVariables>(
     GetChalanisDocument,
-    options
+    options,
   );
 }
 export type GetChalanisQueryHookResult = ReturnType<typeof useGetChalanisQuery>;
@@ -1940,24 +1977,24 @@ export function useMyChalaniInboxQuery(
   baseOptions?: Apollo.QueryHookOptions<
     MyChalaniInboxQuery,
     MyChalaniInboxQueryVariables
-  >
+  >,
 ) {
   const options = { ...defaultOptions, ...baseOptions };
   return Apollo.useQuery<MyChalaniInboxQuery, MyChalaniInboxQueryVariables>(
     MyChalaniInboxDocument,
-    options
+    options,
   );
 }
 export function useMyChalaniInboxLazyQuery(
   baseOptions?: Apollo.LazyQueryHookOptions<
     MyChalaniInboxQuery,
     MyChalaniInboxQueryVariables
-  >
+  >,
 ) {
   const options = { ...defaultOptions, ...baseOptions };
   return Apollo.useLazyQuery<MyChalaniInboxQuery, MyChalaniInboxQueryVariables>(
     MyChalaniInboxDocument,
-    options
+    options,
   );
 }
 export function useMyChalaniInboxSuspenseQuery(
@@ -1966,7 +2003,7 @@ export function useMyChalaniInboxSuspenseQuery(
     | Apollo.SuspenseQueryHookOptions<
         MyChalaniInboxQuery,
         MyChalaniInboxQueryVariables
-      >
+      >,
 ) {
   const options =
     baseOptions === Apollo.skipToken
@@ -1989,4 +2026,108 @@ export type MyChalaniInboxSuspenseQueryHookResult = ReturnType<
 export type MyChalaniInboxQueryResult = Apollo.QueryResult<
   MyChalaniInboxQuery,
   MyChalaniInboxQueryVariables
+>;
+export const ChalaniDetailDocument = gql`
+  query ChalaniDetail($id: ID!) {
+    chalani(id: $id) {
+      id
+      subject
+      body
+      status
+      fiscalYear
+      recipient {
+        name
+        address
+      }
+      createdAt
+      updatedAt
+      auditTrail {
+        id
+        action
+        fromStatus
+        toStatus
+        actor {
+          fullName
+        }
+        timestamp
+        reason
+      }
+      allowedActions
+    }
+  }
+`;
+
+/**
+ * __useChalaniDetailQuery__
+ *
+ * To run a query within a React component, call `useChalaniDetailQuery` and pass it any options that fit your needs.
+ * When your component renders, `useChalaniDetailQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useChalaniDetailQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useChalaniDetailQuery(
+  baseOptions: Apollo.QueryHookOptions<
+    ChalaniDetailQuery,
+    ChalaniDetailQueryVariables
+  > &
+    (
+      | { variables: ChalaniDetailQueryVariables; skip?: boolean }
+      | { skip: boolean }
+    ),
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<ChalaniDetailQuery, ChalaniDetailQueryVariables>(
+    ChalaniDetailDocument,
+    options,
+  );
+}
+export function useChalaniDetailLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<
+    ChalaniDetailQuery,
+    ChalaniDetailQueryVariables
+  >,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<ChalaniDetailQuery, ChalaniDetailQueryVariables>(
+    ChalaniDetailDocument,
+    options,
+  );
+}
+export function useChalaniDetailSuspenseQuery(
+  baseOptions?:
+    | Apollo.SkipToken
+    | Apollo.SuspenseQueryHookOptions<
+        ChalaniDetailQuery,
+        ChalaniDetailQueryVariables
+      >,
+) {
+  const options =
+    baseOptions === Apollo.skipToken
+      ? baseOptions
+      : { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<
+    ChalaniDetailQuery,
+    ChalaniDetailQueryVariables
+  >(ChalaniDetailDocument, options);
+}
+export type ChalaniDetailQueryHookResult = ReturnType<
+  typeof useChalaniDetailQuery
+>;
+export type ChalaniDetailLazyQueryHookResult = ReturnType<
+  typeof useChalaniDetailLazyQuery
+>;
+export type ChalaniDetailSuspenseQueryHookResult = ReturnType<
+  typeof useChalaniDetailSuspenseQuery
+>;
+export type ChalaniDetailQueryResult = Apollo.QueryResult<
+  ChalaniDetailQuery,
+  ChalaniDetailQueryVariables
 >;

@@ -10,9 +10,9 @@ import {
 // Screens (implementations can be simple stubs to start)
 import { ChalaniCompose } from "../features/compose/ChalaniCompose";
 import { ChalaniListView } from "../layout/ChalaniListView/ChalaniListView";
+import { ChalaniDetailView } from "../layout/ChalaniDetailView/ChalaniDetailView";
 // import { Drafts } from "../features/drafts/Drafts";
 // import { Sent } from "../features/sent/Sent";
-// import { ChalaniDetail } from "../features/detail/ChalaniDetail";
 
 function AppLayout() {
   return (
@@ -57,9 +57,8 @@ const sentRoute = createRoute({
 
 const detailRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: "detail/$chalaniId",
-  // component: ChalaniDetail,
-  component: () => <div>Chalani Detail</div>,
+  path: "/:id",
+  component: () => <ChalaniDetailView />,
 });
 
 const notFoundRoute = createRoute({
