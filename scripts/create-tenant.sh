@@ -2,11 +2,9 @@
 set -euo pipefail
 
 if command -v tput >/dev/null 2>&1; then
-  BOLD=$(tput bold)
-  RESET=$(tput sgr0)
+  BOLD=$(tput bold); RESET=$(tput sgr0)
 else
-  BOLD=""
-  RESET=""
+  BOLD=""; RESET=""
 fi
 
 echo "${BOLD}🏛️  ePalika Tenant Provisioning${RESET}"
@@ -24,6 +22,7 @@ if [ -f .env ]; then
   source .env
 fi
 
+# ===== Inputs =====
 read -rp "Tenant slug (e.g. palika_bagmati): " TENANT_SLUG
 TENANT_SLUG=$(echo "$TENANT_SLUG" | tr '[:upper:]' '[:lower:]' | tr -cd 'a-z0-9_-')
 if [ -z "$TENANT_SLUG" ]; then
@@ -55,6 +54,7 @@ OPENFGA_API_URL=${OPENFGA_API_URL:-http://localhost:8081}
 FGA_STORE_ID=${FGA_STORE_ID:-}
 FGA_MODEL_ID=${FGA_MODEL_ID:-}
 
+# ===== Auth =====
 echo ""
 echo "🔐 Authenticating with Keycloak..."
 TOKEN=$(curl -s \
@@ -69,6 +69,7 @@ if [ -z "$TOKEN" ]; then
   exit 1
 fi
 
+# ===== Realm ensure =====
 REALM_CHECK_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
   -H "Authorization: Bearer ${TOKEN}" \
   "${KEYCLOAK_BASE_URL}/admin/realms/${TENANT_SLUG}")
@@ -104,6 +105,7 @@ else
   fi
 fi
 
+# ===== Roles ensure =====
 declare -a ROLES=(
   "darta_clerk:Create and manage incoming correspondence drafts"
   "darta_reviewer:Review and route Darta records"
@@ -140,6 +142,7 @@ for role_def in "${ROLES[@]}"; do
   echo "   • ${role_name} (created)"
 done
 
+# ===== Client ensure =====
 echo "🔑 Ensuring client '${CLIENT_ID}' exists..."
 CLIENT_LOOKUP=$(curl -s \
   -H "Authorization: Bearer ${TOKEN}" \
@@ -205,23 +208,214 @@ else
   echo "   • ${CLIENT_ID} (exists)"
 fi
 
+# Fetch / create secret
 SECRET_JSON=$(curl -s \
   -H "Authorization: Bearer ${TOKEN}" \
   "${KEYCLOAK_BASE_URL}/admin/realms/${TENANT_SLUG}/clients/${CLIENT_INTERNAL_ID}/client-secret")
 CLIENT_SECRET=$(echo "$SECRET_JSON" | jq -r '.value // empty')
-
 if [ -z "$CLIENT_SECRET" ]; then
   SECRET_JSON=$(curl -s \
     -H "Authorization: Bearer ${TOKEN}" \
     -X POST "${KEYCLOAK_BASE_URL}/admin/realms/${TENANT_SLUG}/clients/${CLIENT_INTERNAL_ID}/client-secret")
   CLIENT_SECRET=$(echo "$SECRET_JSON" | jq -r '.value // empty')
 fi
-
 if [ -z "$CLIENT_SECRET" ]; then
   echo "❌ Failed to retrieve client secret for '${CLIENT_ID}'"
   exit 1
 fi
 
+# ===== Client Scope with protocol mappers for extra claims =====
+SCOPE_NAME=${SCOPE_NAME:-epalika-default}
+echo "🧱 Ensuring client scope '${SCOPE_NAME}' with custom claims exists..."
+
+# Lookup scope
+SCOPE_LIST=$(curl -s -H "Authorization: Bearer ${TOKEN}" \
+  "${KEYCLOAK_BASE_URL}/admin/realms/${TENANT_SLUG}/client-scopes")
+SCOPE_ID=$(echo "$SCOPE_LIST" | jq -r --arg name "$SCOPE_NAME" '.[] | select(.name==$name) | .id // empty')
+
+if [ -z "$SCOPE_ID" ]; then
+  SCOPE_PAYLOAD=$(jq -n --arg name "$SCOPE_NAME" '{
+    name: $name, description: "ePalika default JWT claims (user_id, user_name, tenant, roles)",
+    protocol: "openid-connect"
+  }')
+  CREATE_SCOPE_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+    -H "Authorization: Bearer ${TOKEN}" \
+    -H "Content-Type: application/json" \
+    -X POST "${KEYCLOAK_BASE_URL}/admin/realms/${TENANT_SLUG}/client-scopes" \
+    -d "$SCOPE_PAYLOAD")
+  if [ "$CREATE_SCOPE_STATUS" != "201" ] && [ "$CREATE_SCOPE_STATUS" != "204" ]; then
+    echo "❌ Failed to create client scope '${SCOPE_NAME}' (status ${CREATE_SCOPE_STATUS})"
+    exit 1
+  fi
+  # Re-fetch ID
+  SCOPE_LIST=$(curl -s -H "Authorization: Bearer ${TOKEN}" \
+    "${KEYCLOAK_BASE_URL}/admin/realms/${TENANT_SLUG}/client-scopes")
+  SCOPE_ID=$(echo "$SCOPE_LIST" | jq -r --arg name "$SCOPE_NAME" '.[] | select(.name==$name) | .id // empty')
+  echo "   • ${SCOPE_NAME} (created)"
+else
+  echo "   • ${SCOPE_NAME} (exists)"
+fi
+
+# Helper: ensure a protocol mapper exists on a client scope by name
+ensure_mapper () {
+  local mapper_name="$1"
+  local payload_json="$2"
+  local existing=$(curl -s -H "Authorization: Bearer ${TOKEN}" \
+    "${KEYCLOAK_BASE_URL}/admin/realms/${TENANT_SLUG}/client-scopes/${SCOPE_ID}/protocol-mappers/models" \
+    | jq -r --arg name "$mapper_name" '.[] | select(.name==$name) | .id // empty')
+  if [ -n "$existing" ]; then
+    echo "   • mapper '${mapper_name}' (exists)"
+  else
+    local st=$(curl -s -o /dev/null -w "%{http_code}" \
+      -H "Authorization: Bearer ${TOKEN}" \
+      -H "Content-Type: application/json" \
+      -X POST "${KEYCLOAK_BASE_URL}/admin/realms/${TENANT_SLUG}/client-scopes/${SCOPE_ID}/protocol-mappers/models" \
+      -d "$payload_json")
+    if [ "$st" != "201" ] && [ "$st" != "204" ]; then
+      echo "❌ Failed to create mapper '${mapper_name}' (status ${st})"
+      exit 1
+    fi
+    echo "   • mapper '${mapper_name}' (created)"
+  fi
+}
+
+echo "🧬 Adding protocol mappers (user_id, user_name, tenant, roles)..."
+
+# 1) user_id via Script Mapper
+USER_ID_SCRIPT='
+/*
+  Emits Keycloak internal user id as "user_id"
+*/
+var uid = user.getId();
+token.setOtherClaims("user_id", uid);
+'
+USER_ID_MAPPER=$(jq -n --arg name "user_id" --arg script "$USER_ID_SCRIPT" '{
+  name: $name,
+  protocol: "openid-connect",
+  protocolMapper: "oidc-script-based-protocol-mapper",
+  config: {
+    "script": $script,
+    "claim.name": "user_id",
+    "jsonType.label": "String",
+    "access.token.claim": "true",
+    "id.token.claim": "true",
+    "userinfo.token.claim": "true"
+  }
+}')
+ensure_mapper "user_id" "$USER_ID_MAPPER"
+
+# 2) user_name from preferred_username (Property Mapper)
+USER_NAME_MAPPER=$(jq -n '{
+  name: "user_name",
+  protocol: "openid-connect",
+  protocolMapper: "oidc-usermodel-property-mapper",
+  config: {
+    "user.attribute": "username",
+    "claim.name": "user_name",
+    "jsonType.label": "String",
+    "access.token.claim": "true",
+    "id.token.claim": "true",
+    "userinfo.token.claim": "true"
+  }
+}')
+ensure_mapper "user_name" "$USER_NAME_MAPPER"
+
+# 3) tenant from user attribute "tenant" (multivalued Attribute Mapper)
+TENANT_MAPPER=$(jq -n '{
+  name: "tenant",
+  protocol: "openid-connect",
+  protocolMapper: "oidc-usermodel-attribute-mapper",
+  config: {
+    "user.attribute": "tenant",
+    "claim.name": "tenant",
+    "jsonType.label": "String",
+    "multivalued": "true",
+    "access.token.claim": "true",
+    "id.token.claim": "true",
+    "userinfo.token.claim": "true"
+  }
+}')
+ensure_mapper "tenant" "$TENANT_MAPPER"
+
+# 4) roles array (realm + client roles) via Script Mapper
+ROLES_SCRIPT='
+/*
+  Emits combined roles as "roles" (array):
+  - realm roles
+  - client roles for the current client (if any)
+*/
+var ArrayList = Java.type("java.util.ArrayList");
+var HashSet   = Java.type("java.util.HashSet");
+var combined  = new HashSet();
+
+var realmMappings = user.getRoleMappingsStream().toArray();
+for (var i=0; i<realmMappings.length; i++) {
+  var r = realmMappings[i];
+  // only pure realm roles (no client) getRealmRole != null
+  if (r.getContainer() != null && r.getContainer().getName() === realm.getName()) {
+    combined.add(r.getName());
+  }
+}
+
+// client roles for the audience client (if present)
+try {
+  var clientId = userSession.getClient().getClientId();
+  var client = keycloakSession.clients().getClientByClientId(realm, clientId);
+  if (client != null) {
+    var clientRoles = user.getClientRoleMappings(client);
+    if (clientRoles != null) {
+      var it = clientRoles.iterator();
+      while (it.hasNext()) {
+        combined.add(it.next().getName());
+      }
+    }
+  }
+} catch (e) {
+  // ignore if context not available
+}
+
+var out = new ArrayList();
+var it2 = combined.iterator();
+while (it2.hasNext()) { out.add(it2.next()); }
+
+token.setOtherClaims("roles", out);
+'
+ROLES_MAPPER=$(jq -n --arg script "$ROLES_SCRIPT" '{
+  name: "roles",
+  protocol: "openid-connect",
+  protocolMapper: "oidc-script-based-protocol-mapper",
+  config: {
+    "script": $script,
+    "claim.name": "roles",
+    "jsonType.label": "String",
+    "access.token.claim": "true",
+    "id.token.claim": "true",
+    "userinfo.token.claim": "true",
+    "multivalued": "true"
+  }
+}')
+ensure_mapper "roles" "$ROLES_MAPPER"
+
+# ===== Attach scope to client as default =====
+echo "🔗 Attaching client scope '${SCOPE_NAME}' to client '${CLIENT_ID}' (default)..."
+DEFAULT_SCOPES=$(curl -s -H "Authorization: Bearer ${TOKEN}" \
+  "${KEYCLOAK_BASE_URL}/admin/realms/${TENANT_SLUG}/clients/${CLIENT_INTERNAL_ID}/default-client-scopes")
+ALREADY_ATTACHED=$(echo "$DEFAULT_SCOPES" | jq -r --arg id "$SCOPE_ID" '.[] | select(.id==$id) | .id // empty')
+
+if [ -z "$ALREADY_ATTACHED" ]; then
+  ATTACH_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+    -H "Authorization: Bearer ${TOKEN}" \
+    -X PUT "${KEYCLOAK_BASE_URL}/admin/realms/${TENANT_SLUG}/clients/${CLIENT_INTERNAL_ID}/default-client-scopes/${SCOPE_ID}")
+  if [ "$ATTACH_STATUS" != "204" ]; then
+    echo "❌ Failed to attach client scope (status ${ATTACH_STATUS})"
+    exit 1
+  fi
+  echo "   • attached as default"
+else
+  echo "   • already attached"
+fi
+
+# ===== OpenFGA (optional) =====
 if [ -z "$FGA_STORE_ID" ] || [ -z "$FGA_MODEL_ID" ]; then
   echo "⚠️  Skipping OpenFGA propagation (FGA_STORE_ID or FGA_MODEL_ID missing)"
 else
@@ -276,6 +470,7 @@ else
   fi
 fi
 
+# ===== Output =====
 echo ""
 echo "🎉 Tenant '${TENANT_SLUG}' provisioned successfully!"
 echo "   Realm URL: ${KEYCLOAK_BASE_URL}/realms/${TENANT_SLUG}"
@@ -286,13 +481,20 @@ echo "   WebOrigin: ${CLIENT_WEB_ORIGIN}"
 if [ -n "$CLIENT_SECRET" ]; then
   echo "   Client secret: ${CLIENT_SECRET}"
 fi
+echo "   Client Scope: ${SCOPE_NAME} (attached as default)"
+echo "   Claims added: user_id (String), user_name (String), tenant (String[]), roles (String[])"
 if [ -n "$FGA_STORE_ID" ] && [ -n "$FGA_MODEL_ID" ]; then
   echo "   OpenFGA tenant object: tenant:${TENANT_SLUG}"
 fi
 
 echo ""
 echo "Next steps:"
-echo "  1. Store the client secret securely and configure applications to use '${CLIENT_ID}'."
-echo "  2. Create users in the new realm and assign the realm roles above."
-echo "  3. Map Keycloak role assignments to OpenFGA subjects (e.g. role:darta_clerk#member)."
-echo "  4. Restart dependent services if they cache realm metadata."
+echo "  1) For each user, set attribute 'tenant' (can be multivalued)."
+echo "  2) Assign realm/client roles to users or groups."
+echo "  3) Decode a fresh access token and verify claims:"
+echo "     - user_id, user_name, tenant[], roles[]"
+echo "  4) Your gateway template can now use:"
+echo "       X-User-ID:    {{ print .Extra.user_id }}"
+echo "       X-User-Name:  {{ .Extra.user_name }}"
+echo "       X-Tenant:     {{ if .Extra.tenant }}{{ index .Extra.tenant 0 }}{{ else }}default{{ end }}"
+echo "       X-Roles:      {{- range \$i, \$r := .Extra.roles -}}{{- if \$i }},{{ end -}}{{ \$r }}{{- end -}}"
