@@ -1,0 +1,42 @@
+mutation SubmitChalani($chalaniId: ID!) {
+  submitChalani(chalaniId: $chalaniId) {
+    id
+    status
+    updatedAt
+    auditTrail {
+      id
+      action
+      fromStatus
+      toStatus
+      actor {
+        fullName
+      }
+      timestamp
+    }
+    allowedActions
+  }
+}
+
+mutation ApproveChalani($input: ApproveChalaniInput!) {
+  approveChalani(input: $input) {
+    id
+    status
+    updatedAt
+    allowedActions
+    auditTrail {
+      id
+      action
+      toStatus
+      timestamp
+    }
+  }
+}
+
+mutation DispatchChalani($input: DispatchChalaniInput!) {
+  dispatchChalani(input: $input) {
+    id
+    status
+    updatedAt
+    allowedActions
+  }
+}
