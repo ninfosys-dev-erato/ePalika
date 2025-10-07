@@ -13,22 +13,14 @@
     },
     "authenticators": [
       {
-        "handler": "jwt",
-        "config": {
-          "claims_map": {
-            "tenant_id": "{{ $iss := .iss | regexReplaceAll \"^.*/realms/(.*)$\" \"$1\" }}{{ $iss }}",
-            "roles": "realm_access.roles",
-            "user_name": "preferred_username",
-            "user_id": "user_id"
-          }
-        }
+        "handler": "jwt"
       }
     ],
     "authorizer": {
       "handler": "remote_json",
       "config": {
         "remote": "http://pdp:8080/authorize",
-        "payload": "{{- $perm := index .MatchContext.Headers \"X-Graphql-Permission\" -}}{\"subject\":\"user:{{ print .Subject }}\",\"resource\":\"graphql:{{ if $perm }}{{ index $perm 0 }}{{ else }}query{{ end }}\",\"action\":\"{{ .MatchContext.Method }}\",\"context\":{\"tenant\":\"{{ if .Extra.tenant_id }}{{ index .Extra.tenant_id 0 }}{{ else }}palika{{ end }}\"}}",
+        "payload": "{{- $perm := index .MatchContext.Headers \"X-Graphql-Permission\" -}}{{- $iss := .Extra.iss | default \"\" -}}{{- $tenant := \"palika\" -}}{{- if $iss -}}{{- $tenant = $iss | regexReplaceAll \"^.*/realms/(.*)$\" \"$1\" -}}{{- end -}}{\"subject\":\"user:{{ print .Subject }}\",\"resource\":\"graphql:{{ if $perm }}{{ index $perm 0 }}{{ else }}query{{ end }}\",\"action\":\"{{ .MatchContext.Method }}\",\"context\":{\"tenant\":\"{{ $tenant }}\"}}",
         "retry": {
           "give_up_after": "1s",
           "max_delay": "100ms"
@@ -38,13 +30,16 @@
     },
     "mutators": [
       {
+        "handler": "id_token"
+      },
+      {
         "handler": "header",
         "config": {
           "headers": {
-            "X-User-ID": "{{ if .Extra.user_id }}{{ index .Extra.user_id 0 }}{{ else }}{{ print .Subject }}{{ end }}",
-            "X-User-Name": "{{ if .Extra.user_name }}{{ index .Extra.user_name 0 }}{{ end }}",
-            "X-Tenant": "{{ if .Extra.tenant_id }}{{ index .Extra.tenant_id 0 }}{{ else }}palika{{ end }}",
-            "X-Roles": "{{- range $index, $role := .Extra.roles -}}{{- if $index }},{{ end -}}{{ $role }}{{- end -}}",
+            "X-User-ID": "{{ if .Extra.user_id }}{{ print .Extra.user_id }}{{ else if .Extra.sub }}{{ print .Extra.sub }}{{ else }}{{ print .Subject }}{{ end }}",
+            "X-User-Name": "{{ if .Extra.preferred_username }}{{ print .Extra.preferred_username }}{{ end }}",
+            "X-Tenant": "{{ $iss := .Extra.iss | default \"\" }}{{ if $iss }}{{ $iss | regexReplaceAll \"^.*/realms/(.*)$\" \"$1\" }}{{ else }}palika{{ end }}",
+            "X-Roles": "{{ if .Extra.realm_access }}{{ $roles := index .Extra.realm_access \"roles\" }}{{ range $index, $role := $roles }}{{ if $index }},{{ end }}{{ $role }}{{ end }}{{ end }}",
             "X-Forwarded-For": "{{ .MatchContext.RemoteAddr }}"
           }
         }

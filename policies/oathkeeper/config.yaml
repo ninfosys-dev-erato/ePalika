@@ -24,7 +24,6 @@ authenticators:
         - http://keycloak:8080/realms/palika_sallaghari
         - http://localhost:8083/realms/palika
         - http://localhost:8083/realms/palika_sallaghari
-      claims_mapper_url: ""
       required_scope: []
 
   noop:
@@ -49,6 +48,13 @@ authorizers:
     enabled: true
 
 mutators:
+  id_token:
+    enabled: true
+    config:
+      issuer_url: http://localhost:4455
+      jwks_url: file:///etc/secrets/mutator.id_token.jwks.json
+      ttl: 1m
+
   header:
     enabled: true
     config:

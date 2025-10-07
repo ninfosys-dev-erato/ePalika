@@ -152,6 +152,7 @@ services:
       - "4456:4456"
     volumes:
       - ./policies/oathkeeper:/oathkeeper
+      - ./policies/oathkeeper/secrets:/etc/secrets
     healthcheck:
       test:
         ["CMD", "wget", "-q", "--spider", "http://localhost:4456/health/alive"]
@@ -264,11 +265,26 @@ services:
     volumes:
       - kafka-data:/tmp/kafka-logs
 
+  portainer:
+    container_name: portainer
+    image: portainer/portainer-ce:lts
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+    ports:
+      - 9443:9443
+    networks:
+      - authnz
+
+
 volumes:
   yugabytedb-data:
   openfga-postgres-data:
   keycloak-db-data:
   kafka-data:
+  portainer_data:
+    name: portainer_data
 
 networks:
   authnz:
