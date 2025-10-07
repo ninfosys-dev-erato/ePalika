@@ -56,7 +56,7 @@ export function useChalaniActions() {
               chalaniId,
               decision: "EDIT_REQUIRED",
               notes,
-              idempotencyKey: `review-${chalaniId}-${Date.now()}`
+              idempotencyKey: `review-${chalaniId}-${Date.now()}`,
             },
           },
         });
@@ -70,7 +70,7 @@ export function useChalaniActions() {
               chalaniId,
               decision: "APPROVE_REVIEW",
               notes,
-              idempotencyKey: `review-${chalaniId}-${Date.now()}`
+              idempotencyKey: `review-${chalaniId}-${Date.now()}`,
             },
           },
         });
@@ -87,7 +87,7 @@ export function useChalaniActions() {
               notes,
               reason: null,
               delegateToId: null,
-              idempotencyKey: `approve-${chalaniId}-${Date.now()}`
+              idempotencyKey: `approve-${chalaniId}-${Date.now()}`,
             },
           },
         });
@@ -104,7 +104,7 @@ export function useChalaniActions() {
               reason,
               notes: null,
               delegateToId: null,
-              idempotencyKey: `reject-${chalaniId}-${Date.now()}`
+              idempotencyKey: `reject-${chalaniId}-${Date.now()}`,
             },
           },
         });
@@ -118,8 +118,8 @@ export function useChalaniActions() {
             input: {
               chalaniId,
               allocationId,
-              idempotencyKey: `reserve-${chalaniId}-${Date.now()}`
-            }
+              idempotencyKey: `reserve-${chalaniId}-${Date.now()}`,
+            },
           },
         });
       }
@@ -132,8 +132,8 @@ export function useChalaniActions() {
             input: {
               chalaniId,
               allocationId,
-              idempotencyKey: `finalize-${chalaniId}-${Date.now()}`
-            }
+              idempotencyKey: `finalize-${chalaniId}-${Date.now()}`,
+            },
           },
         });
       }
@@ -143,9 +143,9 @@ export function useChalaniActions() {
           variables: {
             input: {
               chalaniId,
-              idempotencyKey: `direct-register-${chalaniId}-${Date.now()}`
-            }
-          }
+              idempotencyKey: `direct-register-${chalaniId}-${Date.now()}`,
+            },
+          },
         });
 
       // ----- Signing & Sealing
@@ -157,9 +157,9 @@ export function useChalaniActions() {
             input: {
               chalaniId,
               signatureAttachmentId,
-              idempotencyKey: `sign-${chalaniId}-${Date.now()}`
-            }
-          }
+              idempotencyKey: `sign-${chalaniId}-${Date.now()}`,
+            },
+          },
         });
       }
 
@@ -171,9 +171,9 @@ export function useChalaniActions() {
             input: {
               chalaniId,
               sealAttachmentId,
-              idempotencyKey: `seal-${chalaniId}-${Date.now()}`
-            }
-          }
+              idempotencyKey: `seal-${chalaniId}-${Date.now()}`,
+            },
+          },
         });
       }
 
@@ -200,7 +200,7 @@ export function useChalaniActions() {
               trackingId: trackingId ?? null,
               courierName: courierName ?? null,
               idempotencyKey: `dispatch-${chalaniId}-${Date.now()}`,
-              scheduledDispatchAt: null
+              scheduledDispatchAt: null,
             },
           },
         });
@@ -216,8 +216,8 @@ export function useChalaniActions() {
               chalaniId,
               trackingId,
               courierName,
-              idempotencyKey: `transit-${chalaniId}-${Date.now()}`
-            }
+              idempotencyKey: `transit-${chalaniId}-${Date.now()}`,
+            },
           },
         });
       }
@@ -231,8 +231,8 @@ export function useChalaniActions() {
               chalaniId,
               acknowledgedBy,
               acknowledgementProofId: null,
-              idempotencyKey: `ack-${chalaniId}-${Date.now()}`
-            }
+              idempotencyKey: `ack-${chalaniId}-${Date.now()}`,
+            },
           },
         });
       }
@@ -243,9 +243,9 @@ export function useChalaniActions() {
             input: {
               chalaniId,
               deliveredProofId: null,
-              idempotencyKey: `deliver-${chalaniId}-${Date.now()}`
-            }
-          }
+              idempotencyKey: `deliver-${chalaniId}-${Date.now()}`,
+            },
+          },
         });
 
       case "RETURN_UNDELIVERED": {
@@ -258,8 +258,8 @@ export function useChalaniActions() {
             input: {
               chalaniId,
               reason,
-              idempotencyKey: `return-${chalaniId}-${Date.now()}`
-            }
+              idempotencyKey: `return-${chalaniId}-${Date.now()}`,
+            },
           },
         });
       }
@@ -285,7 +285,7 @@ export function useChalaniActions() {
               dispatchChannel: channel,
               trackingId,
               courierName,
-              idempotencyKey: `resend-${chalaniId}-${Date.now()}`
+              idempotencyKey: `resend-${chalaniId}-${Date.now()}`,
             },
           },
         });
@@ -300,21 +300,18 @@ export function useChalaniActions() {
             input: {
               chalaniId,
               reason,
-              idempotencyKey: `void-${chalaniId}-${Date.now()}`
-            }
-          }
+              idempotencyKey: `void-${chalaniId}-${Date.now()}`,
+            },
+          },
         });
       }
 
       case "SUPERSEDE": {
-        const subject =
-          window.prompt("New Chalani subject (required):") || "";
+        const subject = window.prompt("New Chalani subject (required):") || "";
         if (!subject.trim()) throw new Error("Subject is required");
-        const body =
-          window.prompt("New Chalani body (required):") || "";
+        const body = window.prompt("New Chalani body (required):") || "";
         if (!body.trim()) throw new Error("Body is required");
-        const reason =
-          window.prompt("Supersede reason (required):") || "";
+        const reason = window.prompt("Supersede reason (required):") || "";
         if (!reason.trim()) throw new Error("Reason is required");
 
         return supercede({
