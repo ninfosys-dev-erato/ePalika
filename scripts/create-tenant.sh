@@ -435,6 +435,208 @@ else
   fi
 fi
 
+# ===== User Creation =====
+echo ""
+echo "👥 Creating demo users for each role..."
+
+# Generate a cryptographically secure random password
+generate_password() {
+  # Try multiple methods for cross-platform compatibility
+  if command -v openssl >/dev/null 2>&1; then
+    openssl rand -base64 24 | tr -d "=+/" | cut -c1-20
+  elif [ -f /dev/urandom ]; then
+    LC_ALL=C tr -dc 'A-Za-z0-9!@#$%^&*' </dev/urandom | head -c 20
+  else
+    # Fallback: date-based (less secure, but works everywhere)
+    echo "CHANGEME-$(date +%s | sha256sum | base64 | head -c 12)"
+  fi
+}
+
+# Helper: create user with role assignment
+create_user_with_role() {
+  local username="$1"
+  local first_name="$2"
+  local last_name="$3"
+  local email="$4"
+  local role_name="$5"
+  local password="$6"
+
+  # Check if user exists
+  local user_check=$(curl -s \
+    -H "Authorization: Bearer ${TOKEN}" \
+    "${KEYCLOAK_BASE_URL}/admin/realms/${TENANT_SLUG}/users?username=${username}")
+  local user_id=$(echo "$user_check" | jq -r '.[0].id // empty')
+
+  if [ -n "$user_id" ]; then
+    echo "   • ${username} (exists, skipping)"
+    return 0
+  fi
+
+  # Create user payload
+  local user_payload=$(jq -n \
+    --arg username "$username" \
+    --arg firstName "$first_name" \
+    --arg lastName "$last_name" \
+    --arg email "$email" \
+    --arg tenant "$TENANT_SLUG" \
+    '{
+      username: $username,
+      firstName: $firstName,
+      lastName: $lastName,
+      email: $email,
+      enabled: true,
+      emailVerified: true,
+      attributes: {
+        tenant: [$tenant]
+      },
+      requiredActions: []
+    }')
+
+  # Create user
+  local create_status=$(curl -s -o /dev/null -w "%{http_code}" \
+    -H "Authorization: Bearer ${TOKEN}" \
+    -H "Content-Type: application/json" \
+    -X POST "${KEYCLOAK_BASE_URL}/admin/realms/${TENANT_SLUG}/users" \
+    -d "$user_payload")
+
+  if [ "$create_status" != "201" ]; then
+    echo "❌ Failed to create user '${username}' (status ${create_status})"
+    return 1
+  fi
+
+  # Get user ID
+  user_check=$(curl -s \
+    -H "Authorization: Bearer ${TOKEN}" \
+    "${KEYCLOAK_BASE_URL}/admin/realms/${TENANT_SLUG}/users?username=${username}")
+  user_id=$(echo "$user_check" | jq -r '.[0].id // empty')
+
+  if [ -z "$user_id" ]; then
+    echo "❌ Failed to retrieve user ID for '${username}'"
+    return 1
+  fi
+
+  # Set password
+  local password_payload=$(jq -n \
+    --arg pwd "$password" \
+    '{
+      type: "password",
+      value: $pwd,
+      temporary: false
+    }')
+
+  local pwd_status=$(curl -s -o /dev/null -w "%{http_code}" \
+    -H "Authorization: Bearer ${TOKEN}" \
+    -H "Content-Type: application/json" \
+    -X PUT "${KEYCLOAK_BASE_URL}/admin/realms/${TENANT_SLUG}/users/${user_id}/reset-password" \
+    -d "$password_payload")
+
+  if [ "$pwd_status" != "204" ]; then
+    echo "❌ Failed to set password for '${username}' (status ${pwd_status})"
+    return 1
+  fi
+
+  # Get role ID
+  local role_json=$(curl -s \
+    -H "Authorization: Bearer ${TOKEN}" \
+    "${KEYCLOAK_BASE_URL}/admin/realms/${TENANT_SLUG}/roles/${role_name}")
+  local role_id=$(echo "$role_json" | jq -r '.id // empty')
+
+  if [ -z "$role_id" ]; then
+    echo "❌ Role '${role_name}' not found"
+    return 1
+  fi
+
+  # Assign role
+  local role_assignment=$(jq -n \
+    --arg id "$role_id" \
+    --arg name "$role_name" \
+    '[{
+      id: $id,
+      name: $name
+    }]')
+
+  local assign_status=$(curl -s -o /dev/null -w "%{http_code}" \
+    -H "Authorization: Bearer ${TOKEN}" \
+    -H "Content-Type: application/json" \
+    -X POST "${KEYCLOAK_BASE_URL}/admin/realms/${TENANT_SLUG}/users/${user_id}/role-mappings/realm" \
+    -d "$role_assignment")
+
+  if [ "$assign_status" != "204" ]; then
+    echo "❌ Failed to assign role '${role_name}' to '${username}' (status ${assign_status})"
+    return 1
+  fi
+
+  echo "   • ${username} (created with role: ${role_name})"
+  return 0
+}
+
+# Define demo users for each role with generated passwords
+declare -A USER_CREDENTIALS
+
+# Create users for each role
+USER_CREDENTIALS["darta.clerk@${TENANT_SLUG}"]=$(generate_password)
+create_user_with_role \
+  "darta.clerk" \
+  "Darta" \
+  "Clerk" \
+  "darta.clerk@${TENANT_SLUG}.local" \
+  "darta_clerk" \
+  "${USER_CREDENTIALS["darta.clerk@${TENANT_SLUG}"]}"
+
+USER_CREDENTIALS["darta.reviewer@${TENANT_SLUG}"]=$(generate_password)
+create_user_with_role \
+  "darta.reviewer" \
+  "Darta" \
+  "Reviewer" \
+  "darta.reviewer@${TENANT_SLUG}.local" \
+  "darta_reviewer" \
+  "${USER_CREDENTIALS["darta.reviewer@${TENANT_SLUG}"]}"
+
+USER_CREDENTIALS["darta.registrar@${TENANT_SLUG}"]=$(generate_password)
+create_user_with_role \
+  "darta.registrar" \
+  "Darta" \
+  "Registrar" \
+  "darta.registrar@${TENANT_SLUG}.local" \
+  "darta_registrar" \
+  "${USER_CREDENTIALS["darta.registrar@${TENANT_SLUG}"]}"
+
+USER_CREDENTIALS["chalani.dispatcher@${TENANT_SLUG}"]=$(generate_password)
+create_user_with_role \
+  "chalani.dispatcher" \
+  "Chalani" \
+  "Dispatcher" \
+  "chalani.dispatcher@${TENANT_SLUG}.local" \
+  "chalani_dispatcher" \
+  "${USER_CREDENTIALS["chalani.dispatcher@${TENANT_SLUG}"]}"
+
+USER_CREDENTIALS["chalani.approver@${TENANT_SLUG}"]=$(generate_password)
+create_user_with_role \
+  "chalani.approver" \
+  "Chalani" \
+  "Approver" \
+  "chalani.approver@${TENANT_SLUG}.local" \
+  "chalani_approver" \
+  "${USER_CREDENTIALS["chalani.approver@${TENANT_SLUG}"]}"
+
+USER_CREDENTIALS["numbering.officer@${TENANT_SLUG}"]=$(generate_password)
+create_user_with_role \
+  "numbering.officer" \
+  "Numbering" \
+  "Officer" \
+  "numbering.officer@${TENANT_SLUG}.local" \
+  "numbering_officer" \
+  "${USER_CREDENTIALS["numbering.officer@${TENANT_SLUG}"]}"
+
+USER_CREDENTIALS["identity.admin@${TENANT_SLUG}"]=$(generate_password)
+create_user_with_role \
+  "identity.admin" \
+  "Identity" \
+  "Admin" \
+  "identity.admin@${TENANT_SLUG}.local" \
+  "identity_admin" \
+  "${USER_CREDENTIALS["identity.admin@${TENANT_SLUG}"]}"
+
 # ===== Output =====
 echo ""
 echo "🎉 Tenant '${TENANT_SLUG}' provisioned successfully!"
