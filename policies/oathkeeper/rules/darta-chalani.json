@@ -4,12 +4,13 @@
     "version": "v0.40.9",
     "description": "Protect GraphQL mutations and queries with Keycloak JWT and PDP authorization",
     "match": {
-      "url": "http://<.*>/graphql",
+      "url": "http://<.*>/query",
       "methods": ["POST", "OPTIONS"]
     },
     "upstream": {
       "url": "http://graphql-gateway:8000/query",
-      "preserve_host": true
+      "preserve_host": false,
+      "strip_path": "/query"
     },
     "authenticators": [
       {
@@ -42,27 +43,6 @@
             "X-Roles": "{{ if .Extra.realm_access }}{{ $roles := index .Extra.realm_access \"roles\" }}{{ range $index, $role := $roles }}{{ if $index }},{{ end }}{{ $role }}{{ end }}{{ end }}"          }
         }
       }
-    ]
-  },
-  {
-    "id": "graphql-playground",
-    "version": "v0.40.9",
-    "description": "Allow unauthenticated access to the GraphQL playground UI",
-    "match": {
-      "url": "http://<.*>/",
-      "methods": ["GET"]
-    },
-    "upstream": {
-      "url": "http://graphql-gateway:8000/"
-    },
-    "authenticators": [
-      { "handler": "noop" }
-    ],
-    "authorizer": {
-      "handler": "allow"
-    },
-    "mutators": [
-      { "handler": "noop" }
     ]
   },
   {
