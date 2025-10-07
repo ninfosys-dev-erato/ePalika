@@ -16,9 +16,10 @@
         "handler": "jwt",
         "config": {
           "claims_map": {
-            "tenant": "tenant_id",
+            "tenant_id": "{{ $iss := .iss | regexReplaceAll \"^.*/realms/(.*)$\" \"$1\" }}{{ $iss }}",
             "roles": "realm_access.roles",
-            "user_name": "preferred_username"
+            "user_name": "preferred_username",
+            "user_id": "user_id"
           }
         }
       }
@@ -27,7 +28,7 @@
       "handler": "remote_json",
       "config": {
         "remote": "http://pdp:8080/authorize",
-        "payload": "{{- $perm := index .MatchContext.Headers \"X-Graphql-Permission\" -}}{\"subject\":\"user:{{ print .Subject }}\",\"resource\":\"graphql:{{ if $perm }}{{ index $perm 0 }}{{ else }}query{{ end }}\",\"action\":\"{{ .MatchContext.Method }}\",\"context\":{\"tenant\":\"{{ if .Extra.tenant }}{{ index .Extra.tenant 0 }}{{ else }}default{{ end }}\"}}",
+        "payload": "{{- $perm := index .MatchContext.Headers \"X-Graphql-Permission\" -}}{\"subject\":\"user:{{ print .Subject }}\",\"resource\":\"graphql:{{ if $perm }}{{ index $perm 0 }}{{ else }}query{{ end }}\",\"action\":\"{{ .MatchContext.Method }}\",\"context\":{\"tenant\":\"{{ if .Extra.tenant_id }}{{ index .Extra.tenant_id 0 }}{{ else }}palika{{ end }}\"}}",
         "retry": {
           "give_up_after": "1s",
           "max_delay": "100ms"
@@ -40,9 +41,9 @@
         "handler": "header",
         "config": {
           "headers": {
-            "X-User-ID": "{{ print .Subject }}",
-            "X-User-Name": "{{ if .Extra.user_name }}{{ .Extra.user_name }}{{ end }}",
-            "X-Tenant": "{{ if .Extra.tenant }}{{ index .Extra.tenant 0 }}{{ else }}default{{ end }}",
+            "X-User-ID": "{{ if .Extra.user_id }}{{ index .Extra.user_id 0 }}{{ else }}{{ print .Subject }}{{ end }}",
+            "X-User-Name": "{{ if .Extra.user_name }}{{ index .Extra.user_name 0 }}{{ end }}",
+            "X-Tenant": "{{ if .Extra.tenant_id }}{{ index .Extra.tenant_id 0 }}{{ else }}palika{{ end }}",
             "X-Roles": "{{- range $index, $role := .Extra.roles -}}{{- if $index }},{{ end -}}{{ $role }}{{- end -}}",
             "X-Forwarded-For": "{{ .MatchContext.RemoteAddr }}"
           }

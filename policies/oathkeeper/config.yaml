@@ -16,11 +16,16 @@ authenticators:
     enabled: true
     config:
       jwks_urls:
-        - http://keycloak:8080/realms/palika/protocol/openid-connect/certs
+        - http://keycloak:8080/realms/{palika,palika_*}/protocol/openid-connect/certs
+        - http://localhost:8083/realms/{palika,palika_*}/protocol/openid-connect/certs
       scope_strategy: exact
       trusted_issuers:
         - http://keycloak:8080/realms/palika
+        - http://keycloak:8080/realms/palika_sallaghari
         - http://localhost:8083/realms/palika
+        - http://localhost:8083/realms/palika_sallaghari
+      claims_mapper_url: ""
+      required_scope: []
 
   noop:
     enabled: true
@@ -35,7 +40,7 @@ authorizers:
           "subject": "{{ print .Subject }}",
           "resource": "{{ .MatchContext.URL.Path }}",
           "action": "{{ .MatchContext.Method }}",
-          "tenant": "{{ .Extra.tenant }}"
+          "tenant": "{{ if .Extra.tenant_id }}{{ index .Extra.tenant_id 0 }}{{ else }}palika{{ end }}"
         }
       headers:
         Content-Type: application/json
@@ -49,7 +54,7 @@ mutators:
     config:
       headers:
         X-User-ID: "{{ print .Subject }}"
-        X-Tenant: "{{ .Extra.tenant }}"
+        X-Tenant: "{{ if .Extra.tenant_id }}{{ index .Extra.tenant_id 0 }}{{ else }}palika{{ end }}"
 
   noop:
     enabled: true
