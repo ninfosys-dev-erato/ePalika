@@ -68,6 +68,33 @@ func startHTTPHealth(ctx context.Context, cfg *config.Config, svc *service.Servi
 		}
 	})
 
+	mux.HandleFunc("/authorize", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+
+		var req struct {
+			Subject  string            `json:"subject"`
+			Resource string            `json:"resource"`
+			Action   string            `json:"action"`
+			Context  map[string]string `json:"context"`
+		}
+
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, "invalid request body", http.StatusBadRequest)
+			return
+		}
+
+		// TODO: Map the Oathkeeper request format to your PDP's authorization format
+		// For now, return allowed=true
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(map[string]any{
+			"allowed": true,
+		})
+	})
+
 	srv := &http.Server{
 		Addr:    ":" + cfg.HTTPPort,
 		Handler: mux,

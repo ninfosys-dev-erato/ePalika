@@ -20,7 +20,7 @@
       "handler": "remote_json",
       "config": {
         "remote": "http://pdp:8080/authorize",
-        "payload": "{{- $perm := index .MatchContext.Headers \"X-Graphql-Permission\" -}}{{- $iss := .Extra.iss | default \"\" -}}{{- $tenant := \"palika\" -}}{{- if $iss -}}{{- $tenant = $iss | regexReplaceAll \"^.*/realms/(.*)$\" \"$1\" -}}{{- end -}}{\"subject\":\"user:{{ print .Subject }}\",\"resource\":\"graphql:{{ if $perm }}{{ index $perm 0 }}{{ else }}query{{ end }}\",\"action\":\"{{ .MatchContext.Method }}\",\"context\":{\"tenant\":\"{{ $tenant }}\"}}",
+        "payload": "{{- $perm := .MatchContext.Header.Get \"X-Graphql-Permission\" -}}{{- $iss := .Extra.iss | default \"\" -}}{{- $tenant := \"palika\" -}}{{- if $iss -}}{{- $tenant = $iss | regexReplaceAll \"^.*/realms/(.*)$\" \"$1\" -}}{{- end -}}{\"subject\":\"user:{{ print .Subject }}\",\"resource\":\"graphql:{{ if $perm }}{{ $perm }}{{ else }}query{{ end }}\",\"action\":\"{{ .MatchContext.Method }}\",\"context\":{\"tenant\":\"{{ $tenant }}\"}}",
         "retry": {
           "give_up_after": "1s",
           "max_delay": "100ms"

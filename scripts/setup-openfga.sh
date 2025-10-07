@@ -3,7 +3,7 @@ set -e
 
 # Configuration
 OPENFGA_API_URL="${OPENFGA_API_URL:-http://localhost:8081}"
-MODEL_FILE="${MODEL_FILE:-policies/openfga/model.json}"
+MODEL_FILE="${MODEL_FILE:-policies/openfga/models/model.json}"
 ENV_FILE=".env"
 
 echo "🚀 Setting up OpenFGA..."
