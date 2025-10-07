@@ -13,7 +13,7 @@ import { statusToTag } from "../../features/dashboard/helpers";
 import dayjs from "dayjs";
 
 export function ChalaniDetailView() {
-  const { id } = useParams({ from: "/:id" });
+  const { id } = useParams({ from: "/chalani/$id" }) as { id: string };
   const { data, loading, error, refetch } = useChalaniDetailQuery({
     variables: { id },
   });

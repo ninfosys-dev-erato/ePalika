@@ -31,7 +31,7 @@ const rootRoute = createRootRoute({
 
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/",
+  path: "/chalani",
 
   component: () => <ChalaniListView />,
 });
@@ -57,7 +57,7 @@ const sentRoute = createRoute({
 
 const detailRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/:id",
+  path: "/chalani/$id",
   component: () => <ChalaniDetailView />,
 });
 
