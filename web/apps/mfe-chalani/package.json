@@ -22,7 +22,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@apollo/client": "^4.0.6",
+    "dayjs": "1.11.18",
+    "@apollo/client": "^3.10.0",
     "@egov/api-schema": "workspace:*",
     "@egov/api-types": "workspace:*",
     "@egov/state-core": "workspace:*",

@@ -1,0 +1,237 @@
+# ---- Review stage ------------------------------------------------------------
+mutation SubmitChalaniAction($chalaniId: ID!) {
+  submitChalani(chalaniId: $chalaniId) {
+    id
+    status
+    updatedAt
+    allowedActions
+    auditTrail {
+      id
+      action
+      fromStatus
+      toStatus
+      actor {
+        fullName
+      }
+      timestamp
+    }
+  }
+}
+
+mutation ReviewChalani($input: ReviewChalaniInput!) {
+  reviewChalani(input: $input) {
+    id
+    status
+    updatedAt
+    allowedActions
+    auditTrail {
+      id
+      action
+      fromStatus
+      toStatus
+      actor {
+        fullName
+      }
+      timestamp
+      reason
+    }
+  }
+}
+
+# ---- Approval + Registration -------------------------------------------------
+mutation ApproveChalani($input: ApproveChalaniInput!) {
+  approveChalani(input: $input) {
+    id
+    status
+    updatedAt
+    allowedActions
+    auditTrail {
+      id
+      action
+      toStatus
+      timestamp
+    }
+  }
+}
+
+mutation ReserveChalaniNumber($input: ReserveChalaniNumberInput!) {
+  reserveChalaniNumber(input: $input) {
+    id
+    status
+    chalaniNumber
+    formattedChalaniNumber
+    updatedAt
+    allowedActions
+    auditTrail {
+      id
+      action
+      toStatus
+      timestamp
+    }
+  }
+}
+
+mutation FinalizeChalaniRegistration(
+  $input: FinalizeChalaniRegistrationInput!
+) {
+  finalizeChalaniRegistration(input: $input) {
+    id
+    status
+    updatedAt
+    allowedActions
+    auditTrail {
+      id
+      action
+      toStatus
+      timestamp
+    }
+  }
+}
+
+mutation DirectRegisterChalani($input: DirectRegisterChalaniInput!) {
+  directRegisterChalani(input: $input) {
+    id
+    status
+    chalaniNumber
+    formattedChalaniNumber
+    updatedAt
+    allowedActions
+    auditTrail {
+      id
+      action
+      toStatus
+      timestamp
+    }
+  }
+}
+
+# ---- Signing & sealing -------------------------------------------------------
+mutation SignChalani($input: SignChalaniInput!) {
+  signChalani(input: $input) {
+    id
+    status
+    updatedAt
+    allowedActions
+    auditTrail {
+      id
+      action
+      toStatus
+      timestamp
+    }
+  }
+}
+
+mutation SealChalani($input: SealChalaniInput!) {
+  sealChalani(input: $input) {
+    id
+    status
+    updatedAt
+    allowedActions
+    auditTrail {
+      id
+      action
+      toStatus
+      timestamp
+    }
+  }
+}
+
+# ---- Dispatch & delivery -----------------------------------------------------
+mutation DispatchChalaniAction($input: DispatchChalaniInput!) {
+  dispatchChalani(input: $input) {
+    id
+    status
+    dispatchChannel
+    trackingId
+    courierName
+    updatedAt
+    allowedActions
+  }
+}
+
+mutation MarkChalaniInTransit($input: MarkInTransitInput!) {
+  markChalaniInTransit(input: $input) {
+    id
+    status
+    trackingId
+    courierName
+    updatedAt
+    allowedActions
+  }
+}
+
+mutation AcknowledgeChalani($input: AcknowledgeChalaniInput!) {
+  acknowledgeChalani(input: $input) {
+    id
+    status
+    isAcknowledged
+    acknowledgedAt
+    acknowledgedBy
+    updatedAt
+    allowedActions
+  }
+}
+
+mutation MarkChalaniDelivered($input: MarkDeliveredInput!) {
+  markChalaniDelivered(input: $input) {
+    id
+    status
+    deliveredAt
+    updatedAt
+    allowedActions
+  }
+}
+
+mutation MarkChalaniReturnedUndelivered($input: MarkReturnedUndeliveredInput!) {
+  markChalaniReturnedUndelivered(input: $input) {
+    id
+    status
+    updatedAt
+    allowedActions
+  }
+}
+
+mutation ResendChalani($input: ResendChalaniInput!) {
+  resendChalani(input: $input) {
+    id
+    status
+    trackingId
+    courierName
+    updatedAt
+    allowedActions
+  }
+}
+
+# ---- Termination -------------------------------------------------------------
+mutation VoidChalani($input: VoidChalaniInput!) {
+  voidChalani(input: $input) {
+    id
+    status
+    updatedAt
+    allowedActions
+  }
+}
+
+mutation SupersedeChalani($input: SupersedeChalaniInput!) {
+  supersedeChalani(input: $input) {
+    old {
+      id
+      status
+    }
+    new {
+      id
+      status
+      subject
+      createdAt
+    }
+  }
+}
+
+mutation CloseChalani($chalaniId: ID!) {
+  closeChalani(chalaniId: $chalaniId) {
+    id
+    status
+    updatedAt
+    allowedActions
+  }
+}

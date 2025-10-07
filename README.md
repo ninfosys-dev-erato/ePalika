@@ -44,6 +44,7 @@ A modern, microservices-based correspondence management system for Nepali munici
 ### Technology Stack
 
 **Backend Services**:
+
 - **Language**: Go 1.23+
 - **RPC Framework**: gRPC with Protocol Buffers (protobuf)
 - **API Gateway**: GraphQL (gqlgen)
@@ -52,17 +53,20 @@ A modern, microservices-based correspondence management system for Nepali munici
 - **Migrations**: goose
 
 **Authentication & Authorization**:
+
 - **Auth Gateway**: ORY Oathkeeper
 - **Identity Provider**: Keycloak (OAuth2/OIDC)
 - **Authorization**: OpenFGA (relationship-based access control)
 - **PDP**: Policy Decision Point service
 
 **Infrastructure**:
+
 - **Containerization**: Docker & Docker Compose
 - **Proto Tooling**: protoc, protoc-gen-go, protoc-gen-go-grpc (in ~/.go/bin)
 - **Deployment**: Distroless containers for production
 
 **Code Generation**:
+
 - **Proto**: protoc with go/go-grpc plugins
 - **GraphQL**: gqlgen
 - **SQL**: sqlc
@@ -92,6 +96,7 @@ open http://localhost:8000/
 ```
 
 **Services Started**:
+
 - PostgreSQL (port 5432)
 - Keycloak (port 8080)
 - Darta-Chalani gRPC (port 9000)
@@ -103,6 +108,7 @@ open http://localhost:8000/
 ### Option 2: Local Development
 
 **1. Start Infrastructure**:
+
 ```bash
 # Start PostgreSQL, Keycloak, PDP
 docker-compose up -d postgres keycloak pdp oathkeeper
@@ -112,6 +118,7 @@ docker-compose ps
 ```
 
 **2. Run Database Migrations**:
+
 ```bash
 cd services/darta-chalani
 
@@ -126,6 +133,7 @@ goose -dir internal/dbutil/migrations postgres "$DATABASE_DSN" up
 ```
 
 **3. Start Darta-Chalani Service**:
+
 ```bash
 cd services/darta-chalani
 
@@ -136,6 +144,7 @@ go run cmd/dartasvc/main.go
 ```
 
 **4. Start Identity Service**:
+
 ```bash
 cd services/identity
 
@@ -149,6 +158,7 @@ go run cmd/identitysvc/main.go
 ```
 
 **5. Start GraphQL Gateway**:
+
 ```bash
 cd services/graphql-gateway
 
@@ -161,6 +171,7 @@ go run cmd/gateways/main.go
 ```
 
 **6. Access GraphQL Playground**:
+
 ```bash
 # Via Oathkeeper (with auth)
 open http://localhost:4455/playground
@@ -312,23 +323,26 @@ ePalika/
 ### GraphQL Mutations
 
 **Create Darta**:
+
 ```graphql
 mutation CreateDarta {
-  createDarta(input: {
-    fiscalYearID: "fy-2081-82"
-    scope: MUNICIPALITY
-    subject: "Budget Approval Request"
-    applicant: {
-      type: ORGANIZATION
-      fullName: "ABC Corporation"
-      email: "abc@example.com"
-      phone: "9841234567"
+  createDarta(
+    input: {
+      fiscalYearID: "fy-2081-82"
+      scope: MUNICIPALITY
+      subject: "Budget Approval Request"
+      applicant: {
+        type: ORGANIZATION
+        fullName: "ABC Corporation"
+        email: "abc@example.com"
+        phone: "9841234567"
+      }
+      intakeChannel: EDARTA_PORTAL
+      receivedDate: "2025-10-05T10:00:00Z"
+      priority: HIGH
+      idempotencyKey: "unique-key-123"
     }
-    intakeChannel: EDARTA_PORTAL
-    receivedDate: "2025-10-05T10:00:00Z"
-    priority: HIGH
-    idempotencyKey: "unique-key-123"
-  }) {
+  ) {
     id
     dartaNumber
     formattedDartaNumber
@@ -340,22 +354,24 @@ mutation CreateDarta {
 ```
 
 **Submit for Review**:
+
 ```graphql
 mutation SubmitDarta {
   submitDartaForReview(dartaId: "uuid-here") {
     id
-    status  # Should be PENDING_REVIEW
+    status # Should be PENDING_REVIEW
   }
 }
 ```
 
 **Reserve Darta Number**:
+
 ```graphql
 mutation ReserveDarta {
   reserveDartaNumber(dartaId: "uuid-here") {
     id
     dartaNumber
-    formattedDartaNumber  # e.g., "2081-82/MUN/D-00123"
+    formattedDartaNumber # e.g., "2081-82/MUN/D-00123"
   }
 }
 ```
@@ -363,6 +379,7 @@ mutation ReserveDarta {
 ### GraphQL Queries
 
 **Get Darta by ID**:
+
 ```graphql
 query GetDarta {
   darta(id: "uuid-here") {
@@ -384,6 +401,7 @@ query GetDarta {
 ```
 
 **List Dartas with Filters**:
+
 ```graphql
 query ListDartas {
   dartas(
@@ -394,10 +412,7 @@ query ListDartas {
       priority: HIGH
       search: "budget"
     }
-    pagination: {
-      limit: 20
-      offset: 0
-    }
+    pagination: { limit: 20, offset: 0 }
   ) {
     edges {
       cursor
@@ -419,12 +434,10 @@ query ListDartas {
 ```
 
 **Get Statistics**:
+
 ```graphql
 query DartaStats {
-  dartaStats(
-    scope: MUNICIPALITY
-    fiscalYearId: "fy-2081-82"
-  ) {
+  dartaStats(scope: MUNICIPALITY, fiscalYearId: "fy-2081-82") {
     total
     overdueCount
     byStatus {
@@ -472,18 +485,21 @@ grpcurl -plaintext localhost:9000 grpc.health.v1.Health/Check
 ### Code Generation
 
 **Protocol Buffers**:
+
 ```bash
 cd proto
 buf generate
 ```
 
 **GraphQL**:
+
 ```bash
 cd services/graphql-gateway
 go run github.com/99designs/gqlgen generate
 ```
 
 **Database Queries (sqlc)**:
+
 ```bash
 cd services/darta-chalani
 sqlc generate
@@ -492,17 +508,20 @@ sqlc generate
 ### Database Migrations
 
 **Create new migration**:
+
 ```bash
 cd services/darta-chalani
 goose -dir internal/dbutil/migrations create add_new_table sql
 ```
 
 **Apply migrations**:
+
 ```bash
 goose -dir internal/dbutil/migrations postgres "$DATABASE_DSN" up
 ```
 
 **Rollback**:
+
 ```bash
 goose -dir internal/dbutil/migrations postgres "$DATABASE_DSN" down
 ```
@@ -553,27 +572,32 @@ goose -dir internal/dbutil/migrations postgres "$DATABASE_DSN" down
 ## 📊 Monitoring
 
 **Health Endpoints**:
+
 - `/health`: Basic health check (no auth)
 - GraphQL health query: `{ health { status service timestamp } }`
 
 **Metrics** (TODO):
+
 - Prometheus metrics at `/metrics`
 - Request count, duration, error rate
 - Database connection pool metrics
 - gRPC method metrics
 
 **Logging**:
+
 - Structured JSON logging
 - Request ID correlation
 - User context in all logs
 
 **Tracing** (TODO):
+
 - OpenTelemetry integration
 - Jaeger/Tempo for trace visualization
 
 ## 🚧 Roadmap
 
 ### Completed ✅
+
 - [x] Protocol Buffer definitions (70+ RPC methods across 3 services)
   - [x] Darta service: 27 RPCs
   - [x] Chalani service: 28 RPCs
@@ -592,12 +616,14 @@ goose -dir internal/dbutil/migrations postgres "$DATABASE_DSN" down
 - [x] Type conversion layer (pgtype ↔ protobuf)
 
 ### In Progress 🔄
+
 - [ ] GraphQL gateway build fixes (field name mismatches)
 - [ ] Complete Chalani service implementation (7/28 RPCs done)
 - [ ] PDP authorization integration in GraphQL layer
 - [ ] End-to-end testing with all services
 
 ### Upcoming 📝
+
 - [ ] OpenTelemetry distributed tracing
 - [ ] Prometheus metrics
 - [ ] Rate limiting
@@ -635,6 +661,7 @@ Developed for Nepali municipalities to modernize their correspondence management
 **Completed Work**:
 
 1. **Fixed Darta-Chalani Build Issues**:
+
    - Added type conversion helpers for pgx v5 (pgtype.Timestamptz ↔ time.Time, pgtype.UUID ↔ uuid.UUID)
    - Fixed proto import paths (`proto/darta/v1/` → `darta/v1/`)
    - Generated all proto files using protoc from ~/.go/bin
@@ -644,6 +671,7 @@ Developed for Nepali municipalities to modernize their correspondence management
    - Commented out non-existent CreateAuditTrail calls
 
 2. **Created Identity Service** (NEW):
+
    - Complete proto definition ([proto/identity/v1/identity.proto](proto/identity/v1/identity.proto)) with 15 RPCs
    - Keycloak client integration ([services/identity/internal/keycloak/client.go](services/identity/internal/keycloak/client.go))
    - gRPC server implementation ([services/identity/internal/grpc/server.go](services/identity/internal/grpc/server.go))
@@ -663,6 +691,7 @@ Developed for Nepali municipalities to modernize their correspondence management
 ### Current Issues
 
 **GraphQL Gateway Build Failure**:
+
 - Location: [services/graphql-gateway/graph/schema.resolvers.go](services/graphql-gateway/graph/schema.resolvers.go)
 - Issues:
   - Field name mismatches: `FiscalYearId` vs proto field names
@@ -671,6 +700,7 @@ Developed for Nepali municipalities to modernize their correspondence management
   - Undefined PDPService type in resolver
 
 **Next Steps**:
+
 1. Fix GraphQL schema field names to match proto definitions
 2. Add missing RPC method wrappers to DartaService interface
 3. Define PDPService interface
@@ -680,16 +710,19 @@ Developed for Nepali municipalities to modernize their correspondence management
 ### Key Technical Decisions
 
 **Type System**:
+
 - Using pgx v5 with pgtype for database layer (sqlc generates pgtype.Timestamptz, pgtype.UUID)
 - Conversion helpers at boundaries (domain → DB uses pgtype, gRPC → proto uses timestamppb)
 - Pattern: Convert at layer boundaries, not in domain logic
 
 **Proto Toolchain**:
+
 - protoc binaries located in ~/.go/bin (not ~/go/bin)
 - Import paths: Relative from proto/ directory (e.g., `import "darta/v1/common.proto"`)
 - Generated code in proto/gen/ directory
 
 **Identity Service Architecture**:
+
 - Direct Keycloak integration using gocloak library
 - No separate database (Keycloak is source of truth)
 - Realm: master (initially tried "epalika" but it didn't exist)
@@ -698,6 +731,7 @@ Developed for Nepali municipalities to modernize their correspondence management
 ### File References
 
 **Key Files Modified**:
+
 - [services/darta-chalani/internal/domain/darta_service.go](services/darta-chalani/internal/domain/darta_service.go) - Type conversion helpers
 - [services/darta-chalani/internal/grpc/converters.go](services/darta-chalani/internal/grpc/converters.go) - Proto converters
 - [services/darta-chalani/internal/grpc/darta_server.go](services/darta-chalani/internal/grpc/darta_server.go) - RPC implementations
@@ -705,6 +739,7 @@ Developed for Nepali municipalities to modernize their correspondence management
 - [services/graphql-gateway/internal/clients/darta.go](services/graphql-gateway/internal/clients/darta.go) - Client interface (in progress)
 
 **Files Created**:
+
 - [proto/identity/v1/identity.proto](proto/identity/v1/identity.proto) - Identity service definition
 - [services/identity/cmd/identitysvc/main.go](services/identity/cmd/identitysvc/main.go) - Service entry point
 - [services/identity/internal/keycloak/client.go](services/identity/internal/keycloak/client.go) - Keycloak integration
@@ -731,5 +766,5 @@ Mutated downstream headers to carry X-User-ID, X-User-Name, X-Tenant, X-Roles, a
 Next Steps
 
 Make sure Keycloak tokens expose tenant_id, preferred_username, and realm_access.roles so the JWT handler can populate the .Extra fields used in the rule.
-Have the GraphQL gateway set X-Graphql-Permission (or call the PDP directly per resolver) so requests hit the intended graphql_operation:* objects instead of the default graphql:query.
+Have the GraphQL gateway set X-Graphql-Permission (or call the PDP directly per resolver) so requests hit the intended graphql_operation:\* objects instead of the default graphql:query.
 Publish the updated OpenFGA model to your store and load the seed tuples before rolling these rules into an environment.

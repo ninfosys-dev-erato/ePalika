@@ -1,0 +1,27 @@
+query ChalaniDetail($id: ID!) {
+  chalani(id: $id) {
+    id
+    subject
+    body
+    status
+    fiscalYear
+    recipient {
+      name
+      address
+    }
+    createdAt
+    updatedAt
+    auditTrail {
+      id
+      action
+      fromStatus
+      toStatus
+      actor {
+        fullName
+      }
+      timestamp
+      reason
+    }
+    allowedActions
+  }
+}

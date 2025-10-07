@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
+import type { WritableDraft } from "immer";
 import type { Chalani, ChalaniFilterInput } from "@egov/api-types";
 import type { DraftDocument } from "./darta.store";
 import type DeepWritable from "../utils/types";
@@ -84,7 +85,7 @@ export const useChalaniStore = create<ChalaniState>()(
           state.filters = {
             ...(state.filters as unknown as Record<string, any>),
             ...(filters as unknown as Record<string, any>),
-          } as ChalaniFilterInput;
+          } as WritableDraft<ChalaniFilterInput>;
         }),
 
       setDraft: (draft) =>
