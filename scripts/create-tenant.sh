@@ -492,15 +492,21 @@ create_user_with_role() {
       requiredActions: []
     }')
 
-  # Create user
-  local create_status=$(curl -s -o /dev/null -w "%{http_code}" \
+  # Create user (capture response for debugging)
+  local create_response=$(curl -s -w "\n%{http_code}" \
     -H "Authorization: Bearer ${TOKEN}" \
     -H "Content-Type: application/json" \
     -X POST "${KEYCLOAK_BASE_URL}/admin/realms/${TENANT_SLUG}/users" \
     -d "$user_payload")
 
+  local create_status=$(echo "$create_response" | tail -n1)
+  local create_body=$(echo "$create_response" | sed '$d')
+
   if [ "$create_status" != "201" ]; then
     echo "❌ Failed to create user '${username}' (status ${create_status})"
+    if [ -n "$create_body" ]; then
+      echo "   Response: $create_body"
+    fi
     return 1
   fi
 
@@ -573,13 +579,16 @@ create_user_with_role() {
 # Define demo users for each role with generated passwords
 declare -A USER_CREDENTIALS
 
+# Sanitize tenant slug for email (remove underscores, hyphens, convert to alphanumeric)
+EMAIL_DOMAIN=$(echo "$TENANT_SLUG" | tr -d '_-')
+
 # Create users for each role
 USER_CREDENTIALS["darta.clerk@${TENANT_SLUG}"]=$(generate_password)
 create_user_with_role \
   "darta.clerk" \
   "Darta" \
   "Clerk" \
-  "darta.clerk@${TENANT_SLUG}.local" \
+  "dartaclerk@${EMAIL_DOMAIN}.local" \
   "darta_clerk" \
   "${USER_CREDENTIALS["darta.clerk@${TENANT_SLUG}"]}"
 
@@ -588,7 +597,7 @@ create_user_with_role \
   "darta.reviewer" \
   "Darta" \
   "Reviewer" \
-  "darta.reviewer@${TENANT_SLUG}.local" \
+  "dartareviewer@${EMAIL_DOMAIN}.local" \
   "darta_reviewer" \
   "${USER_CREDENTIALS["darta.reviewer@${TENANT_SLUG}"]}"
 
@@ -597,7 +606,7 @@ create_user_with_role \
   "darta.registrar" \
   "Darta" \
   "Registrar" \
-  "darta.registrar@${TENANT_SLUG}.local" \
+  "dartaregistrar@${EMAIL_DOMAIN}.local" \
   "darta_registrar" \
   "${USER_CREDENTIALS["darta.registrar@${TENANT_SLUG}"]}"
 
@@ -606,7 +615,7 @@ create_user_with_role \
   "chalani.dispatcher" \
   "Chalani" \
   "Dispatcher" \
-  "chalani.dispatcher@${TENANT_SLUG}.local" \
+  "chalanidispatcher@${EMAIL_DOMAIN}.local" \
   "chalani_dispatcher" \
   "${USER_CREDENTIALS["chalani.dispatcher@${TENANT_SLUG}"]}"
 
@@ -615,7 +624,7 @@ create_user_with_role \
   "chalani.approver" \
   "Chalani" \
   "Approver" \
-  "chalani.approver@${TENANT_SLUG}.local" \
+  "chalaniapprover@${EMAIL_DOMAIN}.local" \
   "chalani_approver" \
   "${USER_CREDENTIALS["chalani.approver@${TENANT_SLUG}"]}"
 
@@ -624,7 +633,7 @@ create_user_with_role \
   "numbering.officer" \
   "Numbering" \
   "Officer" \
-  "numbering.officer@${TENANT_SLUG}.local" \
+  "numberingofficer@${EMAIL_DOMAIN}.local" \
   "numbering_officer" \
   "${USER_CREDENTIALS["numbering.officer@${TENANT_SLUG}"]}"
 
@@ -633,35 +642,73 @@ create_user_with_role \
   "identity.admin" \
   "Identity" \
   "Admin" \
-  "identity.admin@${TENANT_SLUG}.local" \
+  "identityadmin@${EMAIL_DOMAIN}.local" \
   "identity_admin" \
   "${USER_CREDENTIALS["identity.admin@${TENANT_SLUG}"]}"
 
 # ===== Output =====
 echo ""
-echo "🎉 Tenant '${TENANT_SLUG}' provisioned successfully!"
-echo "   Realm URL: ${KEYCLOAK_BASE_URL}/realms/${TENANT_SLUG}"
-echo "   Display:   ${TENANT_DISPLAY}"
-echo "   Client:    ${CLIENT_ID}"
-echo "   Redirect:  ${CLIENT_REDIRECT_URI}"
-echo "   WebOrigin: ${CLIENT_WEB_ORIGIN}"
-if [ -n "$CLIENT_SECRET" ]; then
-  echo "   Client secret: ${CLIENT_SECRET}"
-fi
-echo "   Client Scope: ${SCOPE_NAME} (attached as default)"
-echo "   Claims added: user_id (String), user_name (String), tenant (String[]), roles (String[])"
-if [ -n "$FGA_STORE_ID" ] && [ -n "$FGA_MODEL_ID" ]; then
-  echo "   OpenFGA tenant object: tenant:${TENANT_SLUG}"
-fi
-
+echo "═══════════════════════════════════════════════════════════════════════════════"
+echo "🎉 Tenant Provisioning Complete!"
+echo "═══════════════════════════════════════════════════════════════════════════════"
 echo ""
-echo "Next steps:"
-echo "  1) For each user, set attribute 'tenant' (can be multivalued)."
-echo "  2) Assign realm/client roles to users or groups."
-echo "  3) Decode a fresh access token and verify claims:"
-echo "     - user_id, user_name, tenant[], roles[]"
-echo "  4) Your gateway template can now use:"
-echo "       X-User-ID:    {{ print .Extra.user_id }}"
-echo "       X-User-Name:  {{ .Extra.user_name }}"
-echo "       X-Tenant:     {{ if .Extra.tenant }}{{ index .Extra.tenant 0 }}{{ else }}default{{ end }}"
-echo "       X-Roles:      {{- range \$i, \$r := .Extra.roles -}}{{- if \$i }},{{ end -}}{{ \$r }}{{- end -}}"
+echo "${BOLD}Tenant Information:${RESET}"
+echo "   Tenant Slug:     ${TENANT_SLUG}"
+echo "   Display Name:    ${TENANT_DISPLAY}"
+echo "   Realm URL:       ${KEYCLOAK_BASE_URL}/realms/${TENANT_SLUG}"
+echo "   Admin Console:   ${KEYCLOAK_BASE_URL}/admin/${TENANT_SLUG}/console"
+echo ""
+echo "${BOLD}OAuth2 / OIDC Configuration:${RESET}"
+echo "   Client ID:       ${CLIENT_ID}"
+if [ -n "$CLIENT_SECRET" ]; then
+  echo "   Client Secret:   ${CLIENT_SECRET}"
+fi
+echo "   Redirect URI:    ${CLIENT_REDIRECT_URI}"
+echo "   Web Origin:      ${CLIENT_WEB_ORIGIN}"
+echo "   Token Endpoint:  ${KEYCLOAK_BASE_URL}/realms/${TENANT_SLUG}/protocol/openid-connect/token"
+echo "   Auth Endpoint:   ${KEYCLOAK_BASE_URL}/realms/${TENANT_SLUG}/protocol/openid-connect/auth"
+echo "   Userinfo:        ${KEYCLOAK_BASE_URL}/realms/${TENANT_SLUG}/protocol/openid-connect/userinfo"
+echo ""
+echo "${BOLD}Client Scope & Claims:${RESET}"
+echo "   Scope Name:      ${SCOPE_NAME} (attached as default)"
+echo "   Custom Claims:   user_id (String), user_name (String), tenant (String[]), roles (String[])"
+echo ""
+if [ -n "$FGA_STORE_ID" ] && [ -n "$FGA_MODEL_ID" ]; then
+  echo "${BOLD}OpenFGA Configuration:${RESET}"
+  echo "   Store ID:        ${FGA_STORE_ID}"
+  echo "   Model ID:        ${FGA_MODEL_ID}"
+  echo "   Tenant Object:   tenant:${TENANT_SLUG}"
+  echo ""
+fi
+echo "${BOLD}Demo User Accounts:${RESET}"
+echo "┌─────────────────────┬──────────────────────┬───────────────────────────────────┐"
+echo "│ Username            │ Role                 │ Password                          │"
+echo "├─────────────────────┼──────────────────────┼───────────────────────────────────┤"
+
+printf "│ %-19s │ %-20s │ %-33s │\n" "darta.clerk" "darta_clerk" "${USER_CREDENTIALS["darta.clerk@${TENANT_SLUG}"]}"
+printf "│ %-19s │ %-20s │ %-33s │\n" "darta.reviewer" "darta_reviewer" "${USER_CREDENTIALS["darta.reviewer@${TENANT_SLUG}"]}"
+printf "│ %-19s │ %-20s │ %-33s │\n" "darta.registrar" "darta_registrar" "${USER_CREDENTIALS["darta.registrar@${TENANT_SLUG}"]}"
+printf "│ %-19s │ %-20s │ %-33s │\n" "chalani.dispatcher" "chalani_dispatcher" "${USER_CREDENTIALS["chalani.dispatcher@${TENANT_SLUG}"]}"
+printf "│ %-19s │ %-20s │ %-33s │\n" "chalani.approver" "chalani_approver" "${USER_CREDENTIALS["chalani.approver@${TENANT_SLUG}"]}"
+printf "│ %-19s │ %-20s │ %-33s │\n" "numbering.officer" "numbering_officer" "${USER_CREDENTIALS["numbering.officer@${TENANT_SLUG}"]}"
+printf "│ %-19s │ %-20s │ %-33s │\n" "identity.admin" "identity_admin" "${USER_CREDENTIALS["identity.admin@${TENANT_SLUG}"]}"
+
+echo "└─────────────────────┴──────────────────────┴───────────────────────────────────┘"
+echo ""
+echo "${BOLD}⚠️  SECURITY NOTICE:${RESET}"
+echo "   • Store these credentials securely (e.g., password manager)"
+echo "   • Each user has the 'tenant' attribute set to: ${TENANT_SLUG}"
+echo "   • Passwords are randomly generated and non-temporary"
+echo "   • Email verification is pre-enabled for all users"
+echo ""
+echo "${BOLD}Next Steps:${RESET}"
+echo "   1. Test authentication with any of the demo users"
+echo "   2. Verify JWT tokens contain custom claims (user_id, user_name, tenant, roles)"
+echo "   3. Configure your API gateway to extract headers:"
+echo "      • X-User-ID:    {{ print .Extra.user_id }}"
+echo "      • X-User-Name:  {{ .Extra.user_name }}"
+echo "      • X-Tenant:     {{ if .Extra.tenant }}{{ index .Extra.tenant 0 }}{{ else }}default{{ end }}"
+echo "      • X-Roles:      {{- range \$i, \$r := .Extra.roles -}}{{- if \$i }},{{ end -}}{{ \$r }}{{- end -}}"
+echo "   4. Create additional users via Keycloak Admin Console as needed"
+echo ""
+echo "═══════════════════════════════════════════════════════════════════════════════"
