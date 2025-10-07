@@ -74,4 +74,4 @@ errors:
 
 log:
   level: debug
-  format: json
+  format: text
