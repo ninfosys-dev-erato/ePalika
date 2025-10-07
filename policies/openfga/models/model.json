@@ -1,669 +1,98 @@
 {
   "schema_version": "1.1",
   "type_definitions": [
-    {
-      "type": "user",
-      "relations": {},
-      "metadata": {
-        "relations": {}
-      }
-    },
-    {
-      "type": "role",
-      "relations": {
-        "member": {
-          "this": {}
-        }
-      },
-      "metadata": {
-        "relations": {
-          "member": {
-            "directly_related_user_types": [
-              {
-                "type": "user"
-              }
-            ]
-          }
-        }
-      }
-    },
+    { "type": "user" },
+
     {
       "type": "tenant",
       "relations": {
-        "admin": {
-          "this": {}
-        },
-        "member": {
-          "union": {
-            "child": [
-              {
-                "this": {}
-              },
-              {
-                "computedUserset": {
-                  "relation": "admin"
-                }
-              }
-            ]
-          }
-        },
-        "viewer": {
-          "union": {
-            "child": [
-              {
-                "computedUserset": {
-                  "relation": "member"
-                }
-              }
-            ]
-          }
-        }
+        "admin": { "this": {} },
+        "darta_clerk": { "this": {} },
+        "darta_reviewer": { "this": {} },
+        "darta_registrar": { "this": {} },
+        "chalani_dispatcher": { "this": {} },
+        "chalani_approver": { "this": {} },
+        "numbering_officer": { "this": {} },
+        "identity_admin": { "this": {} }
       },
       "metadata": {
         "relations": {
-          "admin": {
-            "directly_related_user_types": [
-              {
-                "type": "user"
-              },
-              {
-                "type": "role",
-                "relation": "member"
-              }
-            ]
-          },
-          "member": {
-            "directly_related_user_types": [
-              {
-                "type": "user"
-              },
-              {
-                "type": "role",
-                "relation": "member"
-              }
-            ]
-          },
-          "viewer": {
-            "directly_related_user_types": [
-              {
-                "type": "user"
-              },
-              {
-                "type": "role",
-                "relation": "member"
-              }
-            ]
-          }
+          "admin":               { "directly_related_user_types": [ { "type": "user" } ] },
+          "darta_clerk":         { "directly_related_user_types": [ { "type": "user" } ] },
+          "darta_reviewer":      { "directly_related_user_types": [ { "type": "user" } ] },
+          "darta_registrar":     { "directly_related_user_types": [ { "type": "user" } ] },
+          "chalani_dispatcher":  { "directly_related_user_types": [ { "type": "user" } ] },
+          "chalani_approver":    { "directly_related_user_types": [ { "type": "user" } ] },
+          "numbering_officer":   { "directly_related_user_types": [ { "type": "user" } ] },
+          "identity_admin":      { "directly_related_user_types": [ { "type": "user" } ] }
         }
       }
     },
+
     {
-      "type": "graphql_operation",
+      "type": "graphql",
       "relations": {
-        "tenant": {
-          "this": {}
-        },
-        "grantee": {
-          "this": {}
-        },
-        "execute": {
+        "in_tenant": { "this": {} },
+        "can_query": {
           "union": {
             "child": [
-              {
-                "computedUserset": {
-                  "relation": "grantee"
-                }
-              },
-              {
-                "tupleToUserset": {
-                  "tupleset": {
-                    "relation": "tenant"
-                  },
-                  "computedUserset": {
-                    "relation": "member"
-                  }
-                }
-              }
+              { "tupleToUserset": { "tupleset": { "relation": "in_tenant" }, "computedUserset": { "relation": "admin" } } },
+              { "tupleToUserset": { "tupleset": { "relation": "in_tenant" }, "computedUserset": { "relation": "darta_clerk" } } },
+              { "tupleToUserset": { "tupleset": { "relation": "in_tenant" }, "computedUserset": { "relation": "darta_reviewer" } } },
+              { "tupleToUserset": { "tupleset": { "relation": "in_tenant" }, "computedUserset": { "relation": "darta_registrar" } } },
+              { "tupleToUserset": { "tupleset": { "relation": "in_tenant" }, "computedUserset": { "relation": "chalani_dispatcher" } } },
+              { "tupleToUserset": { "tupleset": { "relation": "in_tenant" }, "computedUserset": { "relation": "chalani_approver" } } },
+              { "tupleToUserset": { "tupleset": { "relation": "in_tenant" }, "computedUserset": { "relation": "numbering_officer" } } },
+              { "tupleToUserset": { "tupleset": { "relation": "in_tenant" }, "computedUserset": { "relation": "identity_admin" } } }
             ]
-          }
-        },
-        "manage": {
-          "tupleToUserset": {
-            "tupleset": {
-              "relation": "tenant"
-            },
-            "computedUserset": {
-              "relation": "admin"
-            }
           }
         }
       },
       "metadata": {
         "relations": {
-          "tenant": {
-            "directly_related_user_types": [
-              {
-                "type": "tenant"
-              }
-            ]
-          },
-          "grantee": {
-            "directly_related_user_types": [
-              {
-                "type": "user"
-              },
-              {
-                "type": "role",
-                "relation": "member"
-              }
-            ]
-          },
-          "execute": {
-            "directly_related_user_types": []
-          },
-          "manage": {
-            "directly_related_user_types": []
-          }
+          "in_tenant": { "directly_related_user_types": [ { "type": "tenant" } ] }
         }
       }
     },
+
     {
-      "type": "darta_record",
+      "type": "service_darta",
       "relations": {
-        "tenant": {
-          "this": {}
-        },
-        "creator": {
-          "this": {}
-        },
-        "assignee": {
-          "this": {}
-        },
-        "reviewer": {
-          "this": {}
-        },
-        "registrar": {
-          "this": {}
-        },
-        "viewer": {
-          "this": {}
-        },
-        "can_view": {
+        "in_tenant": { "this": {} },
+        "can_use": {
           "union": {
             "child": [
-              {
-                "computedUserset": {
-                  "relation": "viewer"
-                }
-              },
-              {
-                "computedUserset": {
-                  "relation": "creator"
-                }
-              },
-              {
-                "computedUserset": {
-                  "relation": "assignee"
-                }
-              },
-              {
-                "tupleToUserset": {
-                  "tupleset": {
-                    "relation": "tenant"
-                  },
-                  "computedUserset": {
-                    "relation": "member"
-                  }
-                }
-              }
-            ]
-          }
-        },
-        "can_update": {
-          "union": {
-            "child": [
-              {
-                "computedUserset": {
-                  "relation": "creator"
-                }
-              },
-              {
-                "computedUserset": {
-                  "relation": "assignee"
-                }
-              },
-              {
-                "computedUserset": {
-                  "relation": "registrar"
-                }
-              },
-              {
-                "tupleToUserset": {
-                  "tupleset": {
-                    "relation": "tenant"
-                  },
-                  "computedUserset": {
-                    "relation": "admin"
-                  }
-                }
-              }
-            ]
-          }
-        },
-        "can_route": {
-          "union": {
-            "child": [
-              {
-                "computedUserset": {
-                  "relation": "reviewer"
-                }
-              },
-              {
-                "tupleToUserset": {
-                  "tupleset": {
-                    "relation": "tenant"
-                  },
-                  "computedUserset": {
-                    "relation": "admin"
-                  }
-                }
-              }
-            ]
-          }
-        },
-        "can_close": {
-          "union": {
-            "child": [
-              {
-                "computedUserset": {
-                  "relation": "registrar"
-                }
-              },
-              {
-                "tupleToUserset": {
-                  "tupleset": {
-                    "relation": "tenant"
-                  },
-                  "computedUserset": {
-                    "relation": "admin"
-                  }
-                }
-              }
+              { "tupleToUserset": { "tupleset": { "relation": "in_tenant" }, "computedUserset": { "relation": "admin" } } },
+              { "tupleToUserset": { "tupleset": { "relation": "in_tenant" }, "computedUserset": { "relation": "darta_clerk" } } },
+              { "tupleToUserset": { "tupleset": { "relation": "in_tenant" }, "computedUserset": { "relation": "darta_reviewer" } } },
+              { "tupleToUserset": { "tupleset": { "relation": "in_tenant" }, "computedUserset": { "relation": "darta_registrar" } } }
             ]
           }
         }
       },
       "metadata": {
         "relations": {
-          "tenant": {
-            "directly_related_user_types": [
-              {
-                "type": "tenant"
-              }
-            ]
-          },
-          "creator": {
-            "directly_related_user_types": [
-              {
-                "type": "user"
-              }
-            ]
-          },
-          "assignee": {
-            "directly_related_user_types": [
-              {
-                "type": "user"
-              },
-              {
-                "type": "role",
-                "relation": "member"
-              }
-            ]
-          },
-          "reviewer": {
-            "directly_related_user_types": [
-              {
-                "type": "user"
-              },
-              {
-                "type": "role",
-                "relation": "member"
-              }
-            ]
-          },
-          "registrar": {
-            "directly_related_user_types": [
-              {
-                "type": "user"
-              },
-              {
-                "type": "role",
-                "relation": "member"
-              }
-            ]
-          },
-          "viewer": {
-            "directly_related_user_types": [
-              {
-                "type": "user"
-              },
-              {
-                "type": "role",
-                "relation": "member"
-              }
-            ]
-          },
-          "can_view": {
-            "directly_related_user_types": []
-          },
-          "can_update": {
-            "directly_related_user_types": []
-          },
-          "can_route": {
-            "directly_related_user_types": []
-          },
-          "can_close": {
-            "directly_related_user_types": []
-          }
+          "in_tenant": { "directly_related_user_types": [ { "type": "tenant" } ] }
         }
       }
     },
+
     {
-      "type": "chalani_record",
+      "type": "service_identity",
       "relations": {
-        "tenant": {
-          "this": {}
-        },
-        "drafter": {
-          "this": {}
-        },
-        "approver": {
-          "this": {}
-        },
-        "dispatcher": {
-          "this": {}
-        },
-        "viewer": {
-          "this": {}
-        },
-        "can_view": {
+        "in_tenant": { "this": {} },
+        "can_use": {
           "union": {
             "child": [
-              {
-                "computedUserset": {
-                  "relation": "viewer"
-                }
-              },
-              {
-                "computedUserset": {
-                  "relation": "drafter"
-                }
-              },
-              {
-                "computedUserset": {
-                  "relation": "approver"
-                }
-              },
-              {
-                "computedUserset": {
-                  "relation": "dispatcher"
-                }
-              },
-              {
-                "tupleToUserset": {
-                  "tupleset": {
-                    "relation": "tenant"
-                  },
-                  "computedUserset": {
-                    "relation": "member"
-                  }
-                }
-              }
-            ]
-          }
-        },
-        "can_update": {
-          "union": {
-            "child": [
-              {
-                "computedUserset": {
-                  "relation": "drafter"
-                }
-              },
-              {
-                "computedUserset": {
-                  "relation": "approver"
-                }
-              },
-              {
-                "tupleToUserset": {
-                  "tupleset": {
-                    "relation": "tenant"
-                  },
-                  "computedUserset": {
-                    "relation": "admin"
-                  }
-                }
-              }
-            ]
-          }
-        },
-        "can_dispatch": {
-          "union": {
-            "child": [
-              {
-                "computedUserset": {
-                  "relation": "dispatcher"
-                }
-              },
-              {
-                "tupleToUserset": {
-                  "tupleset": {
-                    "relation": "tenant"
-                  },
-                  "computedUserset": {
-                    "relation": "admin"
-                  }
-                }
-              }
-            ]
-          }
-        },
-        "can_close": {
-          "union": {
-            "child": [
-              {
-                "computedUserset": {
-                  "relation": "approver"
-                }
-              },
-              {
-                "tupleToUserset": {
-                  "tupleset": {
-                    "relation": "tenant"
-                  },
-                  "computedUserset": {
-                    "relation": "admin"
-                  }
-                }
-              }
+              { "tupleToUserset": { "tupleset": { "relation": "in_tenant" }, "computedUserset": { "relation": "admin" } } },
+              { "tupleToUserset": { "tupleset": { "relation": "in_tenant" }, "computedUserset": { "relation": "identity_admin" } } }
             ]
           }
         }
       },
       "metadata": {
         "relations": {
-          "tenant": {
-            "directly_related_user_types": [
-              {
-                "type": "tenant"
-              }
-            ]
-          },
-          "drafter": {
-            "directly_related_user_types": [
-              {
-                "type": "user"
-              },
-              {
-                "type": "role",
-                "relation": "member"
-              }
-            ]
-          },
-          "approver": {
-            "directly_related_user_types": [
-              {
-                "type": "user"
-              },
-              {
-                "type": "role",
-                "relation": "member"
-              }
-            ]
-          },
-          "dispatcher": {
-            "directly_related_user_types": [
-              {
-                "type": "user"
-              },
-              {
-                "type": "role",
-                "relation": "member"
-              }
-            ]
-          },
-          "viewer": {
-            "directly_related_user_types": [
-              {
-                "type": "user"
-              },
-              {
-                "type": "role",
-                "relation": "member"
-              }
-            ]
-          },
-          "can_view": {
-            "directly_related_user_types": []
-          },
-          "can_update": {
-            "directly_related_user_types": []
-          },
-          "can_dispatch": {
-            "directly_related_user_types": []
-          },
-          "can_close": {
-            "directly_related_user_types": []
-          }
-        }
-      }
-    },
-    {
-      "type": "numbering_resource",
-      "relations": {
-        "tenant": {
-          "this": {}
-        },
-        "allocator": {
-          "this": {}
-        },
-        "viewer": {
-          "this": {}
-        },
-        "can_view": {
-          "union": {
-            "child": [
-              {
-                "computedUserset": {
-                  "relation": "viewer"
-                }
-              },
-              {
-                "tupleToUserset": {
-                  "tupleset": {
-                    "relation": "tenant"
-                  },
-                  "computedUserset": {
-                    "relation": "member"
-                  }
-                }
-              }
-            ]
-          }
-        },
-        "can_allocate": {
-          "union": {
-            "child": [
-              {
-                "computedUserset": {
-                  "relation": "allocator"
-                }
-              },
-              {
-                "tupleToUserset": {
-                  "tupleset": {
-                    "relation": "tenant"
-                  },
-                  "computedUserset": {
-                    "relation": "admin"
-                  }
-                }
-              }
-            ]
-          }
-        },
-        "can_manage": {
-          "tupleToUserset": {
-            "tupleset": {
-              "relation": "tenant"
-            },
-            "computedUserset": {
-              "relation": "admin"
-            }
-          }
-        }
-      },
-      "metadata": {
-        "relations": {
-          "tenant": {
-            "directly_related_user_types": [
-              {
-                "type": "tenant"
-              }
-            ]
-          },
-          "allocator": {
-            "directly_related_user_types": [
-              {
-                "type": "user"
-              },
-              {
-                "type": "role",
-                "relation": "member"
-              }
-            ]
-          },
-          "viewer": {
-            "directly_related_user_types": [
-              {
-                "type": "user"
-              },
-              {
-                "type": "role",
-                "relation": "member"
-              }
-            ]
-          },
-          "can_view": {
-            "directly_related_user_types": []
-          },
-          "can_allocate": {
-            "directly_related_user_types": []
-          },
-          "can_manage": {
-            "directly_related_user_types": []
-          }
+          "in_tenant": { "directly_related_user_types": [ { "type": "tenant" } ] }
         }
       }
     }

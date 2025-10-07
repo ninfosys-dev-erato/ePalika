@@ -1,80 +1,44 @@
 {
-  "writes": {
-    "tuple_keys": [
-      { "object": "role:darta_clerk", "relation": "member", "user": "user:alice" },
-      { "object": "role:darta_reviewer", "relation": "member", "user": "user:bob" },
-      { "object": "role:darta_registrar", "relation": "member", "user": "user:carol" },
-      { "object": "role:chalani_dispatcher", "relation": "member", "user": "user:bob" },
-      { "object": "role:chalani_approver", "relation": "member", "user": "user:carol" },
-      { "object": "role:numbering_officer", "relation": "member", "user": "user:carol" },
-      { "object": "role:identity_admin", "relation": "member", "user": "user:admin" },
-
-      { "object": "tenant:palika_bagmati", "relation": "admin", "user": "user:admin" },
-      { "object": "tenant:palika_bagmati", "relation": "member", "user": "role:darta_clerk#member" },
-      { "object": "tenant:palika_bagmati", "relation": "member", "user": "role:darta_reviewer#member" },
-      { "object": "tenant:palika_bagmati", "relation": "member", "user": "role:darta_registrar#member" },
-      { "object": "tenant:palika_bagmati", "relation": "member", "user": "role:chalani_dispatcher#member" },
-      { "object": "tenant:palika_bagmati", "relation": "member", "user": "role:chalani_approver#member" },
-      { "object": "tenant:palika_bagmati", "relation": "member", "user": "role:numbering_officer#member" },
-
-      { "object": "graphql_operation:darta.read", "relation": "tenant", "user": "tenant:palika_bagmati" },
-      { "object": "graphql_operation:darta.read", "relation": "grantee", "user": "role:darta_clerk#member" },
-      { "object": "graphql_operation:darta.read", "relation": "grantee", "user": "role:darta_reviewer#member" },
-      { "object": "graphql_operation:darta.read", "relation": "grantee", "user": "role:darta_registrar#member" },
-      { "object": "graphql_operation:darta.intake", "relation": "tenant", "user": "tenant:palika_bagmati" },
-      { "object": "graphql_operation:darta.intake", "relation": "grantee", "user": "role:darta_clerk#member" },
-      { "object": "graphql_operation:darta.intake", "relation": "grantee", "user": "role:darta_registrar#member" },
-      { "object": "graphql_operation:darta.review", "relation": "tenant", "user": "tenant:palika_bagmati" },
-      { "object": "graphql_operation:darta.review", "relation": "grantee", "user": "role:darta_reviewer#member" },
-      { "object": "graphql_operation:darta.digitization", "relation": "tenant", "user": "tenant:palika_bagmati" },
-      { "object": "graphql_operation:darta.digitization", "relation": "grantee", "user": "role:darta_registrar#member" },
-      { "object": "graphql_operation:darta.actions", "relation": "tenant", "user": "tenant:palika_bagmati" },
-      { "object": "graphql_operation:darta.actions", "relation": "grantee", "user": "role:darta_registrar#member" },
-
-      { "object": "graphql_operation:chalani.read", "relation": "tenant", "user": "tenant:palika_bagmati" },
-      { "object": "graphql_operation:chalani.read", "relation": "grantee", "user": "role:chalani_dispatcher#member" },
-      { "object": "graphql_operation:chalani.read", "relation": "grantee", "user": "role:chalani_approver#member" },
-      { "object": "graphql_operation:chalani.draft", "relation": "tenant", "user": "tenant:palika_bagmati" },
-      { "object": "graphql_operation:chalani.draft", "relation": "grantee", "user": "role:chalani_dispatcher#member" },
-      { "object": "graphql_operation:chalani.review", "relation": "tenant", "user": "tenant:palika_bagmati" },
-      { "object": "graphql_operation:chalani.review", "relation": "grantee", "user": "role:chalani_approver#member" },
-      { "object": "graphql_operation:chalani.dispatch", "relation": "tenant", "user": "tenant:palika_bagmati" },
-      { "object": "graphql_operation:chalani.dispatch", "relation": "grantee", "user": "role:chalani_dispatcher#member" },
-      { "object": "graphql_operation:chalani.manageQueues", "relation": "tenant", "user": "tenant:palika_bagmati" },
-      { "object": "graphql_operation:chalani.manageQueues", "relation": "grantee", "user": "role:chalani_dispatcher#member" },
-      { "object": "graphql_operation:chalani.manageQueues", "relation": "grantee", "user": "role:chalani_approver#member" },
-
-      { "object": "graphql_operation:numbering.read", "relation": "tenant", "user": "tenant:palika_bagmati" },
-      { "object": "graphql_operation:numbering.read", "relation": "grantee", "user": "role:numbering_officer#member" },
-      { "object": "graphql_operation:numbering.read", "relation": "grantee", "user": "role:darta_registrar#member" },
-      { "object": "graphql_operation:numbering.allocate", "relation": "tenant", "user": "tenant:palika_bagmati" },
-      { "object": "graphql_operation:numbering.allocate", "relation": "grantee", "user": "role:numbering_officer#member" },
-      { "object": "graphql_operation:numbering.allocate", "relation": "grantee", "user": "role:darta_registrar#member" },
-
-      { "object": "graphql_operation:identity.read", "relation": "grantee", "user": "role:identity_admin#member" },
-      { "object": "graphql_operation:identity.directoryAdmin", "relation": "grantee", "user": "role:identity_admin#member" },
-      { "object": "graphql_operation:identity.grantAdmin", "relation": "grantee", "user": "role:identity_admin#member" },
-      { "object": "graphql_operation:identity.roleAdmin", "relation": "grantee", "user": "role:identity_admin#member" },
-
-      { "object": "darta_record:palika_bagmati/DR-2024-001", "relation": "tenant", "user": "tenant:palika_bagmati" },
-      { "object": "darta_record:palika_bagmati/DR-2024-001", "relation": "creator", "user": "user:alice" },
-      { "object": "darta_record:palika_bagmati/DR-2024-001", "relation": "assignee", "user": "user:bob" },
-      { "object": "darta_record:palika_bagmati/DR-2024-001", "relation": "reviewer", "user": "role:darta_reviewer#member" },
-      { "object": "darta_record:palika_bagmati/DR-2024-001", "relation": "registrar", "user": "role:darta_registrar#member" },
-      { "object": "darta_record:palika_bagmati/DR-2024-001", "relation": "viewer", "user": "role:chalani_dispatcher#member" },
-
-      { "object": "chalani_record:palika_bagmati/CH-2024-011", "relation": "tenant", "user": "tenant:palika_bagmati" },
-      { "object": "chalani_record:palika_bagmati/CH-2024-011", "relation": "drafter", "user": "role:chalani_dispatcher#member" },
-      { "object": "chalani_record:palika_bagmati/CH-2024-011", "relation": "approver", "user": "role:chalani_approver#member" },
-      { "object": "chalani_record:palika_bagmati/CH-2024-011", "relation": "dispatcher", "user": "role:chalani_dispatcher#member" },
-      { "object": "chalani_record:palika_bagmati/CH-2024-011", "relation": "viewer", "user": "role:darta_registrar#member" },
-
-      { "object": "numbering_resource:darta.palika_bagmati", "relation": "tenant", "user": "tenant:palika_bagmati" },
-      { "object": "numbering_resource:darta.palika_bagmati", "relation": "allocator", "user": "role:numbering_officer#member" },
-      { "object": "numbering_resource:darta.palika_bagmati", "relation": "viewer", "user": "role:darta_registrar#member" },
-      { "object": "numbering_resource:chalani.palika_bagmati", "relation": "tenant", "user": "tenant:palika_bagmati" },
-      { "object": "numbering_resource:chalani.palika_bagmati", "relation": "allocator", "user": "role:numbering_officer#member" },
-      { "object": "numbering_resource:chalani.palika_bagmati", "relation": "viewer", "user": "role:chalani_dispatcher#member" }
-    ]
-  }
+  "tuple_keys": [
+    {
+      "user": "user:admin",
+      "relation": "admin",
+      "object": "tenant:default"
+    },
+    {
+      "user": "user:darta.clerk",
+      "relation": "darta_clerk",
+      "object": "tenant:default"
+    },
+    {
+      "user": "user:darta.reviewer",
+      "relation": "darta_reviewer",
+      "object": "tenant:default"
+    },
+    {
+      "user": "user:darta.registrar",
+      "relation": "darta_registrar",
+      "object": "tenant:default"
+    },
+    {
+      "user": "user:chalani.dispatcher",
+      "relation": "chalani_dispatcher",
+      "object": "tenant:default"
+    },
+    {
+      "user": "user:chalani.approver",
+      "relation": "chalani_approver",
+      "object": "tenant:default"
+    },
+    {
+      "user": "user:numbering.officer",
+      "relation": "numbering_officer",
+      "object": "tenant:default"
+    },
+    {
+      "user": "user:identity.admin",
+      "relation": "identity_admin",
+      "object": "tenant:default"
+    }
+  ]
 }
