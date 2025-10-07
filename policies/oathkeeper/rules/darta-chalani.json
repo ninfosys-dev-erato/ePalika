@@ -39,9 +39,7 @@
             "X-User-ID": "{{ if .Extra.user_id }}{{ print .Extra.user_id }}{{ else if .Extra.sub }}{{ print .Extra.sub }}{{ else }}{{ print .Subject }}{{ end }}",
             "X-User-Name": "{{ if .Extra.preferred_username }}{{ print .Extra.preferred_username }}{{ end }}",
             "X-Tenant": "{{ $iss := .Extra.iss | default \"\" }}{{ if $iss }}{{ $iss | regexReplaceAll \"^.*/realms/(.*)$\" \"$1\" }}{{ else }}palika{{ end }}",
-            "X-Roles": "{{ if .Extra.realm_access }}{{ $roles := index .Extra.realm_access \"roles\" }}{{ range $index, $role := $roles }}{{ if $index }},{{ end }}{{ $role }}{{ end }}{{ end }}",
-            "X-Forwarded-For": "{{ .MatchContext.RemoteAddr }}"
-          }
+            "X-Roles": "{{ if .Extra.realm_access }}{{ $roles := index .Extra.realm_access \"roles\" }}{{ range $index, $role := $roles }}{{ if $index }},{{ end }}{{ $role }}{{ end }}{{ end }}"          }
         }
       }
     ]

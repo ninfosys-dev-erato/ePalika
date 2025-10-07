@@ -128,8 +128,7 @@ data:
                 "X-User-ID": "{{ print .Subject }}",
                 "X-User-Name": "{{ if .Extra.user_name }}{{ .Extra.user_name }}{{ end }}",
                 "X-Tenant": "{{ if .Extra.tenant }}{{ index .Extra.tenant 0 }}{{ else }}default{{ end }}",
-                "X-Roles": "{{- range $index, $role := .Extra.roles -}}{{- if $index }},{{ end -}}{{ $role }}{{- end -}}",
-                "X-Forwarded-For": "{{ .MatchContext.RemoteAddr }}"
+                "X-Roles": "{{- range $index, $role := .Extra.roles -}}{{- if $index }},{{ end -}}{{ $role }}{{- end -}}"
               }
             }
           }
