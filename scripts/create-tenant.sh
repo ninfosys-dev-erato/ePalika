@@ -281,20 +281,28 @@ ensure_mapper () {
 
 echo "🧬 Adding protocol mappers (user_id, user_name, tenant, roles)..."
 
-# 1) user_id via Script Mapper
-USER_ID_SCRIPT='
-/*
-  Emits Keycloak internal user id as "user_id"
-*/
-var uid = user.getId();
-token.setOtherClaims("user_id", uid);
-'
-USER_ID_MAPPER=$(jq -n --arg name "user_id" --arg script "$USER_ID_SCRIPT" '{
-  name: $name,
+# 1) user_id via Hardcoded Claim Mapper (copies 'sub' to 'user_id')
+# Note: Keycloak's 'sub' claim already contains the user ID, we just alias it
+USER_ID_MAPPER=$(jq -n '{
+  name: "user_id",
   protocol: "openid-connect",
-  protocolMapper: "oidc-script-based-protocol-mapper",
+  protocolMapper: "oidc-hardcoded-claim-mapper",
   config: {
-    "script": $script,
+    "claim.name": "user_id",
+    "claim.value": "${sub}",
+    "jsonType.label": "String",
+    "access.token.claim": "true",
+    "id.token.claim": "true",
+    "userinfo.token.claim": "true"
+  }
+}')
+# Since hardcoded mapper doesn't support substitution, use usermodel-property instead
+USER_ID_MAPPER=$(jq -n '{
+  name: "user_id",
+  protocol: "openid-connect",
+  protocolMapper: "oidc-usermodel-property-mapper",
+  config: {
+    "user.attribute": "id",
     "claim.name": "user_id",
     "jsonType.label": "String",
     "access.token.claim": "true",
@@ -337,55 +345,12 @@ TENANT_MAPPER=$(jq -n '{
 }')
 ensure_mapper "tenant" "$TENANT_MAPPER"
 
-# 4) roles array (realm + client roles) via Script Mapper
-ROLES_SCRIPT='
-/*
-  Emits combined roles as "roles" (array):
-  - realm roles
-  - client roles for the current client (if any)
-*/
-var ArrayList = Java.type("java.util.ArrayList");
-var HashSet   = Java.type("java.util.HashSet");
-var combined  = new HashSet();
-
-var realmMappings = user.getRoleMappingsStream().toArray();
-for (var i=0; i<realmMappings.length; i++) {
-  var r = realmMappings[i];
-  // only pure realm roles (no client) getRealmRole != null
-  if (r.getContainer() != null && r.getContainer().getName() === realm.getName()) {
-    combined.add(r.getName());
-  }
-}
-
-// client roles for the audience client (if present)
-try {
-  var clientId = userSession.getClient().getClientId();
-  var client = keycloakSession.clients().getClientByClientId(realm, clientId);
-  if (client != null) {
-    var clientRoles = user.getClientRoleMappings(client);
-    if (clientRoles != null) {
-      var it = clientRoles.iterator();
-      while (it.hasNext()) {
-        combined.add(it.next().getName());
-      }
-    }
-  }
-} catch (e) {
-  // ignore if context not available
-}
-
-var out = new ArrayList();
-var it2 = combined.iterator();
-while (it2.hasNext()) { out.add(it2.next()); }
-
-token.setOtherClaims("roles", out);
-'
-ROLES_MAPPER=$(jq -n --arg script "$ROLES_SCRIPT" '{
+# 4) roles array (realm + client roles) via Realm Role Mapper
+ROLES_MAPPER=$(jq -n '{
   name: "roles",
   protocol: "openid-connect",
-  protocolMapper: "oidc-script-based-protocol-mapper",
+  protocolMapper: "oidc-usermodel-realm-role-mapper",
   config: {
-    "script": $script,
     "claim.name": "roles",
     "jsonType.label": "String",
     "access.token.claim": "true",
