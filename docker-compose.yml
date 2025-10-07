@@ -208,10 +208,12 @@ services:
     ports:
       - "8083:8083"
     healthcheck:
-      test: ["CMD", "curl", "-f",   "http://localhost:8083/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 12
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/localhost/9000  && echo -e \"GET /health/ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n\" >&3 && grep -q \"200 OK\" <&3'"]
+      interval: 15s
+      timeout: 10s
+      retries: 30
+      start_period: 60s
+
 
 ### YUGABYTE SETUP ###
   yugabytedb:
