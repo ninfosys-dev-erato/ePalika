@@ -1,5 +1,5 @@
 # ---- Review stage ------------------------------------------------------------
-mutation SubmitChalani($chalaniId: ID!) {
+mutation SubmitChalaniAction($chalaniId: ID!) {
   submitChalani(chalaniId: $chalaniId) {
     id
     status
@@ -137,7 +137,7 @@ mutation SealChalani($input: SealChalaniInput!) {
 }
 
 # ---- Dispatch & delivery -----------------------------------------------------
-mutation DispatchChalani($input: DispatchChalaniInput!) {
+mutation DispatchChalaniAction($input: DispatchChalaniInput!) {
   dispatchChalani(input: $input) {
     id
     status
