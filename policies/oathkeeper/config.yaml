@@ -16,7 +16,7 @@ authenticators:
     enabled: true
     config:
       jwks_urls:
-        - http://keycloak:8083/realms/${KEYCLOAK_REALM}/protocol/openid-connect/certs
+        - file:///etc/secrets/keycloak_${KEYCLOAK_REALM}.jwks.json
       scope_strategy: exact
       trusted_issuers:
         - http://keycloak:8083/realms/${KEYCLOAK_REALM}
@@ -30,7 +30,7 @@ authorizers:
   remote_json:
     enabled: true
     config:
-      remote: http://pdp:8080/authorize
+      remote: ${PDP_URL}
       payload: |
         {
           "subject": "{{ print .Subject }}",
@@ -49,7 +49,7 @@ mutators:
     enabled: true
     config:
       issuer_url: http://localhost:4455
-      jwks_url: file:///etc/secrets/mutator.id_token.jwks.json
+      jwks_url: file:///oathkeeper/secrets/mutator.id_token.jwks.json
       ttl: 1m
 
   header:

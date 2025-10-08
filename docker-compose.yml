@@ -145,22 +145,20 @@ services:
       - authnz
 
   oathkeeper:
-    image: oryd/oathkeeper:latest
-    command: ["serve", "--config", "/oathkeeper/config.yaml"]
+    build:
+      context: ./policies/oathkeeper
+      dockerfile: Dockerfile
     ports:
       - "4455:4455"
       - "4456:4456"
-    volumes:
-      - ./policies/oathkeeper:/oathkeeper
-      - ./policies/oathkeeper/secrets:/etc/secrets
     healthcheck:
-      test:
-        ["CMD", "wget", "-q", "--spider", "http://localhost:4456/health/alive"]
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:4456/health/alive"]
       interval: 5s
       timeout: 3s
       retries: 10
     environment:
-      - KEYCLOAK_REALM=${KEYCLOAK_REALM}
+      KEYCLOAK_REALM: ${KEYCLOAK_REALM:-palika_hari}
+      PDP_URL: http://pdp:8080
     depends_on:
       - keycloak
       - pdp
