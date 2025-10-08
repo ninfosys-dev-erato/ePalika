@@ -46,6 +46,8 @@ TENANT_ADMIN_SUBJECT=${TENANT_ADMIN_SUBJECT:-user:admin}
 KEYCLOAK_BASE_URL=${KEYCLOAK_BASE_URL:-http://localhost:8083}
 KEYCLOAK_ADMIN_USER=${KEYCLOAK_ADMIN_USER:-admin}
 KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD:-admin}
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
 CLIENT_ID=${CLIENT_ID:-palika_api}
 CLIENT_SECRET=""
@@ -53,6 +55,25 @@ CLIENT_SECRET=""
 OPENFGA_API_URL=${OPENFGA_API_URL:-http://localhost:8081}
 FGA_STORE_ID=${FGA_STORE_ID:-}
 FGA_MODEL_ID=${FGA_MODEL_ID:-}
+
+ENV_FILE="${ENV_FILE:-${PROJECT_ROOT}/.env}"
+
+# ===== Helper Functions =====
+upsert_env_var() {
+  local file="$1" key="$2" value="$3"
+
+  # Create .env if it doesn't exist
+  if [ ! -f "$file" ]; then
+    touch "$file"
+  fi
+
+  # Update or add the variable
+  if grep -q "^${key}=" "$file"; then
+    sed -i "s|^${key}=.*|${key}=${value}|" "$file"
+  else
+    echo "${key}=${value}" >> "$file"
+  fi
+}
 
 # ===== Auth =====
 echo ""
@@ -104,6 +125,10 @@ else
     exit 1
   fi
 fi
+
+# ===== Update .env with KEYCLOAK_REALM =====
+echo "📝 Updating .env with KEYCLOAK_REALM..."
+upsert_env_var "$ENV_FILE" "KEYCLOAK_REALM" "$TENANT_SLUG"
 
 # ===== Roles ensure =====
 declare -a ROLES=(

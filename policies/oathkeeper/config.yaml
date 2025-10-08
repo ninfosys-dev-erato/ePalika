@@ -16,11 +16,11 @@ authenticators:
     enabled: true
     config:
       jwks_urls:
-        - http://keycloak:8083/realms/palika_sallaghari/protocol/openid-connect/certs
+        - http://keycloak:8083/realms/${KEYCLOAK_REALM}/protocol/openid-connect/certs
       scope_strategy: exact
       trusted_issuers:
-        - http://keycloak:8083/realms/palika_sallaghari
-        - http://172.17.0.1:8083/realms/palika_sallaghari
+        - http://keycloak:8083/realms/${KEYCLOAK_REALM}
+        - http://172.17.0.1:8083/realms/${KEYCLOAK_REALM}
       required_scope: []
 
   noop:
